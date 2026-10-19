@@ -395,7 +395,7 @@ const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
 // Online outputs (DAK computers): each board's live state is kept in Supabase; the page itself is hosted on Vercel.
-// Short links look like SITE/#abc123/2 (board code / output number).
+// Short links look like SITE/?abc123/2 (board code / output number). Older #abc123/2 links still work.
 const SB_URL = 'https://hitwqszexymlvoxbnxbc.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdHdxc3pleHltbHZveGJueGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNTg2NjQsImV4cCI6MjEwNzYzNDY2NH0.xD-Nu9ylFgWNPDZ1o9iWzZew46ltzdazDP_AKPp6_M4';
 const SB_H = {apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY};
@@ -702,7 +702,7 @@ function boardHTML(pages, idx, b, opt){
       '<span class="dots">' + (pages.length > 1 ? pages.map((_, i) => '<i class="' + (i === idx ? 'on' : '') + '"></i>').join('') : '') + '</span></header>';
   }
   if (!page.games.length) {
-    h += '<div class="empty">Add games to the rundown</div>';
+    h += '<div class="empty">' + esc(opt.emptyText || 'Add games to the rundown') + '</div>';
   } else {
     const mixed = !b.groupBySport && new Set(page.games.map(g => g.sport)).size > 1;
     // if any team on the page is ranked, every row keeps a rank slot so names line up
@@ -722,7 +722,8 @@ window.__sbLogo = img => { const fb = img.getAttribute('data-fb'); if (fb) { img
 // #output or ?output = Output 1, #output2 / ?output=2 = Output 2, and so on
 const OUT_M = (location.search.replace(/^\?/, '&') + '&' + location.hash.replace('#','&')).match(/&output=?(\d)?(?=&|$)/);
 const N_OUT = 4;
-const PATH_M = location.hash.match(/^#\/?([a-z0-9]{4,12})\/([1-9])$/) || (location.protocol.startsWith('http') ? location.pathname.match(/\/([a-z0-9]{4,12})\/([1-9])\/?$/) : null);
+const PATH_M = location.search.match(/^\?([a-z0-9]{4,12})\/([1-9])$/) || location.hash.match(/^#\/?([a-z0-9]{4,12})\/([1-9])$/) ||
+  (location.protocol.startsWith('http') ? location.pathname.match(/\/([a-z0-9]{4,12})\/([1-9])\/?$/) : null);
 const ONLINE_ID = PATH_M ? PATH_M[1] : '';
 const IS_OUT = !!OUT_M || !!PATH_M;
 const OUT_IDX = Math.min(N_OUT, Math.max(1, +((PATH_M && PATH_M[2]) || (OUT_M && OUT_M[1]) || 1))) - 1;
@@ -872,7 +873,7 @@ function renderBoard(holder, i){
   // dissolve: the outgoing page stays layered on the board and fades out while the new page fades in
   const prev = enter && b.fade > 0 ? holder.querySelector('.board > .grid:not(.leave)') : null;
   if (enter && b.fade > 0) rt.fadeUntil = Date.now() + b.fade * 1000;
-  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, bumped: k => (bumps[k] || 0) > now});
+  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, bumped: k => (bumps[k] || 0) > now});
   if (prev) {
     const nb = holder.querySelector('.board');
     prev.classList.remove('enter'); prev.classList.add('leave');
@@ -947,6 +948,8 @@ function bootOutput(){
     const poll = async () => {
       try {
         const row = await get('ver,logo_ver,live,updated_at');
+        window.__emptyText = !row ? 'Board ' + ONLINE_ID + ' not found. Check the link.' : 'No games on board ' + ONLINE_ID + ' yet';
+        if (!row) renderAll();
         if (row) {
           if (row.updated_at !== seen.upd) { if (seen.upd) beatAt = Date.now(); seen.upd = row.updated_at; }
           if (row.logo_ver !== seen.logoVer) { const l = await get('logos'); knownLogos = (l && l.logos) || []; seen.logoVer = row.logo_ver; seen.ver = -1; }
@@ -1013,7 +1016,7 @@ function push(forceLogos){
 const ONLINE_STORE = STORE + '.online';
 const rid = (n, abc) => { const a = new Uint32Array(n); crypto.getRandomValues(a); return [...a].map(x => abc[x % abc.length]).join(''); };
 let online = (() => { try { const o = JSON.parse(localStorage.getItem(ONLINE_STORE) || 'null'); if (o && /^[a-z0-9]{4,12}$/.test(o.id) && o.key) return o; } catch(e) {} return null; })();
-if (!online && !IS_OUT) { online = {id: rid(6, 'abcdefghjkmnpqrstuvwxyz23456789'), key: rid(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), on: true}; try { localStorage.setItem(ONLINE_STORE, JSON.stringify(online)); } catch(e) {} }
+if (!online && !IS_OUT) { online = {id: rid(6, 'abcdefghjkmnpqrstuvwxyz23456789'), key: rid(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), on: false}; try { localStorage.setItem(ONLINE_STORE, JSON.stringify(online)); } catch(e) {} }
 const onlineStatus = {ok: null, msg: ''};
 let pub = {busy: false, again: false, stateSig: '', logoSig: '', liveSig: '', beat: 0};
 async function publishOnline(){
@@ -1343,7 +1346,7 @@ function bootControl(){
   // Short link for DAK computers: SITE/<board code>/<output number>. It follows this dashboard live.
   function copyLink(i){
     if (!online.on) { online.on = true; $('onlineOn').checked = true; saveOnline(); publishOnline(); }
-    const url = SITE + '/#' + online.id + '/' + (i+1);
+    const url = SITE + '/?' + online.id + '/' + (i+1);
     $('copyBox').hidden = false; $('copyTxt').value = url; $('copyTxt').select();
     const done = () => toast('Output ' + (i+1) + ' link copied: ' + url.replace(/^https?:\/\//, ''));
     try { navigator.clipboard.writeText(url).then(done, () => {}); } catch(e) {}
@@ -1352,8 +1355,8 @@ function bootControl(){
   window.__onlineChanged = () => {
     const bar = $('onlineBar');
     bar.classList.toggle('ok', online.on && onlineStatus.ok === true); bar.classList.toggle('err', online.on && onlineStatus.ok === false);
-    $('onlineTxt').textContent = !online.on ? 'Off. DAK links will hold the last thing sent.' :
-      onlineStatus.ok === false ? onlineStatus.msg : onlineStatus.ok ? 'Live · board ' + online.id + ' · ' + SITE.replace(/^https?:\/\//, '') + '/#' + online.id + '/1' : 'Connecting…';
+    $('onlineTxt').textContent = !online.on ? 'Off · board ' + online.id + '. Click Copy link on an output to start sending.' :
+      onlineStatus.ok === false ? onlineStatus.msg : onlineStatus.ok ? 'Live · board ' + online.id + ' · ' + SITE.replace(/^https?:\/\//, '') + '/?' + online.id + '/1' : 'Connecting…';
   };
   $('onlineOn').checked = !!online.on;
   $('onlineOn').onchange = e => { online.on = e.target.checked; saveOnline(); window.__onlineChanged(); if (online.on) { pub.stateSig = pub.logoSig = ''; publishOnline(); } };
