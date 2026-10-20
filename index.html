@@ -170,7 +170,7 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 /* ---------- the board (graphic) ----------
    House package: navy field, white/orange/white bracket beside each game, condensed caps,
    leading score in orange, status column = period / clock / orange rule / network. */
-.board{position:relative;overflow:hidden;color:#fff;font-family:var(--f-score);--panel:color-mix(in srgb, var(--bgc) 84%, #000 16%);--shade:color-mix(in srgb, var(--bgc) 52%, #000 48%)}
+.board{position:relative;overflow:hidden;color:#fff;font-family:var(--f-score)}
 .board .hd{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-end;gap:1.4em;padding-bottom:1.6em}
 .board .hd .ttl{font:800 5.4em/1 var(--f-score);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;padding-bottom:.12em;border-bottom:.09em solid var(--accent)}
 .board .hd .sp{font:800 3em/1 var(--f-score);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;padding-bottom:.25em}
@@ -753,11 +753,17 @@ function fitNames(root){
   });
 }
 
+// darken a #rrggbb colour toward black (done here rather than CSS color-mix so older browsers in DAK players match)
+function darken(hex, amt){
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return '#0b1d42';
+  const n = parseInt(m[1], 16), f = c => Math.round(c * (1 - amt)).toString(16).padStart(2, '0');
+  return '#' + f(n >> 16 & 255) + f(n >> 8 & 255) + f(n & 255);
+}
 function boardHTML(pages, idx, b, opt){
   const page = pages[idx] || {sport:null, games:[]};
   const geo = geometry(b, page.games.length);
   const bg = b.bg === 'transparent' ? 'transparent' : b.bg === 'green' ? '#00B140' : b.bgColor;
-  let h = '<div class="board" style="width:' + geo.W + 'px;height:' + geo.H + 'px;--accent:' + esc(b.accent) + ';--bgc:' + esc(b.bgColor) + ';--fade:' + b.fade + 's;background:' + bg + '">';
+  let h = '<div class="board" style="width:' + geo.W + 'px;height:' + geo.H + 'px;--accent:' + esc(b.accent) + ';--bgc:' + esc(b.bgColor) + ';--panel:' + darken(b.bgColor, 0.16) + ';--shade:' + darken(b.bgColor, 0.48) + ';--fade:' + b.fade + 's;background:' + bg + '">';
   if (b.header) {
     const sp = page.sport ? SPORTS[page.sport].label : '';
     const useLogo = b.hdMode === 'logo' && b.logo;
@@ -1027,13 +1033,14 @@ function bootOutput(){
   // Online (DAK) output: poll the board's small "live" record often; pull the full state and logos only when they change.
   // While the dashboard is publishing it drives pages and scores; if it goes quiet this output carries on by itself.
   if (ONLINE_ID) {
+    window.__emptyText = 'Connecting to board ' + ONLINE_ID + '…';
     const seen = {ver: -1, logoVer: -1, upd: ''}; let state = null, beatAt = 0;
     const get = async cols => { const r = await fetch(SB_URL + '/rest/v1/scoreboard_boards?id=eq.' + ONLINE_ID + '&select=' + cols, {headers: SB_H, cache: 'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); return (await r.json())[0]; };
     const poll = async () => {
       try {
         const row = await get('ver,logo_ver,live,updated_at');
-        window.__emptyText = !row ? 'Board ' + ONLINE_ID + ' not found. Check the link.' : 'No games on board ' + ONLINE_ID + ' yet';
-        if (!row) renderAll();
+        const msg = !row ? 'Board ' + ONLINE_ID + ' not found. Check the link.' : 'Board ' + ONLINE_ID + ' has no games. Check this link matches your dashboard.';
+        if (msg !== window.__emptyText) { window.__emptyText = msg; renderAll(); }
         if (row) {
           if (row.updated_at !== seen.upd) { if (seen.upd) beatAt = Date.now(); seen.upd = row.updated_at; }
           if (row.logo_ver !== seen.logoVer) { const l = await get('logos'); knownLogos = (l && l.logos) || []; seen.logoVer = row.logo_ver; seen.ver = -1; }
