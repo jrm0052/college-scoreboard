@@ -87,6 +87,19 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 
 .rd{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;overflow:auto;max-height:calc(100vh - 130px)}
 .rd li{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:7px 8px 7px 10px}
+.rd li.is-stale{border-color:var(--warn)}
+.rd .meta .stale{color:var(--warn);font-weight:600}
+.rd .meta .ups{color:var(--sel);font-weight:600}
+.stale-note{color:var(--warn);font-size:13px;font-weight:600}
+.qb{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.qrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.qrow select,.qrow input[type=text]{flex:1;min-width:120px}
+.qd{font-size:12px;color:var(--muted);margin-right:auto}
+.names{display:flex;flex-direction:column;gap:8px;padding:4px 12px 14px}
+.names .row-ctl input{flex:1}
+.nrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 80px 30px;gap:6px;align-items:center;font-size:13px}
+.nrow .orig{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.names label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);max-width:320px}
 .rd .ln{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
 .rd .num{font:500 11px var(--f-mono);color:var(--muted);width:1.6em}
 .rd .mu{display:flex;flex-direction:column;min-width:0;font-size:13px}
@@ -184,6 +197,9 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 
 .g{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:.55em;align-items:start;min-width:0}
 .g.has-play{z-index:3}
+.g .upset{position:absolute;left:1.9em;top:-.95em;z-index:2;background:var(--accent);color:#fff;font:800 1.4em/1 var(--f-score);letter-spacing:.07em;text-transform:uppercase;padding:.28em .6em .22em;box-shadow:.25em .25em 0 var(--shade);white-space:nowrap}
+.g.mir .upset{left:.7em}
+.g.wide .upset{top:.35em;left:2.2em;font-size:1.15em}
 .g.mir{grid-template-columns:minmax(0,1fr) auto}
 .g.mir .br{order:2}
 .g .br{display:flex;flex-direction:column;gap:.45em;width:.6em;height:calc(100% - .55em)}
@@ -241,6 +257,7 @@ body.out.trans{background:transparent}
     <div class="brand"><span class="mark"></span><h1>College Scoreboard</h1></div>
     <div class="feed" id="feed"><i></i><span id="feedTxt">Connecting to ESPN…</span></div>
     <div class="acts">
+      <span class="stale-note" id="staleNote" hidden></span>
       <label class="ck"><input type="checkbox" id="freeze"> Freeze scores</label>
     </div>
   </header>
@@ -279,6 +296,23 @@ body.out.trans{background:transparent}
         <button class="btn sm" id="addManual">Add manual game</button>
         <button class="btn sm" id="clearRd">Clear</button>
       </div>
+      <div class="qb">
+        <div class="qrow">
+          <select id="qbRecipe" aria-label="Which games">
+            <option value="sec+top25">SEC + Top 25</option><option value="top25">Top 25</option><option value="sec">SEC</option>
+            <option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option><option value="all">All games</option>
+          </select>
+          <div class="chips" id="qbSports" role="group" aria-label="Sports">
+            <button class="chip-btn" data-s="cfb">CFB</button><button class="chip-btn" data-s="mbb">MBB</button><button class="chip-btn" data-s="wbb">WBB</button><button class="chip-btn" data-s="bsb">BSB</button>
+          </div>
+        </div>
+        <div class="qrow"><span class="qd" id="qbDate"></span><button class="btn sm primary" id="qbReplace" type="button">Build rundown</button><button class="btn sm" id="qbAdd" type="button">Add to rundown</button></div>
+        <div class="qrow">
+          <select id="setupSel" aria-label="Saved setups"><option value="">Saved setups…</option></select>
+          <button class="btn sm" id="setupLoad" type="button">Load</button><button class="btn sm" id="setupDel" type="button">Delete</button>
+        </div>
+        <div class="qrow"><input type="text" id="setupName" maxlength="40" placeholder="Name this setup (e.g. Football Saturday)" aria-label="Setup name"><button class="btn sm" id="setupSave" type="button">Save setup</button></div>
+      </div>
       <ol class="rd" id="rdList"></ol>
       <p class="hint" id="rdHint">Click games on the left to add them. Games show on the board in this order.</p>
     </section>
@@ -292,6 +326,15 @@ body.out.trans{background:transparent}
       <div class="copybox" id="moveBox" hidden><input type="text" id="moveTxt" aria-label="Board code and key"><button class="btn sm" id="moveUse" type="button">Use this board</button><button class="btn sm" id="moveClose" type="button">Done</button></div>
       <div class="outs" id="outs"></div>
       <div class="copybox" id="copyBox" hidden><input type="text" id="copyTxt" readonly aria-label="Standalone output link"><button class="btn sm" id="copyClose">Done</button></div>
+      <details class="settings" id="namesBox">
+        <summary>Team names &amp; warnings</summary>
+        <div class="names">
+          <div class="row-ctl"><input type="text" id="nameFind" list="teamList" placeholder="Find a team from today’s games" aria-label="Find a team"><datalist id="teamList"></datalist><button class="btn sm" id="nameAdd" type="button">Add name</button></div>
+          <div id="nameRows"></div>
+          <p class="hint">Board names for any team, on every output and sport. Leave a box empty to use ESPN’s.</p>
+          <label class="f">Warn when a live game hasn’t updated for (minutes)<input type="number" id="pStale" min="1" max="30"></label>
+        </div>
+      </details>
       <details class="settings" open>
         <summary>Board settings</summary>
         <div class="otabs">
@@ -354,6 +397,9 @@ body.out.trans{background:transparent}
           </label>
           <label class="f">Scoring play seconds<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
           <label class="f">Page dissolve (seconds, 0 = cut)<input type="number" id="sFade" data-k="fade" min="0" max="3" step="0.1"></label>
+          <label class="f">Upset alerts
+            <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
+          </label>
           <label class="ck"><input type="checkbox" id="sGroup" data-k="groupBySport"> One sport per page</label>
           <label class="ck"><input type="checkbox" id="sSportLabel" data-k="sportLabel"> Sport name in header</label>
           <label class="ck"><input type="checkbox" id="sLogos" data-k="logos"> Logos</label>
@@ -390,7 +436,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -490,10 +536,31 @@ function statusInfo(g){
   return {main:m, short:m, lines:[], cls:'post', tv:''};
 }
 
+// Team name overrides (team id -> {name, abbr}); set from the dashboard, used on every output
+var NAME_OVR = {};
 function teamLabel(t, mode, narrow){
-  if (mode === 'abbr') return t.abbr || t.name;
-  if (mode === 'school') return t.name;
-  return narrow ? (t.abbr || t.name) : t.name;
+  const o = (t.id && NAME_OVR[t.id]) || {};
+  const name = o.name || t.name, abbr = o.abbr || t.abbr;
+  if (mode === 'abbr') return abbr || name;
+  if (mode === 'school') return name;
+  return narrow ? (abbr || name) : name;
+}
+
+// Upset alert: an underdog (unranked, or ranked 8+ spots lower) leads a ranked team late, or beat one ("Upset" on finals).
+// mode 'half' = from the second half (5th inning in baseball), 'late' = 4th quarter / last 10 minutes / 7th inning.
+function upsetTag(g, mode){
+  if (!mode || mode === 'off' || g.manual) return '';
+  const as = parseFloat(g.away.score), hs = parseFloat(g.home.score);
+  if (!isFinite(as) || !isFinite(hs) || as === hs) return '';
+  const lead = as > hs ? g.away : g.home, trail = as > hs ? g.home : g.away;
+  const lr = lead.rank || 99, tr = trail.rank || 99;
+  if (!(tr < 99 && (lr === 99 || lr - tr >= 8))) return '';
+  if (g.state === 'post') return /^\s*final/i.test(g.detail || 'Final') ? 'Upset' : '';
+  if (g.state !== 'in' || isHalf(g)) return '';
+  const p = g.period || 0, m = String(g.detail || '').match(/^(\d+):\d+/), minLeft = m ? +m[1] : 99;
+  const late = mode === 'late';
+  const ok = {cfb: p >= (late ? 4 : 3), wbb: p >= (late ? 4 : 3), mbb: late ? (p >= 3 || (p === 2 && minLeft < 10)) : p >= 2, bsb: p >= (late ? 7 : 5)}[g.sport];
+  return ok ? 'Upset Alert' : '';
 }
 
 function perPage(b){ return b.layout === 'grid' ? Math.max(1, b.cols * b.rows) : Math.max(1, b.perPage); }
@@ -661,8 +728,8 @@ function cardHTML(g, ctx){
       (b.records && t.record ? '<span class="rec">' + esc(t.record) + '</span>' : '') + '</span>' +
       '<span class="sc" style="' + scW + '">' + (showScore ? esc(t.score) : '') + '</span></div>';
   };
-  const play = activePlay(g, b, ctx.now);
-  return '<div class="g' + (ctx.mirror ? ' mir' : '') + (play ? ' has-play' : '') + (ctx.wide ? ' wide' : '') + '"><div class="br"><i></i><i class="o"></i><i></i></div>' +
+  const play = activePlay(g, b, ctx.now), upset = upsetTag(g, b.upsets);
+  return '<div class="g' + (ctx.mirror ? ' mir' : '') + (play ? ' has-play' : '') + (ctx.wide ? ' wide' : '') + '">' + (upset ? '<span class="upset">' + esc(upset) + '</span>' : '') + '<div class="br"><i></i><i class="o"></i><i></i></div>' +
     '<div class="pn"><div class="tm">' + row(g.away, 'a') + row(g.home, 'h') + '</div>' + brandStatus(g, b, ctx.tag) + '</div>' +
     (play ? playHTML(g, play) : '') + '</div>';
 }
@@ -749,6 +816,7 @@ function fixBoard(b, i){
   if (!['off','logo','text'].includes(o.hdMode)) o.hdMode = 'off';
   o.header = o.hdMode !== 'off'; o.hdAlign = o.hdAlign === 'center' ? 'center' : 'left'; o.hdSize = clampN(o.hdSize,6,45,d.hdSize);
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
+  o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
   o.fade = isFinite(+o.fade) ? Math.min(3, Math.max(0, Math.round(+o.fade * 10) / 10)) : d.fade;
   if (typeof o.logo !== 'string' || !/^data:image\//.test(o.logo)) o.logo = '';
   o.name = String(o.name == null ? d.name : o.name).slice(0, 30);
@@ -756,8 +824,14 @@ function fixBoard(b, i){
   o.secs = clampN(o.secs,2,120,d.secs); o.refresh = clampN(o.refresh,10,300,d.refresh);
   return o;
 }
-function mkCfg(rundown, outputs){
-  const c = {rundown: Array.isArray(rundown) ? rundown : [], outputs: Array.from({length: N_OUT}, (_, i) => fixBoard(outputs && outputs[i], i))};
+function fixPrefs(p){
+  p = p || {};
+  const names = (p.names && typeof p.names === 'object') ? p.names : {'344': {orig: 'Mississippi St', name: 'Miss State', abbr: ''}};
+  return {staleMin: clampN(p.staleMin, 1, 30, 4), names};
+}
+function mkCfg(rundown, outputs, prefs){
+  const c = {rundown: Array.isArray(rundown) ? rundown : [], outputs: Array.from({length: N_OUT}, (_, i) => fixBoard(outputs && outputs[i], i)), prefs: fixPrefs(prefs)};
+  NAME_OVR = c.prefs.names;
   Object.defineProperty(c, 'board', {get(){ return c.outputs[SEL]; }, set(v){ c.outputs[SEL] = v; }});
   return c;
 }
@@ -772,11 +846,11 @@ function loadCfg(){
   } catch(e) {} }
   c = c || {};
   if (!c.outputs && c.board) c.outputs = [c.board];
-  return mkCfg(c.rundown, c.outputs);
+  return mkCfg(c.rundown, c.outputs, c.prefs);
 }
 let saveT = 0;
 function save(){ clearTimeout(saveT); saveT = setTimeout(() => {
-  try { localStorage.setItem(STORE, JSON.stringify({rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''}))})); } catch(e) {}
+  try { localStorage.setItem(STORE, JSON.stringify({rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})), prefs: cfg.prefs})); } catch(e) {}
   cfg.outputs.forEach((b, i) => {
     try { if (b.logo) localStorage.setItem(STORE + '.logo' + i, b.logo); else localStorage.removeItem(STORE + '.logo' + i); } catch(e) { window.__logoSaveFailed && window.__logoSaveFailed(); }
   });
@@ -792,7 +866,17 @@ function ingest(g){
         if (g.state === 'in' && ownsData()) scoringPlay(g, sd, +g[k].score - +old[k].score);
       } });
   }
+  const sig = [g.state, g.away.score, g.home.score, g.detail, g.sit.down, g.sit.outs, g.sit.on1, g.sit.on2, g.sit.on3].join('|');
+  if (!old || sig !== STALE_SIG[g.key]) { STALE_SIG[g.key] = sig; CHANGED_AT[g.key] = Date.now(); }
   games[g.key] = g;
+}
+// Stale-score warning (dashboard only): a live game whose score, clock and situation haven't changed for a while.
+// Halftime, end of a period and weather delays are expected pauses and don't count; baseball gets twice as long.
+const STALE_SIG = {}, CHANGED_AT = {};
+function staleMins(g){
+  if (!g || g.manual || g.state !== 'in' || isHalf(g) || /end of|delay|suspend|rain/i.test((g.detail || '') + ' ' + (g.statusName || ''))) return 0;
+  const limit = cfg.prefs.staleMin * (g.sport === 'bsb' ? 2 : 1), mins = (Date.now() - (CHANGED_AT[g.key] || Date.now())) / 60000;
+  return mins >= limit ? Math.floor(mins) : 0;
 }
 // the control page (or an output running on its own) looks up plays; controlled outputs get them in messages
 let controlledAt = 0;
@@ -930,7 +1014,7 @@ function bootOutput(){
       Object.entries(d.plays || {}).map(([k, p]) => k + p.head + p.text), knownLogos.map(l => (l || '').length + (l || '').slice(-24))]);
     if (sig === lastSig) return;
     lastSig = sig;
-    cfg = mkCfg(d.cfg.rundown, d.cfg.outputs.map((b, j) => Object.assign({}, b, {logo: knownLogos[j] || ''})));
+    cfg = mkCfg(d.cfg.rundown, d.cfg.outputs.map((b, j) => Object.assign({}, b, {logo: knownLogos[j] || ''})), d.cfg.prefs);
     (d.games || []).forEach(ingest);
     Object.keys(PLAYS).forEach(k => delete PLAYS[k]); Object.assign(PLAYS, d.plays || {});
     if (live) { rt.page = d.pages[OUT_IDX]; rt.paused = d.paused[OUT_IDX]; }
@@ -958,7 +1042,7 @@ function bootOutput(){
             const now = Date.now(), plays = {};
             Object.entries(state.plays || {}).forEach(([k, p]) => plays[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
             const fresh = now - beatAt < 12000;
-            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs}, logos: knownLogos, games: state.games, plays,
+            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays,
               pages: (row.live && row.live.pages) || [], paused: (row.live && row.live.paused) || []}, fresh);
           }
         }
@@ -1003,7 +1087,7 @@ function push(forceLogos){
   // logos are large, so they ride along only when they change (and every 10th heartbeat as a safety net)
   const sig = cfg.outputs.map(b => b.logo.length + ':' + b.logo.slice(-40)).join('|');
   const withLogos = forceLogos || sig !== lastLogoSig || (++pushN % 10 === 0); lastLogoSig = sig;
-  const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''}))},
+  const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})), prefs: cfg.prefs},
     logos: withLogos ? cfg.outputs.map(b => b.logo) : null, plays: PLAYS,
     games: cfg.rundown.filter(r => !r.manual).map(r => games[r.key]).filter(Boolean),
     pages: rts.map(r => r.page), paused: rts.map(r => r.paused)};
@@ -1024,7 +1108,7 @@ async function publishOnline(){
   if (pub.busy) { pub.again = true; return; }
   const now = Date.now();
   const plays = {}; Object.entries(PLAYS).forEach(([k, p]) => { if (now - p.t < 60000) plays[k] = Object.assign({}, p, {age: now - p.t, t: undefined}); });
-  const state = {v: 1, rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})),
+  const state = {v: 1, rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})), prefs: cfg.prefs,
     games: cfg.rundown.filter(r => !r.manual).map(r => games[r.key]).filter(Boolean), plays};
   const stateSig = JSON.stringify(Object.assign({}, state, {plays: Object.keys(plays).map(k => k + plays[k].head + plays[k].text)}));
   const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused)}, liveSig = JSON.stringify(live);
@@ -1063,7 +1147,7 @@ function bootControl(){
   $('groupSel').addEventListener('change', e => { pk.group = e.target.value; loadPicker(); });
   $('chips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; pk.filter = b.dataset.f; syncPicker(); renderList(); });
   $('q').addEventListener('input', e => { pk.q = e.target.value.trim().toLowerCase(); renderList(); });
-  const setDate = d => { pk.date = d; syncPicker(); loadPicker(); };
+  const setDate = d => { pk.date = d; syncPicker(); loadPicker(); if (window.__syncQb) window.__syncQb(); };
   $('dPrev').onclick = () => { const d = new Date(pk.date); d.setDate(d.getDate()-1); setDate(d); };
   $('dNext').onclick = () => { const d = new Date(pk.date); d.setDate(d.getDate()+1); setDate(d); };
   $('dToday').onclick = () => setDate(ctToday());
@@ -1141,6 +1225,8 @@ function bootControl(){
   function pageOf(i, key){ return pages(i).findIndex(p => p.games.some(g => g.key === key)); }
   function renderRundown(){
     $('rdCount').textContent = cfg.rundown.length ? '· ' + cfg.rundown.length : '';
+    const nStale = frozen ? 0 : cfg.rundown.filter(r => !r.manual && staleMins(games[r.key])).length;
+    $('staleNote').hidden = !nStale; $('staleNote').textContent = nStale + (nStale === 1 ? ' game hasn’t' : ' games haven’t') + ' updated in a while';
     $('rdHint').hidden = cfg.rundown.length > 0;
     const psSel = pages(SEL);
     $('rdList').innerHTML = cfg.rundown.map((r, i) => {
@@ -1158,10 +1244,13 @@ function bootControl(){
           '<label>State<select data-f="state"><option value="pre"' + (r.state === 'pre' ? ' selected' : '') + '>Upcoming</option><option value="in"' + (r.state === 'in' ? ' selected' : '') + '>Live</option><option value="post"' + (r.state === 'post' ? ' selected' : '') + '>Final</option></select></label>' +
           '<label class="full">Status text (e.g. 7:00 PM, Q3 5:12, Final/OT)<input type="text" data-f="status" maxlength="30" value="' + esc(r.status || '') + '"></label></div>';
       }
-      return '<li data-key="' + esc(r.key) + '"><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu">' +
+      const st = g ? staleMins(g) : 0, ups = g ? upsetTag(g, 'half') : '';
+      return '<li data-key="' + esc(r.key) + '"' + (st ? ' class="is-stale"' : '') + '><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu">' +
         (g ? '<span>' + esc(line(g.away)) + '</span><span>' + esc(line(g.home)) + '</span>' : '<span style="color:var(--muted)">Loading game…</span>') +
         '<span class="meta"><span class="tagx">' + SPORTS[r.sport].short + '</span>' + (r.manual ? '<span class="tagx">Manual</span>' : '') +
-        (s ? '<span class="' + s.cls + '">' + esc(s.short) + '</span>' : '') + (pg >= 0 ? '<span class="pg" title="Page on Output ' + (SEL+1) + ' (the output selected in Board settings)">Pg ' + (pg+1) + '</span>' : '') + '</span></span>' +
+        (s ? '<span class="' + s.cls + '">' + esc(s.short) + '</span>' : '') + (pg >= 0 ? '<span class="pg" title="Page on Output ' + (SEL+1) + ' (the output selected in Board settings)">Pg ' + (pg+1) + '</span>' : '') +
+        (st ? '<span class="stale" title="Score, clock and situation haven’t changed. Check the game or freeze/remove it.">No update ' + st + ' min</span>' : '') +
+        (ups ? '<span class="ups">' + esc(ups) + '</span>' : '') + '</span></span>' +
         '<span class="ib"><button data-a="go" title="Show this game now on every output" aria-label="Show this game now on every output">' + IC.go + '</button>' +
         (r.manual ? '<button data-a="ed" title="Edit" aria-label="Edit manual game">' + IC.ed + '</button>' : '') +
         '<button data-a="up" title="Move up" aria-label="Move up">' + IC.up + '</button><button data-a="dn" title="Move down" aria-label="Move down">' + IC.dn + '</button>' +
@@ -1199,6 +1288,105 @@ function bootControl(){
   $('sortRank').onclick = () => { if (!cfg.rundown.length) return; sortRundown(byRank); toast('Rundown sorted: Top 25 first, by ranking'); };
   // earliest start first; same start time falls back to ranking; manual games (no start time) go last
   $('sortTime').onclick = () => { if (!cfg.rundown.length) return; sortRundown((a, b) => { const x = timeKey(a), y = timeKey(b); return (x === y ? 0 : x < y ? -1 : 1) || byRank(a, b); }); toast('Rundown sorted by game time'); };
+  // ---------- one-click rundowns ----------
+  const RECIPES = {
+    'sec+top25': g => CONF_IDS.sec.has(g.away.id) || CONF_IDS.sec.has(g.home.id) || g.away.rank || g.home.rank,
+    top25: g => g.away.rank || g.home.rank,
+    sec: g => CONF_IDS.sec.has(g.away.id) || CONF_IDS.sec.has(g.home.id),
+    acc: g => CONF_IDS.acc.has(g.away.id) || CONF_IDS.acc.has(g.home.id),
+    b10: g => CONF_IDS.b10.has(g.away.id) || CONF_IDS.b10.has(g.home.id),
+    b12: g => CONF_IDS.b12.has(g.away.id) || CONF_IDS.b12.has(g.home.id),
+    all: g => true
+  };
+  const qb = {sports: new Set([pk.sport])};
+  const syncQb = () => {
+    [...$('qbSports').children].forEach(b => b.setAttribute('aria-pressed', qb.sports.has(b.dataset.s)));
+    $('qbDate').textContent = 'For ' + pk.date.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  };
+  $('qbSports').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const sp = b.dataset.s; qb.sports.has(sp) ? qb.sports.delete(sp) : qb.sports.add(sp); syncQb(); });
+  // pulls each chosen sport for the date shown in the game picker, keeps the matching games, Top 25 first by ranking
+  async function buildRundown(recipe, sports, replace){
+    if (!sports.length) { toast('Pick at least one sport.'); return; }
+    const test = RECIPES[recipe] || RECIPES.all, date = ymd(pk.date), found = [], failed = [];
+    toast('Building rundown…');
+    for (const sp of sports) {
+      const group = SPORTS[sp].groups[0][0], k = feedKey({sport: sp, date, group});
+      try { await loadFeed(k); } catch(e) { failed.push(SPORTS[sp].short); }
+      (feeds[k] || []).filter(test).forEach(g => found.push({key: g.key, sport: sp, id: g.id, date, group}));
+    }
+    if (replace) cfg.rundown = cfg.rundown.filter(r => r.manual);
+    let n = 0;
+    found.sort((a, b) => rankKey(games[a.key]) - rankKey(games[b.key]) || (Date.parse(games[a.key].date) - Date.parse(games[b.key].date)))
+      .forEach(e => { if (!inRd(e.key)) { addToRundown(e); n++; } });
+    changed();
+    toast((replace ? 'Rundown built: ' : 'Added ') + n + (n === 1 ? ' game' : ' games') + (failed.length ? '. Couldn’t load ' + failed.join(', ') + '.' : ''));
+  }
+  $('qbReplace').onclick = () => buildRundown($('qbRecipe').value, [...qb.sports], true);
+  $('qbAdd').onclick = () => buildRundown($('qbRecipe').value, [...qb.sports], false);
+
+  // ---------- saved setups: games recipe + sports + every output's settings (logos included) ----------
+  const SETUP_STORE = STORE + '.setups';
+  const loadSetups = () => { try { return JSON.parse(localStorage.getItem(SETUP_STORE) || '[]'); } catch(e) { return []; } };
+  const syncSetups = () => { const list = loadSetups(); $('setupSel').innerHTML = '<option value="">Saved setups…</option>' + list.map((x, i) => '<option value="' + i + '">' + esc(x.name) + '</option>').join(''); };
+  $('setupSave').onclick = () => {
+    const name = $('setupName').value.trim(); if (!name) { $('setupName').focus(); toast('Name the setup first.'); return; }
+    const list = loadSetups().filter(x => x.name.toLowerCase() !== name.toLowerCase());
+    list.push({name, recipe: $('qbRecipe').value, sports: [...qb.sports], outputs: cfg.outputs});
+    try { localStorage.setItem(SETUP_STORE, JSON.stringify(list)); }
+    catch(e) {
+      list[list.length - 1].outputs = cfg.outputs.map(b => Object.assign({}, b, {logo: ''}));
+      try { localStorage.setItem(SETUP_STORE, JSON.stringify(list)); toast('Saved “' + name + '” without sponsor logos (not enough room to keep them).'); syncSetups(); return; } catch(e2) { toast('Couldn’t save the setup.'); return; }
+    }
+    $('setupName').value = ''; syncSetups(); toast('Saved “' + name + '”');
+  };
+  $('setupLoad').onclick = async () => {
+    const x = loadSetups()[+$('setupSel').value]; if (!x) { toast('Pick a saved setup.'); return; }
+    cfg.outputs = cfg.outputs.map((b, i) => fixBoard(Object.assign({}, x.outputs[i] || b, x.outputs[i] && !x.outputs[i].logo && b.logo ? {logo: b.logo} : {}), i));
+    $('qbRecipe').value = x.recipe; qb.sports = new Set(x.sports); syncQb(); syncSettings();
+    await buildRundown(x.recipe, x.sports, true);
+    toast('Loaded “' + x.name + '”');
+  };
+  let delArm = 0;
+  $('setupDel').onclick = () => {
+    const i = +$('setupSel').value, list = loadSetups(); if (!list[i]) return;
+    if (Date.now() > delArm) { delArm = Date.now() + 3000; toast('Click Delete again to remove “' + list[i].name + '”'); return; }
+    list.splice(i, 1); try { localStorage.setItem(SETUP_STORE, JSON.stringify(list)); } catch(e) {} delArm = 0; syncSetups(); toast('Setup deleted');
+  };
+
+  // ---------- team names ----------
+  let teamIdx = {};
+  function syncTeamList(){
+    teamIdx = {};
+    Object.values(games).forEach(g => [g.away, g.home].forEach(t => { if (t.id) teamIdx[t.name + ' (' + (t.abbr || t.id) + ')'] = t; }));
+    $('teamList').innerHTML = Object.keys(teamIdx).sort().map(k => '<option value="' + esc(k) + '"></option>').join('');
+  }
+  function renderNames(){
+    const n = cfg.prefs.names;
+    $('nameRows').innerHTML = Object.keys(n).length ? '<div class="nrow" style="color:var(--muted);font-size:11px"><span>ESPN name</span><span>Board name</span><span>Short</span><span></span></div>' +
+      Object.entries(n).sort((a, b) => (a[1].orig || '').localeCompare(b[1].orig || '')).map(([id, o]) => '<div class="nrow" data-id="' + esc(id) + '"><span class="orig">' + esc(o.orig || id) + '</span>' +
+        '<input type="text" data-f="name" maxlength="30" value="' + esc(o.name || '') + '" aria-label="Board name for ' + esc(o.orig || id) + '">' +
+        '<input type="text" data-f="abbr" maxlength="6" value="' + esc(o.abbr || '') + '" aria-label="Short name for ' + esc(o.orig || id) + '">' +
+        '<div class="ib"><button type="button" data-x="del" title="Remove" aria-label="Remove">' + IC.x + '</button></div></div>').join('') : '';
+    $('pStale').value = cfg.prefs.staleMin;
+  }
+  $('nameAdd').onclick = () => {
+    const t = teamIdx[$('nameFind').value]; if (!t) { toast('Pick a team from the list (it comes from games loaded today).'); return; }
+    if (!cfg.prefs.names[t.id]) cfg.prefs.names[t.id] = {orig: t.name, name: t.name, abbr: t.abbr || ''};
+    $('nameFind').value = ''; renderNames(); save(); renderAll(); push();
+    const inp = document.querySelector('.nrow[data-id="' + t.id + '"] input'); if (inp) { inp.focus(); inp.select(); }
+  };
+  $('nameRows').addEventListener('input', e => {
+    const row = e.target.closest('.nrow'); if (!row || !e.target.dataset.f) return;
+    cfg.prefs.names[row.dataset.id][e.target.dataset.f] = e.target.value.trim(); save(); renderAll(); push();
+  });
+  $('nameRows').addEventListener('click', e => {
+    const b = e.target.closest('[data-x="del"]'); if (!b) return;
+    delete cfg.prefs.names[b.closest('.nrow').dataset.id]; renderNames(); save(); renderAll(); push();
+  });
+  $('pStale').addEventListener('change', e => { cfg.prefs = fixPrefs(Object.assign({}, cfg.prefs, {staleMin: +e.target.value})); NAME_OVR = cfg.prefs.names; renderNames(); save(); renderRundown(); });
+  $('namesBox').addEventListener('toggle', syncTeamList);
+  syncQb(); syncSetups(); renderNames(); window.__syncQb = syncQb;
+
   let clearArm = 0;
   $('clearRd').onclick = () => {
     if (!cfg.rundown.length) return;
@@ -1282,7 +1470,7 @@ function bootControl(){
   // copy colors, header/logo and display options (not size or layout) from the other output
   $('matchLook').onclick = () => {
     const from = +$('lookFrom').value, src = cfg.outputs[from];
-    ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade'].forEach(k => cfg.board[k] = src[k]);
+    ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets'].forEach(k => cfg.board[k] = src[k]);
     cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
     toast('Output ' + (SEL+1) + ' now matches Output ' + (from+1) + '’s look');
   };
