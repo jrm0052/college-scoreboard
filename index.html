@@ -1109,7 +1109,7 @@ const rid = (n, abc) => { const a = new Uint32Array(n); crypto.getRandomValues(a
 let online = (() => { try { const o = JSON.parse(localStorage.getItem(ONLINE_STORE) || 'null'); if (o && /^[a-z0-9]{4,12}$/.test(o.id) && o.key) return o; } catch(e) {} return null; })();
 if (!online && !IS_OUT) { online = {id: rid(6, 'abcdefghjkmnpqrstuvwxyz23456789'), key: rid(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), on: false}; try { localStorage.setItem(ONLINE_STORE, JSON.stringify(online)); } catch(e) {} }
 const onlineStatus = {ok: null, msg: ''};
-let pub = {busy: false, again: false, stateSig: '', logoSig: '', liveSig: '', beat: 0};
+let pub = {busy: false, again: false, stateSig: '', logoSig: '', liveSig: '', beat: 0, stateAt: 0, logoAt: 0};
 async function publishOnline(){
   if (IS_OUT || !online || !online.on) return;
   if (pub.busy) { pub.again = true; return; }
@@ -1120,7 +1120,8 @@ async function publishOnline(){
   const stateSig = JSON.stringify(Object.assign({}, state, {plays: Object.keys(plays).map(k => k + plays[k].head + plays[k].text)}));
   const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused)}, liveSig = JSON.stringify(live);
   const logoSig = cfg.outputs.map(b => b.logo.length + ':' + b.logo.slice(-40)).join('|');
-  const sendState = stateSig !== pub.stateSig, sendLogos = logoSig !== pub.logoSig;
+  // full games/settings go out whenever they change AND at least every 30 s (logos every 5 min), so a board can never sit empty
+  const sendState = stateSig !== pub.stateSig || now - pub.stateAt > 30000, sendLogos = logoSig !== pub.logoSig || now - pub.logoAt > 300000;
   if (!sendState && !sendLogos && liveSig === pub.liveSig && now - pub.beat < 4000) return;   // 4-second heartbeat keeps DAK outputs "live"
   pub.busy = true;
   try {
@@ -1130,7 +1131,7 @@ async function publishOnline(){
       const t = await r.text();
       throw new Error(/scoreboard_publish|PGRST202|404/.test(t + r.status) ? 'Online outputs aren’t set up yet. Run scoreboard-setup.sql in Supabase.' : /wrong control key/.test(t) ? 'This board code belongs to another dashboard.' : 'Couldn’t reach the online board (HTTP ' + r.status + ').');
     }
-    if (sendState) pub.stateSig = stateSig; if (sendLogos) pub.logoSig = logoSig; pub.liveSig = liveSig; pub.beat = now;
+    if (sendState) { pub.stateSig = stateSig; pub.stateAt = now; } if (sendLogos) { pub.logoSig = logoSig; pub.logoAt = now; } pub.liveSig = liveSig; pub.beat = now;
     onlineStatus.ok = true; onlineStatus.msg = '';
   } catch(e) { onlineStatus.ok = false; onlineStatus.msg = e.message || 'Couldn’t reach the online board.'; pub.beat = now; }
   pub.busy = false;
