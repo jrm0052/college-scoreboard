@@ -115,6 +115,9 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .ed{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 .ed label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);min-width:0}
 .ed .full{grid-column:1/-1}
+.hled .hlchips{display:flex;flex-wrap:wrap;gap:4px}
+.hled .hlchips .chip-btn{font-size:11px;padding:3px 9px}
+.hled select{width:100%}
 .ed .tline{display:grid;grid-template-columns:minmax(0,1fr) 52px 56px 38px;gap:6px;align-items:end}
 
 .stage{position:relative;width:100%;background:repeating-conic-gradient(#0E1A33 0 25%,#0B162C 0 50%) 0 0/20px 20px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
@@ -313,6 +316,10 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .board .scf{font:800 1.65em/1 var(--f-score);text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
 .board .sov{font:800 1.25em/1 var(--f-score);text-align:center;opacity:.65;font-variant-numeric:tabular-nums;white-space:nowrap}
 .board .stand.wide{flex-direction:row;align-items:center;gap:1em}
+.board .srow.hl{background:var(--accent);background-image:none;border-bottom-color:transparent;box-shadow:.35em .35em 0 var(--shade);position:relative;z-index:1}
+.board .srow.hl .sp,.board .srow.hl .sn,.board .srow.hl .scf{color:#fff}
+.board .srow.hl .sov{opacity:.9;color:#fff}
+.board .stand.dim .srow:not(.hl):not(.shd){opacity:.42}
 .board .stand.wide .sth{flex-direction:column;align-items:flex-start;justify-content:center;border:0;border-right:.15em solid var(--accent);padding-right:1em;height:100%;font-size:2.6em;gap:.15em}
 .board .stand.wide .srow{display:flex;gap:.6em;height:78%;padding:0 1.1em;border:0;flex:none}
 .board .stand.wide .sn{font-size:2.6em}.board .stand.wide .scf{font-size:2.6em;opacity:.8}.board .stand.wide .sp{font-size:2.2em}.board .stand.wide .slg{width:3.4em;height:3.4em}
@@ -759,22 +766,30 @@ function standingsHTML(item, b, geo){
   if (!rows.length) return '<div class="empty">' + esc(confName + ' standings loading…') + '</div>';
   const logo = r => /^\d+$/.test(r.id) ? '<img class="slg" alt="" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/' + r.id + '.png" data-fb="' + esc(r.logo) + '" onerror="__sbLogo(this)">' : '<span class="slg"></span>';
   const nm = r => esc(teamLabel({id: r.id, name: r.name, abbr: r.abbr}, b.names === 'abbr' ? 'abbr' : 'school', false));
+  // highlighted teams (e.g. the two teams playing): accent row; the rest can dim
+  const hl = new Set(item.hl || []), any = rows.some(r => hl.has(r.id));
+  const rc = r => 'srow' + (hl.has(r.id) ? ' hl' : '');
+  const dim = any && item.dim !== false ? ' dim' : '';
   if (geo.wide) {   // fascia / ribbon: title block, then as many teams as fit in one row
     const u = H / 10, chip = u * 21, n = Math.max(1, Math.min(rows.length, Math.floor((W - u * 24) / chip)));
-    return '<div class="stand wide" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px;font-size:' + u.toFixed(2) + 'px">' +
+    // a highlighted team further down than fits still shows: top of the table plus the highlighted rows, each with its real position
+    let pick = rows.map((r, k) => k).slice(0, n);
+    const want = rows.map((r, k) => k).filter(k => hl.has(rows[k].id));
+    if (want.some(k => k >= n)) { const rest = n - Math.min(n, want.length); pick = rows.map((r, k) => k).filter(k => !hl.has(rows[k].id)).slice(0, rest).concat(want.slice(0, n)).sort((x, y) => x - y); }
+    return '<div class="stand wide' + dim + '" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px;font-size:' + u.toFixed(2) + 'px">' +
       '<div class="sth"><span class="stt">' + esc(confName) + '</span><span class="sts">Standings</span></div>' +
-      rows.slice(0, n).map((r, k) => '<div class="srow"><span class="sp">' + (k + 1) + '</span>' + logo(r) + '<span class="sn">' + nm(r) + '</span><span class="scf">' + esc(r.conf) + '</span></div>').join('') + '</div>';
+      pick.map(k => rows[k]).map((r, j) => '<div class="' + rc(r) + '"><span class="sp">' + (rows.indexOf(r) + 1) + '</span>' + logo(r) + '<span class="sn">' + nm(r) + '</span><span class="scf">' + esc(r.conf) + '</span></div>').join('') + '</div>';
   }
   const cols = W / H < 1.3 ? 1 : 2, per = Math.ceil(rows.length / cols);
   const titleH = Math.round(H * 0.12), gap = Math.round(W * 0.025);
   const rowH = (H - titleH - H * 0.03) / (per + 0.7), u = Math.max(4, Math.min(rowH / 2.6, ((W - gap * (cols - 1)) / cols) / 24));
-  let h = '<div class="stand" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px">' +
+  let h = '<div class="stand' + dim + '" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px">' +
     '<div class="sth" style="height:' + titleH + 'px;font-size:' + (titleH * 0.62).toFixed(1) + 'px"><span class="stt">' + esc(confName) + ' Standings</span><span class="sts">' + esc(sportName) + '</span></div>' +
     '<div class="stc" style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr));column-gap:' + gap + 'px;font-size:' + u.toFixed(2) + 'px">';
   for (let c = 0; c < cols; c++) {
     h += '<div class="scol" style="grid-template-rows:' + (rowH * 0.7).toFixed(1) + 'px repeat(' + per + ',' + rowH.toFixed(1) + 'px)">' +
       '<div class="srow shd"><span></span><span></span><span class="sn">Team</span><span class="scf">Conf</span><span class="sov">Overall</span></div>' +
-      rows.slice(c * per, (c + 1) * per).map((r, k) => '<div class="srow"><span class="sp">' + (c * per + k + 1) + '</span>' + logo(r) +
+      rows.slice(c * per, (c + 1) * per).map((r, k) => '<div class="' + rc(r) + '"><span class="sp">' + (c * per + k + 1) + '</span>' + logo(r) +
         '<span class="sn">' + nm(r) + '</span><span class="scf">' + esc(r.conf) + '</span><span class="sov">' + esc(r.overall) + '</span></div>').join('') + '</div>';
   }
   return h + '</div></div>';
@@ -1213,7 +1228,7 @@ async function loadFeed(k){
 }
 
 function rundownGames(){
-  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf} : games[r.key]).filter(Boolean);
+  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf, hl: r.hl || [], dim: r.dim !== false} : games[r.key]).filter(Boolean);
 }
 function pages(i){ return buildPages(rundownGames(), cfg.outputs[i]); }
 
@@ -1492,7 +1507,7 @@ function buildFeed(){
       o.title = CONF_NAMES[it.conf] + ' Standings';
       o.standings = {title: o.title, sport: SPORTS[it.sport].label, rows: (st ? st.rows : []).map((r, k) => {
         const t = {id: r.id, name: r.name, abbr: r.abbr};
-        return {pos: k + 1, name: teamLabel(t, 'school'), abbr: teamLabel(t, 'abbr'), rank: '', conf: r.conf, overall: r.overall, logo: /^\d+$/.test(r.id) ? ESPN_LOGO(r.id) : r.logo};
+        return {pos: k + 1, name: teamLabel(t, 'school'), abbr: teamLabel(t, 'abbr'), rank: '', conf: r.conf, overall: r.overall, logo: /^\d+$/.test(r.id) ? ESPN_LOGO(r.id) : r.logo, highlight: (it.hl || []).includes(r.id) ? '1' : ''};
       })};
     } else if (pg) {
       o.title = b.hdMode === 'text' ? b.title : pg.sport ? SPORTS[pg.sport].label : b.title;
@@ -1720,7 +1735,8 @@ function bootControl(){
     dn:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
     ed:'<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>',
     go:'<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>',
-    x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+    x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    hl:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>'
   };
   const onPage = (p, key) => (p.standings && p.standings.key === key) || p.games.some(g => g.key === key);
   function pageOf(i, key){ return pages(i).findIndex(p => onPage(p, key)); }
@@ -1732,15 +1748,29 @@ function bootControl(){
     const psSel = pages(SEL);
     const btns = r => '<span class="ib"><button data-a="go" title="Show this now on every output" aria-label="Show this now on every output">' + IC.go + '</button>' +
         (r.manual ? '<button data-a="ed" title="Edit" aria-label="Edit manual game">' + IC.ed + '</button>' : '') +
+        (r.standings ? '<button data-a="ed" title="Highlight teams" aria-label="Highlight teams">' + IC.hl + '</button>' : '') +
         '<button data-a="up" title="Move up" aria-label="Move up">' + IC.up + '</button><button data-a="dn" title="Move down" aria-label="Move down">' + IC.dn + '</button>' +
         '<button data-a="x" title="Remove" aria-label="Remove">' + IC.x + '</button></span>';
     $('rdList').innerHTML = cfg.rundown.map((r, i) => {
       if (r.standings) {
         const st = STANDINGS[r.sport + ':' + r.conf], pg = psSel.findIndex(p => onPage(p, r.key));
+        const hl = new Set(r.hl || []), rows = st ? st.rows : [], names = rows.filter(x => hl.has(x.id)).map(x => teamLabel(x, 'school'));
+        let ed = '';
+        if (editing === r.key) {
+          // games this conference's teams are in (from the scores loaded on the dashboard), soonest first
+          const ids = new Set(rows.map(x => x.id));
+          const gl = Object.values(games).filter(g => g.sport === r.sport && !g.manual && (ids.has(g.away.id) || ids.has(g.home.id)))
+            .sort((a, b) => (a.state === 'post') - (b.state === 'post') || Date.parse(a.date) - Date.parse(b.date)).slice(0, 40);
+          ed = '<div class="ed hled"><label class="full">Highlight the teams in a game<select data-hlgame>' + '<option value="">Pick a game…</option>' +
+            gl.map(g => '<option value="' + esc(g.away.id + ',' + g.home.id) + '">' + esc(teamLabel(g.away, 'school') + (g.state === 'pre' ? ' at ' : ' ' + g.away.score + ', ') + teamLabel(g.home, 'school') + (g.state === 'pre' ? '' : ' ' + g.home.score) + ' · ' + statusInfo(g).short) + '</option>').join('') +
+            '</select></label><div class="full hlchips">' + (rows.length ? rows.map(x => '<button type="button" class="chip-btn" data-hlt="' + esc(x.id) + '" aria-pressed="' + hl.has(x.id) + '">' + esc(teamLabel(x, 'school')) + '</button>').join('') : '<span class="hint">Teams appear once the standings load.</span>') + '</div>' +
+            '<label class="ck"><input type="checkbox" data-hldim' + (r.dim !== false ? ' checked' : '') + '> Dim the other teams</label>' +
+            '<button class="btn sm" type="button" data-hlclear>Clear highlight</button></div>';
+        }
         return '<li data-key="' + esc(r.key) + '"><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu"><span>' + esc(CONF_NAMES[r.conf] + ' standings') + '</span>' +
           '<span class="meta"><span class="tagx">' + SPORTS[r.sport].short + '</span><span class="tagx">Standings</span>' +
           '<span>' + (st ? st.rows.length + ' teams · updated ' + new Date(st.at).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZone:TZ}) : 'Loading…') + '</span>' +
-          (pg >= 0 ? '<span class="pg">Pg ' + (pg+1) + '</span>' : '') + '</span></span>' + btns(r) + '</div></li>';
+          (pg >= 0 ? '<span class="pg">Pg ' + (pg+1) + '</span>' : '') + (names.length ? '<span class="ups">★ ' + esc(names.join(', ')) + '</span>' : '') + '</span></span>' + btns(r) + '</div>' + ed + '</li>';
       }
       const g = r.manual ? manualGame(r) : games[r.key];
       const s = g ? statusInfo(g) : null;
@@ -1785,6 +1815,21 @@ function bootControl(){
     if (e.target.tagName === 'SELECT') renderRundown();
   });
   $('rdList').addEventListener('change', e => { if (e.target.dataset.f && e.target.tagName !== 'SELECT') renderRundown(); });
+  // standings highlight: pick a game (both teams) or tap teams; shows on every output right away
+  const hlItem = el => { const li = el.closest('li'); return li && cfg.rundown.find(x => x.key === li.dataset.key && x.standings); };
+  const hlDone = () => { save(); renderRundown(); renderAll(); push(); };
+  $('rdList').addEventListener('click', e => {
+    const t = e.target.closest('[data-hlt],[data-hlclear]'); if (!t) return;
+    const r = hlItem(t); if (!r) return;
+    if (t.hasAttribute('data-hlclear')) r.hl = [];
+    else { const id = t.dataset.hlt, s = new Set(r.hl || []); s.has(id) ? s.delete(id) : s.add(id); r.hl = [...s]; }
+    hlDone();
+  });
+  $('rdList').addEventListener('change', e => {
+    const r = hlItem(e.target); if (!r) return;
+    if (e.target.hasAttribute('data-hlgame') && e.target.value) { r.hl = e.target.value.split(',').filter(Boolean); hlDone(); }
+    else if (e.target.hasAttribute('data-hldim')) { r.dim = e.target.checked; hlDone(); }
+  });
   $('addManual').onclick = () => {
     const key = 'm:' + Date.now().toString(36);
     cfg.rundown.push({key, manual:true, sport:pk.sport, state:'pre', status:'7:00 PM', away:{name:'Away Team', score:'', color:'#4A5568'}, home:{name:'Home Team', score:'', color:'#2B4C7E'}});
