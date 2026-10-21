@@ -138,6 +138,9 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .otabs{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:2px 12px 12px}
 .otabs .seg{min-width:min(100%,380px)}
 .otabs .pair{display:flex;gap:6px;align-items:center}
+.themes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 12px 12px}
+.themes .tl{font-size:12px;color:var(--muted);margin-right:4px}
+.themes select,.themes input[type=text]{min-width:140px;flex:1}
 .transport .info{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;margin-left:auto}
 .ck{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
 .settings{border:1px solid var(--line);border-radius:8px;background:var(--panel)}
@@ -160,6 +163,41 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 .copybox{display:flex;gap:6px}
 .copybox input{flex:1;font:12px var(--f-mono)}
 
+/* view tabs, sign-in, admin, failover */
+.vt{min-width:190px}
+.vt button{padding:6px 10px}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.fobar{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--warn);border-radius:8px;background:rgba(242,179,61,.1);color:var(--warn);font-size:13px}
+.fobar span{margin-right:auto}
+.online .scr{color:var(--muted);font-size:12px}
+.locked{opacity:.45}
+body.vw-admin .cols{display:none}
+.admin{padding:16px max(16px,env(safe-area-inset-left,0px)) 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,500px),1fr));gap:14px;align-items:start}
+.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.wide2{grid-column:1/-1}
+.card h3{margin:0;font:600 12px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card h4{margin:6px 0 0;font:600 12px var(--f-ui);color:var(--fg)}
+.card label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.card label.f.inl{flex-direction:row;align-items:center;gap:6px}
+.card code{font:11px var(--f-mono);color:var(--fg)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.urls{display:flex;flex-direction:column;gap:4px}
+.url{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.url input{font:11px var(--f-mono)}
+.urow{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.urow .uf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.urow .up2{display:flex;flex-wrap:wrap;gap:4px 14px}
+.urow .up2 .ck{font-size:12px}
+.urow .ua{display:flex;gap:6px}
+input[type=email],input[type=password]{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th,.tbl td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+.tbl th{color:var(--muted);font-weight:600}
+.tbl .warn{color:var(--warn)}
+.signin{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(9,20,42,.94)}
+.signin .card{width:min(100%,380px)}
+.signin input{width:100%}
+.err{color:var(--warn);font-size:13px;margin:0;min-height:1em}
 @media (max-width:1180px){
   .cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .pane.right{grid-column:1/-1;order:-1}
@@ -170,7 +208,7 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 /* ---------- the board (graphic) ----------
    House package: navy field, white/orange/white bracket beside each game, condensed caps,
    leading score in orange, status column = period / clock / orange rule / network. */
-.board{position:relative;overflow:hidden;color:#fff;font-family:var(--f-score)}
+.board{position:relative;overflow:hidden;color:var(--txt);font-family:var(--f-score)}
 .board .hd{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-end;gap:1.4em;padding-bottom:1.6em}
 .board .hd .ttl{font:800 5.4em/1 var(--f-score);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;padding-bottom:.12em;border-bottom:.09em solid var(--accent)}
 .board .hd .sp{font:800 3em/1 var(--f-score);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;padding-bottom:.25em}
@@ -179,18 +217,26 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 .board .hd .dots i.on{background:var(--accent)}
 .board .hd.lg{align-items:center;padding-bottom:0}
 .board .hd.lg .sp,.board .hd.lg .dots{padding-bottom:0}
-.board .hd .slogo{display:block;height:84%;max-width:78%;object-fit:contain;object-position:left center;flex:none}
-.board .hd.ctr .slogo{position:absolute;left:50%;top:8%;max-width:72%;transform:translateX(-50%);object-position:center}
+.board{--txt:#fff}
+.board .hd .hgrp{display:flex;align-items:center;gap:.9em;height:84%;max-width:80%;min-width:0;flex:none}
+.board .hd .slogo{display:block;height:100%;max-width:100%;min-width:0;object-fit:contain;object-position:left center}
+.board .hd .pby{font:800 2.4em/1 var(--f-score);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;opacity:.9}
+.board .hd.ctr .hgrp{position:absolute;left:50%;top:8%;max-width:76%;transform:translateX(-50%)}
+.board .hd.ctr .slogo{object-position:center}
 .board .hd.ctr .ttl{position:absolute;left:50%;transform:translateX(-50%)}
 /* very wide boards (fascia/ribbon): header becomes a block at the left end */
 .board .hd.side{right:auto;bottom:0;flex-direction:column;justify-content:center;align-items:center;gap:.5em;padding:0 !important;border-right:.3em solid var(--accent)}
-.board .hd.side .slogo{height:84%;max-height:84%;max-width:88%;object-position:center}
+.board .hd.side .hgrp{flex-direction:column;justify-content:center;height:84%;max-width:88%;gap:.35em}
+.board .hd.side .slogo{height:0;flex:1 1 0;width:100%;object-position:center}
+.board .hd.side .pby{font-size:1.7em}
 .board .hd.side .ttl{border-bottom:0;padding-bottom:0;text-align:center;white-space:normal;line-height:.95}
 .board .hd.side .sp{padding:0}
 .board .hd.side .dots{display:none}
 .board .grid{position:absolute;display:grid;place-content:center}
 .board .grid.enter{animation:dissolveIn var(--fade,.6s) ease-in-out both}
 .board .grid.leave{animation:dissolveOut var(--fade,.6s) ease-in-out both;pointer-events:none}
+.board .stand.enter{animation:dissolveIn var(--fade,.6s) ease-in-out both}
+.board .stand.leave{animation:dissolveOut var(--fade,.6s) ease-in-out both;pointer-events:none}
 @keyframes dissolveIn{from{opacity:0}to{opacity:1}}
 @keyframes dissolveOut{from{opacity:1}to{opacity:0}}
 .board .empty{position:absolute;inset:0;display:grid;place-items:center;font:800 4vmin var(--f-score);text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.45)}
@@ -203,7 +249,7 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 .g.mir{grid-template-columns:minmax(0,1fr) auto}
 .g.mir .br{order:2}
 .g .br{display:flex;flex-direction:column;gap:.45em;width:.6em;height:calc(100% - .55em)}
-.g .br i{display:block;background:#fff;flex:0 0 15%}
+.g .br i{display:block;background:var(--txt);flex:0 0 15%}
 .g .br i.o{background:var(--accent);flex:1 1 auto}
 .g .pn{height:calc(100% - .55em);margin-right:.55em;display:grid;grid-template-columns:minmax(0,1fr) auto;background:var(--panel);box-shadow:.55em .55em 0 var(--shade);min-width:0}
 .g .tm{display:grid;align-content:center;row-gap:.25em;padding:0 0 0 1.3em;min-width:0}
@@ -211,14 +257,14 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 .g .logo{width:3.1em;height:3.1em;object-fit:contain;display:block}
 .g .badge{width:3.1em;height:3.1em;display:grid;place-items:center;font:800 1.3em/1 var(--f-score);color:#fff}
 .g .nb{display:flex;align-items:center;gap:.4em;min-width:0}
-.g .rk{font:800 1.75em/1 var(--f-score);color:var(--accent);font-variant-numeric:tabular-nums;align-self:flex-start;margin-top:.15em;width:1.05em;text-align:right;flex:none}
+.g .rk{font:800 1.75em/1 var(--f-score);color:var(--rank);font-variant-numeric:tabular-nums;align-self:flex-start;margin-top:.15em;width:1.05em;text-align:right;flex:none}
 .g .nm{font:800 3.8em/1 var(--f-score);text-transform:uppercase;letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;padding-top:.04em}
 .g .rec{font:800 1.6em/1 var(--f-score);color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums;white-space:nowrap}
 .g .fb{width:1.4em;height:auto;flex:none;display:block}
 .g .fb ellipse{fill:var(--accent)}
 .g .fb path{stroke:var(--panel);stroke-width:1.3;fill:none}
 .g .sc{font:800 3.8em/1 var(--f-score);font-variant-numeric:tabular-nums;text-align:center;padding:.04em 0 0;box-sizing:content-box}
-.g .lead .sc{color:var(--accent)}
+.g .lead .sc{color:var(--lead)}
 .g .bump .sc{animation:bump 1.1s ease-in-out 3}
 @keyframes bump{0%,100%{background:transparent}40%{background:var(--accent);color:var(--panel)}}
 .g .st{width:7.4em;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 .4em 0 .5em;text-transform:uppercase;white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums}
@@ -241,6 +287,35 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width
 .g .play .px{display:flex;align-items:center;padding:0 .9em;font:800 1.45em/1.05 var(--f-score);text-transform:uppercase;letter-spacing:.01em;min-width:0;overflow:hidden}
 .g .play .px span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @keyframes drop{from{transform:scaleY(0);opacity:0}to{transform:none;opacity:1}}
+/* themes: card templates and lower-case names */
+.board.tpl-clean .g,.board.tpl-bar .g,.board.tpl-clean .g.mir,.board.tpl-bar .g.mir{grid-template-columns:minmax(0,1fr)}
+.board.tpl-clean .g .br,.board.tpl-bar .g .br{display:none}
+.board.tpl-clean .g .pn{margin-right:0;border-radius:.9em;box-shadow:0 .5em 1.6em rgba(0,0,0,.35)}
+.board.tpl-clean .g .st{border-left:1px solid rgba(255,255,255,.14)}
+.board.tpl-bar .g .pn{margin-right:0;box-shadow:none;border-left:.55em solid var(--accent)}
+.board.tpl-clean .g .play,.board.tpl-bar .g .play{left:0;right:0}
+.board.tpl-clean .g .upset{left:1em}
+.board.lower .g .nm,.board.lower .g .st,.board.lower .g .play .px,.board.lower .stand .sn,.board.lower .hd .ttl{text-transform:none}
+/* standings pages */
+.board .stand{position:absolute;display:flex;flex-direction:column}
+.board .sth{display:flex;align-items:center;gap:.6em;border-bottom:.07em solid var(--accent);flex:none}
+.board .stt{font:800 1em/1 var(--f-score);text-transform:uppercase;letter-spacing:.02em}
+.board .sts{font:800 .5em/1 var(--f-score);color:var(--accent);text-transform:uppercase;letter-spacing:.12em}
+.board .stc{flex:1;display:grid;padding-top:.6em;min-height:0}
+.board .scol{display:grid;align-content:start;min-width:0}
+.board .srow{display:grid;grid-template-columns:1.7em 2.3em minmax(0,1fr) 3.6em 3.6em;align-items:center;column-gap:.7em;padding:0 .9em;background:var(--panel);border-bottom:.06em solid var(--shade)}
+.board .srow:nth-child(odd){background-image:linear-gradient(rgba(255,255,255,.035),rgba(255,255,255,.035))}
+.board .srow.shd{background:none;border:0}
+.board .srow.shd span{font:800 .9em/1 var(--f-score);color:var(--rank);letter-spacing:.1em;text-transform:uppercase}
+.board .sp{font:800 1.35em/1 var(--f-score);color:var(--rank);text-align:right;font-variant-numeric:tabular-nums}
+.board .slg{width:1.9em;height:1.9em;object-fit:contain;display:block}
+.board .sn{font:800 1.65em/1 var(--f-score);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.board .scf{font:800 1.65em/1 var(--f-score);text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.board .sov{font:800 1.25em/1 var(--f-score);text-align:center;opacity:.65;font-variant-numeric:tabular-nums;white-space:nowrap}
+.board .stand.wide{flex-direction:row;align-items:center;gap:1em}
+.board .stand.wide .sth{flex-direction:column;align-items:flex-start;justify-content:center;border:0;border-right:.15em solid var(--accent);padding-right:1em;height:100%;font-size:2.6em;gap:.15em}
+.board .stand.wide .srow{display:flex;gap:.6em;height:78%;padding:0 1.1em;border:0;flex:none}
+.board .stand.wide .sn{font-size:2.6em}.board .stand.wide .scf{font-size:2.6em;opacity:.8}.board .stand.wide .sp{font-size:2.2em}.board .stand.wide .slg{width:3.4em;height:3.4em}
 @media (prefers-reduced-motion:reduce){.g .bump .sc,.g .play{animation:none}}
 
 /* ---------- output window ---------- */
@@ -255,10 +330,12 @@ body.out.trans{background:transparent}
 <div id="app">
   <header class="top">
     <div class="brand"><span class="mark"></span><h1>College Scoreboard</h1></div>
+    <div class="seg two vt" id="viewTabs" role="group" aria-label="View"><button data-v="control" aria-pressed="true">Control</button><button data-v="admin" aria-pressed="false">Admin</button></div>
     <div class="feed" id="feed"><i></i><span id="feedTxt">Connecting to ESPN…</span></div>
     <div class="acts">
       <span class="stale-note" id="staleNote" hidden></span>
-      <label class="ck"><input type="checkbox" id="freeze"> Freeze scores</label>
+      <label class="ck" id="freezeLbl"><input type="checkbox" id="freeze"> Freeze scores</label>
+      <span class="who" id="whoBox" hidden><span id="whoTxt"></span><button class="btn sm" id="signOut" type="button">Sign out</button></span>
     </div>
   </header>
   <main class="cols">
@@ -312,15 +389,21 @@ body.out.trans{background:transparent}
           <button class="btn sm" id="setupLoad" type="button">Load</button><button class="btn sm" id="setupDel" type="button">Delete</button>
         </div>
         <div class="qrow"><input type="text" id="setupName" maxlength="40" placeholder="Name this setup (e.g. Football Saturday)" aria-label="Setup name"><button class="btn sm" id="setupSave" type="button">Save setup</button></div>
+        <div class="qrow">
+          <select id="stConf" aria-label="Conference"><option value="sec">SEC</option><option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option></select>
+          <select id="stSport" aria-label="Standings sport"><option value="cfb">Football</option><option value="mbb">Men’s basketball</option><option value="wbb">Women’s basketball</option></select>
+          <button class="btn sm" id="stAdd" type="button" title="Adds a standings page; it updates as conference games go final">Add standings</button>
+        </div>
       </div>
       <ol class="rd" id="rdList"></ol>
       <p class="hint" id="rdHint">Click games on the left to add them. Games show on the board in this order.</p>
     </section>
 
     <section class="pane right" aria-label="Preview and settings">
+      <div class="fobar" id="foBar" hidden><span id="foTxt"></span><button class="btn sm primary" id="takeCtl" type="button">Take control</button></div>
       <div class="online" id="onlineBar">
-        <span class="od"><i id="onlineDot"></i><b>DAK / online outputs</b> <span id="onlineTxt">Connecting…</span></span>
-        <label class="ck"><input type="checkbox" id="onlineOn"> Send to online outputs</label>
+        <span class="od"><i id="onlineDot"></i><b>DAK / online outputs</b> <span id="onlineTxt">Connecting…</span> <span class="scr" id="screensTxt"></span></span>
+        <label class="ck" id="onlineOnLbl"><input type="checkbox" id="onlineOn"> Send to online outputs</label>
         <button class="btn sm" id="onlineMove" type="button">Board code</button>
       </div>
       <div class="copybox" id="moveBox" hidden><input type="text" id="moveTxt" aria-label="Board code and key"><button class="btn sm" id="moveUse" type="button">Use this board</button><button class="btn sm" id="moveClose" type="button">Done</button></div>
@@ -335,13 +418,35 @@ body.out.trans{background:transparent}
           <label class="f">Warn when a live game hasn’t updated for (minutes)<input type="number" id="pStale" min="1" max="30"></label>
         </div>
       </details>
-      <details class="settings" open>
+      <details class="settings" id="boardSettings" open>
         <summary>Board settings</summary>
         <div class="otabs">
           <div class="seg four" id="outTabs" role="group" aria-label="Output to edit"><button data-o="0">Output 1</button><button data-o="1">Output 2</button><button data-o="2">Output 3</button><button data-o="3">Output 4</button></div>
           <span class="pair"><select id="lookFrom" aria-label="Output to copy the look from"></select><button class="btn sm" id="matchLook" type="button">Copy look</button></span>
         </div>
+        <div class="themes">
+          <span class="tl">Theme</span>
+          <select id="themeSel" aria-label="Saved themes"><option value="">Saved themes…</option></select>
+          <button class="btn sm" id="themeApply" type="button">Apply to this output</button>
+          <input type="text" id="themeName" maxlength="40" placeholder="Name (e.g. Auburn house)" aria-label="Theme name">
+          <button class="btn sm" id="themeSave" type="button">Save theme</button>
+          <button class="btn sm" id="themeDel" type="button">Delete</button>
+        </div>
         <div class="sgrid">
+          <label class="f">Card template
+            <select id="sTpl" data-k="tpl"><option value="package">House package (brackets)</option><option value="clean">Clean (rounded)</option><option value="bar">Bar (accent edge)</option></select>
+          </label>
+          <label class="f">Font
+            <span class="pair"><select id="sFont" data-k="fontName"></select><label class="btn sm" for="fontFile" title="Upload a font file">Upload</label></span>
+            <input type="file" id="fontFile" accept=".woff2,.woff,.ttf,.otf" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+          </label>
+          <label class="f">Text / panel color
+            <span class="pair"><input type="color" id="sTxt" data-k="textColor" aria-label="Text color"><input type="color" id="sPanel" data-k="panelColor" aria-label="Panel color"><button class="btn sm" type="button" data-auto="panelColor" title="Panel follows the board color">Auto</button></span>
+          </label>
+          <label class="f">Leading score / ranking color
+            <span class="pair"><input type="color" id="sLead" data-k="leadColor" aria-label="Leading score color"><input type="color" id="sRank" data-k="rankColor" aria-label="Ranking color"><button class="btn sm" type="button" data-auto="leadColor,rankColor" title="Use the accent color">Accent</button></span>
+          </label>
+          <label class="ck"><input type="checkbox" id="sUpper" data-k="upper"> All-caps names</label>
           <label class="f wide">Output name<input type="text" id="sName" data-k="name" maxlength="30"></label>
           <label class="f">Output size
             <select id="sPreset">
@@ -369,15 +474,18 @@ body.out.trans{background:transparent}
           <label class="f">Team names
             <select id="sNames" data-k="names"><option value="auto">Auto (fit to card)</option><option value="school">School name</option><option value="abbr">Abbreviation</option></select>
           </label>
-          <label class="f">Header
+          <label class="f" id="fHdMode" data-perm="sponsor">Header
             <select id="sHdMode" data-k="hdMode"><option value="off">Off</option><option value="logo">Sponsor logo</option><option value="text">Text</option></select>
+          </label>
+          <label class="f" id="fPby" data-perm="sponsor">Presented-by line
+            <span class="pair"><input type="checkbox" id="sPbyOn" data-k="presentedOn" aria-label="Show presented-by line"><input type="text" id="sPby" data-k="presented" maxlength="30" aria-label="Presented-by text"></span>
           </label>
           <label class="f" id="fHdAlign">Header position
             <select id="sHdAlign" data-k="hdAlign"><option value="left">Left</option><option value="center">Center</option></select>
           </label>
-          <label class="f" id="fHdSize">Header / logo size (% of board)<input type="number" id="sHdSize" data-k="hdSize" min="6" max="45"></label>
-          <label class="f wide" id="fTitle">Header text<input type="text" id="sTitle" data-k="title" maxlength="40"></label>
-          <div class="f wide" id="fLogo" style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)">Sponsor logo
+          <label class="f" id="fHdSize" data-perm="sponsor">Header / logo size (% of board)<input type="number" id="sHdSize" data-k="hdSize" min="6" max="45"></label>
+          <label class="f wide" id="fTitle" data-perm="sponsor">Header text<input type="text" id="sTitle" data-k="title" maxlength="40"></label>
+          <div class="f wide" id="fLogo" data-perm="sponsor" style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)">Sponsor logo
             <div class="up" id="logoDrop">
               <img class="thumb" id="logoThumb" src="" alt="Sponsor logo preview">
               <span class="ut" id="logoTxt">Drop a PNG, JPG, SVG or WebP here. A transparent PNG or SVG works best.</span>
@@ -411,6 +519,66 @@ body.out.trans{background:transparent}
       </details>
     </section>
   </main>
+  <main class="admin" id="adminView" hidden>
+    <section class="card">
+      <h3>Sign-in &amp; users · board <span class="bcode" id="admBoard"></span></h3>
+      <p class="hint" id="authState"></p>
+      <div class="row-ctl"><button class="btn sm" id="signInAdm" type="button" hidden>Sign in</button><button class="btn sm" id="signOutAdm" type="button" hidden>Sign out</button></div>
+      <div data-need="users" class="stack">
+        <label class="ck"><input type="checkbox" id="reqAuth"> Require sign-in for this board (dashboards must sign in to send to the DAK / online outputs)</label>
+        <div id="userList"></div>
+        <p class="hint">Operators get only the boxes you tick. Admins can do everything, including this tab. The online board checks sign-in, taking control and user changes itself; the other boxes lock those parts of the dashboard.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Failover</h3>
+      <p class="hint" id="foState"></p>
+      <label class="f">This dashboard’s name (shown to the other dashboards)<input type="text" id="foName" maxlength="40"></label>
+      <label class="ck"><input type="checkbox" id="foAuto"> Take over automatically if the dashboard in control goes quiet for 15 seconds</label>
+      <div class="row-ctl" data-need="failover"><button class="btn sm primary" id="foTake" type="button">Take control now</button></div>
+      <p class="hint"><b>Backup computer:</b> open this same page there and sign in to board <b class="bcode"></b> (or use Board code to paste the code and key). It stays on standby, mirrors what’s on air, and takes over if this one stops. Closing the dashboard in control hands over at once.</p>
+      <p class="hint"><b>Outputs:</b> if every dashboard stops, DAK outputs keep pulling scores from ESPN and turning pages on their own, and they remember the last rundown, so a restart without internet still shows the last board. ESPN has a second address the board switches to if the first one fails.</p>
+      <h4>Screens online</h4>
+      <div id="screenList"></div>
+    </section>
+
+    <section class="card" data-need="users">
+      <h3>Stream Deck · Bitfocus Companion</h3>
+      <p class="hint" id="tokState"></p>
+      <div class="row-ctl"><button class="btn sm primary" id="tokMake" type="button">Make control token</button>
+        <label class="f inl">Buttons for <select id="sdOut" aria-label="Output for the buttons"><option value="1">Output 1</option><option value="2">Output 2</option><option value="3">Output 3</option><option value="4">Output 4</option><option value="all">All outputs</option></select></label></div>
+      <div class="urls" id="sdUrls"></div>
+      <p class="hint">In Companion: add the <b>Generic: HTTP Requests</b> connection, then on each button add a <b>GET</b> action with one of these URLs. The dashboard in control carries the command out within a second. The Status URL returns JSON (page, paused, hidden, screens online) for button feedback. Keep the token private: anyone with these URLs can change pages.</p>
+    </section>
+
+    <section class="card" data-need="users">
+      <h3>Ross DashBoard</h3>
+      <p class="hint">A ready-made custom panel with Prev / Next / Pause / First page / Hide buttons for each output, plus Freeze. It uses the control token above.</p>
+      <div class="row-ctl"><button class="btn sm primary" id="rossDl" type="button">Download DashBoard panel (.grid)</button></div>
+      <p class="hint">In DashBoard: File &gt; Open and pick the .grid file (or add it to a CustomPanel). The buttons send the same commands as the Stream Deck URLs, so you can also paste any URL into your own panel’s button task.</p>
+    </section>
+
+    <section class="card wide2">
+      <h3>Ross XPression &amp; Daktronics data feed</h3>
+      <p class="hint">Live data for what each output is showing right now: page, title, and every game’s teams, ranks, scores, status, down &amp; distance, network, possession, upset tag, logo URLs and the scoring-play text (standings pages list the teams in order). It updates whenever the dashboard in control changes page or a score changes.</p>
+      <p class="hint"><b>XPression:</b> add a DataLinq source (XML) with the XML URL and a 1–2 second refresh, then link text fields with paths like <code>/scoreboard/game[@slot='1']/away_score</code>. The <b>flat JSON</b> URL has simple keys (<code>g1_away_score</code>, <code>s3_name</code>) for JSON sources. <b>Daktronics:</b> point a data feed (XML or JSON over HTTP) in your show-control software at the same URLs, or keep using the output links below as web content.</p>
+      <div class="urls" id="feedUrls"></div>
+      <h4>DAK / web content links</h4>
+      <div class="urls" id="dakUrls"></div>
+    </section>
+  </main>
+</div>
+<div class="signin" id="signin" hidden>
+  <form class="card" id="siForm" autocomplete="on">
+    <h3>Sign in</h3>
+    <p class="hint">This board requires sign-in. Use the account your admin set up.</p>
+    <label class="f">Board code<input type="text" id="siBoard" maxlength="12" autocomplete="off" spellcheck="false"></label>
+    <label class="f">Email<input type="email" id="siEmail" autocomplete="username"></label>
+    <label class="f">Password<input type="password" id="siPw" autocomplete="current-password"></label>
+    <p class="err" id="siErr" role="alert"></p>
+    <div class="row-ctl"><button class="btn primary" id="siGo" type="submit">Sign in</button><button class="btn" id="siCancel" type="button">Cancel</button></div>
+  </form>
 </div>
 <div id="outRoot" hidden><div class="stage" style="position:absolute;inset:0;border:0;border-radius:0;background:none"><div class="holder" id="outHolder"></div></div></div>
 <div id="toast" role="status"></div>
@@ -436,7 +604,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -563,12 +731,71 @@ function upsetTag(g, mode){
   return ok ? 'Upset Alert' : '';
 }
 
+// ---------- conference standings ----------
+// ESPN group ids per sport (football / basketball). Baseball standings aren't offered by ESPN's college feed.
+var STANDINGS = {};   // 'cfb:sec' -> {rows:[{id,name,abbr,logo,conf,overall}], at}
+const CONF_NAMES = {sec: 'SEC', acc: 'ACC', b10: 'Big Ten', b12: 'Big 12'};
+const STANDINGS_GROUPS = {cfb: {sec: '8', acc: '1', b12: '4', b10: '5'}, mbb: {sec: '23', acc: '2', b12: '8', b10: '7'}, wbb: {sec: '23', acc: '2', b12: '8', b10: '7'}};
+function parseStandings(j){
+  let entries = (j.standings && j.standings.entries) || [];
+  (j.children || []).forEach(c => { entries = entries.concat((c.standings && c.standings.entries) || []); });
+  const rows = entries.map(e => {
+    const t = e.team || {}, st = e.stats || [];
+    const rec = re => { const s = st.find(x => x.summary && (re.test(x.type || '') || re.test(x.name || ''))); return s ? s.summary : ''; };
+    const val = n => { const s = st.find(x => x.name === n); return s ? +s.value : NaN; };
+    const pct = r => { const m = /^(\d+)-(\d+)/.exec(r || ''); return m ? (+m[1] + +m[2] ? +m[1] / (+m[1] + +m[2]) : 0) : 0; };
+    const conf = rec(/^vs[-_ ]?conf(erence)?$/i), overall = rec(/^(overall|total)$/i);
+    return {id: String(t.id || ''), name: t.shortDisplayName || t.location || t.displayName || '', abbr: t.abbreviation || '',
+      logo: ((t.logos || [])[0] || {}).href || '', conf, overall, seed: val('playoffSeed'), cp: pct(conf), op: pct(overall)};
+  });
+  const seeded = rows.every(r => r.seed > 0);
+  rows.sort((a, b) => seeded ? a.seed - b.seed : (b.cp - a.cp) || (b.op - a.op));
+  return rows;
+}
+function standingsHTML(item, b, geo){
+  const d = STANDINGS[item.sport + ':' + item.conf], rows = d ? d.rows : [];
+  const confName = CONF_NAMES[item.conf] || '', sportName = SPORTS[item.sport].label;
+  const left = geo.hw + geo.padX, top = geo.hh + geo.padY, W = geo.gw, H = geo.gh;
+  if (!rows.length) return '<div class="empty">' + esc(confName + ' standings loading…') + '</div>';
+  const logo = r => /^\d+$/.test(r.id) ? '<img class="slg" alt="" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/' + r.id + '.png" data-fb="' + esc(r.logo) + '" onerror="__sbLogo(this)">' : '<span class="slg"></span>';
+  const nm = r => esc(teamLabel({id: r.id, name: r.name, abbr: r.abbr}, b.names === 'abbr' ? 'abbr' : 'school', false));
+  if (geo.wide) {   // fascia / ribbon: title block, then as many teams as fit in one row
+    const u = H / 10, chip = u * 21, n = Math.max(1, Math.min(rows.length, Math.floor((W - u * 24) / chip)));
+    return '<div class="stand wide" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px;font-size:' + u.toFixed(2) + 'px">' +
+      '<div class="sth"><span class="stt">' + esc(confName) + '</span><span class="sts">Standings</span></div>' +
+      rows.slice(0, n).map((r, k) => '<div class="srow"><span class="sp">' + (k + 1) + '</span>' + logo(r) + '<span class="sn">' + nm(r) + '</span><span class="scf">' + esc(r.conf) + '</span></div>').join('') + '</div>';
+  }
+  const cols = W / H < 1.3 ? 1 : 2, per = Math.ceil(rows.length / cols);
+  const titleH = Math.round(H * 0.12), gap = Math.round(W * 0.025);
+  const rowH = (H - titleH - H * 0.03) / (per + 0.7), u = Math.max(4, Math.min(rowH / 2.6, ((W - gap * (cols - 1)) / cols) / 24));
+  let h = '<div class="stand" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px">' +
+    '<div class="sth" style="height:' + titleH + 'px;font-size:' + (titleH * 0.62).toFixed(1) + 'px"><span class="stt">' + esc(confName) + ' Standings</span><span class="sts">' + esc(sportName) + '</span></div>' +
+    '<div class="stc" style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr));column-gap:' + gap + 'px;font-size:' + u.toFixed(2) + 'px">';
+  for (let c = 0; c < cols; c++) {
+    h += '<div class="scol" style="grid-template-rows:' + (rowH * 0.7).toFixed(1) + 'px repeat(' + per + ',' + rowH.toFixed(1) + 'px)">' +
+      '<div class="srow shd"><span></span><span></span><span class="sn">Team</span><span class="scf">Conf</span><span class="sov">Overall</span></div>' +
+      rows.slice(c * per, (c + 1) * per).map((r, k) => '<div class="srow"><span class="sp">' + (c * per + k + 1) + '</span>' + logo(r) +
+        '<span class="sn">' + nm(r) + '</span><span class="scf">' + esc(r.conf) + '</span><span class="sov">' + esc(r.overall) + '</span></div>').join('') + '</div>';
+  }
+  return h + '</div></div>';
+}
+
+// ---------- fonts for themes ----------
+const FONTS = {'Scoreboard Display': '', 'Oswald': 'Oswald:wght@500;600;700', 'Bebas Neue': 'Bebas+Neue', 'Barlow Condensed': 'Barlow+Condensed:wght@600;700;800',
+  'Anton': 'Anton', 'Teko': 'Teko:wght@500;600;700', 'Saira Extra Condensed': 'Saira+Extra+Condensed:wght@600;700;800', 'Roboto Condensed': 'Roboto+Condensed:wght@600;700;800',
+  'Archivo Narrow': 'Archivo+Narrow:wght@600;700', 'Fjalla One': 'Fjalla+One', 'League Gothic': 'League+Gothic', 'Big Shoulders Display': 'Big+Shoulders+Display:wght@700;800;900'};
+
 function perPage(b){ return b.layout === 'grid' ? Math.max(1, b.cols * b.rows) : Math.max(1, b.perPage); }
 
 function buildPages(items, board){
   const per = perPage(board);
   const pages = [];
-  const chunk = (arr, sport) => { for (let i = 0; i < arr.length; i += per) pages.push({sport, games: arr.slice(i, i+per)}); };
+  const chunk = (arr, sport) => {
+    let cur = [];
+    const flush = () => { for (let i = 0; i < cur.length; i += per) pages.push({sport, games: cur.slice(i, i+per)}); cur = []; };
+    arr.forEach(g => { if (g.standings) { flush(); pages.push({sport: g.sport, standings: g, games: []}); } else cur.push(g); });
+    flush();
+  };
   if (board.groupBySport) {
     const order = []; const by = {};
     items.forEach(g => { if (!by[g.sport]) { by[g.sport] = []; order.push(g.sport); } by[g.sport].push(g); });
@@ -763,18 +990,26 @@ function boardHTML(pages, idx, b, opt){
   const page = pages[idx] || {sport:null, games:[]};
   const geo = geometry(b, page.games.length);
   const bg = b.bg === 'transparent' ? 'transparent' : b.bg === 'green' ? '#00B140' : b.bgColor;
-  let h = '<div class="board" style="width:' + geo.W + 'px;height:' + geo.H + 'px;--accent:' + esc(b.accent) + ';--bgc:' + esc(b.bgColor) + ';--panel:' + darken(b.bgColor, 0.16) + ';--shade:' + darken(b.bgColor, 0.48) + ';--fade:' + b.fade + 's;background:' + bg + '">';
+  const panel = b.panelColor || darken(b.bgColor, 0.16);
+  let h = '<div class="board tpl-' + b.tpl + (b.upper ? '' : ' lower') + '" style="width:' + geo.W + 'px;height:' + geo.H + 'px;--accent:' + esc(b.accent) + ';--bgc:' + esc(b.bgColor) +
+    ';--panel:' + panel + ';--shade:' + darken(panel, 0.42) + ';--txt:' + b.textColor + ';--lead:' + (b.leadColor || b.accent) + ';--rank:' + (b.rankColor || b.accent) +
+    (opt.font ? ';--f-score:' + opt.font : '') + ';--fade:' + b.fade + 's;background:' + bg + '">';
   if (b.header) {
     const sp = page.sport ? SPORTS[page.sport].label : '';
     const useLogo = b.hdMode === 'logo' && b.logo;
     const fs = geo.wide ? Math.min(geo.H / 15, geo.hw / 34) : useLogo ? Math.min(geo.hh/13, geo.H*0.011) : geo.hh/13;
     const hst = geo.wide ? 'width:' + geo.hw + 'px;' : 'height:' + geo.hh + 'px;padding-left:' + geo.padX + 'px;padding-right:' + geo.padX + 'px;';
     h += '<header class="hd' + (useLogo ? ' lg' : '') + (geo.wide ? ' side' : b.hdAlign === 'center' ? ' ctr' : '') + '" style="' + hst + 'font-size:' + fs.toFixed(2) + 'px">' +
-      (useLogo ? '<img class="slogo" alt="" src="' + b.logo + '">' : (b.hdMode === 'text' || !b.logo ? '<span class="ttl">' + esc(b.title) + '</span>' : '')) +
+      (useLogo ? '<span class="hgrp">' + (b.presentedOn && b.presented ? '<span class="pby">' + esc(b.presented) + '</span>' : '') + '<img class="slogo" alt="" src="' + b.logo + '"></span>' :
+        (b.hdMode === 'text' || !b.logo ? '<span class="ttl">' + esc(b.title) + '</span>' : '')) +
       (sp && b.sportLabel ? '<span class="sp">' + esc(sp) + '</span>' : '') +
       '<span class="dots">' + (pages.length > 1 ? pages.map((_, i) => '<i class="' + (i === idx ? 'on' : '') + '"></i>').join('') : '') + '</span></header>';
   }
-  if (!page.games.length) {
+  if (opt.blank) {
+    // output hidden from the Stream Deck / dashboard: background (and header) only
+  } else if (page.standings) {
+    h += standingsHTML(page.standings, b, geo).replace('<div class="stand', '<div class="stand' + (opt.enter && b.fade > 0 ? ' enter' : ''));
+  } else if (!page.games.length) {
     h += '<div class="empty">' + esc(opt.emptyText || 'Add games to the rundown') + '</div>';
   } else {
     const mixed = !b.groupBySport && new Set(page.games.map(g => g.sport)).size > 1;
@@ -823,6 +1058,13 @@ function fixBoard(b, i){
   o.header = o.hdMode !== 'off'; o.hdAlign = o.hdAlign === 'center' ? 'center' : 'left'; o.hdSize = clampN(o.hdSize,6,45,d.hdSize);
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
   o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
+  o.presentedOn = !!o.presentedOn; o.presented = String(o.presented == null ? d.presented : o.presented).slice(0, 30);
+  o.tpl = ['package','clean','bar'].includes(o.tpl) ? o.tpl : 'package';
+  if (o.fontName !== 'custom' && !(o.fontName in FONTS)) o.fontName = d.fontName;
+  if (typeof o.fontData !== 'string' || !/^data:/.test(o.fontData)) o.fontData = '';
+  const hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v : '';
+  o.textColor = hex(o.textColor) || '#FFFFFF'; o.panelColor = hex(o.panelColor); o.leadColor = hex(o.leadColor); o.rankColor = hex(o.rankColor);
+  o.upper = o.upper !== false;
   o.fade = isFinite(+o.fade) ? Math.min(3, Math.max(0, Math.round(+o.fade * 10) / 10)) : d.fade;
   if (typeof o.logo !== 'string' || !/^data:image\//.test(o.logo)) o.logo = '';
   o.name = String(o.name == null ? d.name : o.name).slice(0, 30);
@@ -848,7 +1090,7 @@ function loadCfg(){
   if (!c) { try {
     c = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (c && !c.outputs && c.board) { c.board.logo = localStorage.getItem(STORE + '.logo') || ''; c.outputs = [c.board]; }
-    else if (c && c.outputs) c.outputs.forEach((b, i) => { if (b) b.logo = localStorage.getItem(STORE + '.logo' + i) || ''; });
+    else if (c && c.outputs) c.outputs.forEach((b, i) => { if (b) { b.logo = localStorage.getItem(STORE + '.logo' + i) || ''; b.fontData = localStorage.getItem(STORE + '.font' + i) || ''; } });
   } catch(e) {} }
   c = c || {};
   if (!c.outputs && c.board) c.outputs = [c.board];
@@ -856,12 +1098,19 @@ function loadCfg(){
 }
 let saveT = 0;
 function save(){ clearTimeout(saveT); saveT = setTimeout(() => {
-  try { localStorage.setItem(STORE, JSON.stringify({rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})), prefs: cfg.prefs})); } catch(e) {}
+  try { localStorage.setItem(STORE, JSON.stringify({rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs})); } catch(e) {}
   cfg.outputs.forEach((b, i) => {
     try { if (b.logo) localStorage.setItem(STORE + '.logo' + i, b.logo); else localStorage.removeItem(STORE + '.logo' + i); } catch(e) { window.__logoSaveFailed && window.__logoSaveFailed(); }
+    try { if (b.fontData) localStorage.setItem(STORE + '.font' + i, b.fontData); else localStorage.removeItem(STORE + '.font' + i); } catch(e) { window.__logoSaveFailed && window.__logoSaveFailed(); }
   });
   try { localStorage.removeItem(STORE + '.logo'); } catch(e) {}
 }, 200); }
+
+const assetOf = b => ({logo: b.logo || '', font: b.fontData || ''});
+const stripAssets = b => Object.assign({}, b, {logo: '', fontData: ''});
+const normAsset = x => typeof x === 'string' ? {logo: x, font: ''} : (x || {logo: '', font: ''});
+const assetSig = () => cfg.outputs.map(b => (b.logo || '').length + ':' + (b.logo || '').slice(-40) + '/' + (b.fontData || '').length + ':' + (b.fontData || '').slice(-40)).join('|');
+const withAssets = (outs, assets) => outs.map((b, j) => { const a = normAsset((assets || [])[j]); return Object.assign({}, b, {logo: a.logo || '', fontData: a.font || ''}); });
 
 function ingest(g){
   const old = games[g.key];
@@ -871,6 +1120,11 @@ function ingest(g){
         bumps[g.key + sd] = Date.now() + 3600;
         if (g.state === 'in' && ownsData()) scoringPlay(g, sd, +g[k].score - +old[k].score);
       } });
+  }
+  // a game in a conference with standings on the rundown just went final: refresh those standings (ESPN updates within a few minutes)
+  if (old && old.state !== 'post' && g.state === 'post' && ownsData()) {
+    cfg.rundown.filter(r => r.standings && r.sport === g.sport && CONF_IDS[r.conf] && (CONF_IDS[r.conf].has(g.away.id) || CONF_IDS[r.conf].has(g.home.id)))
+      .forEach(r => [60000, 300000].forEach(ms => setTimeout(() => loadStandings(r.sport, r.conf).then(() => { if (typeof renderAll === 'function') renderAll(); push(); }).catch(() => {}), ms)));
   }
   const sig = [g.state, g.away.score, g.home.score, g.detail, g.sit.down, g.sit.outs, g.sit.on1, g.sit.on2, g.sit.on3].join('|');
   if (!old || sig !== STALE_SIG[g.key]) { STALE_SIG[g.key] = sig; CHANGED_AT[g.key] = Date.now(); }
@@ -926,10 +1180,30 @@ async function loadRankings(){
 }
 
 const feedKey = r => r.sport + '|' + r.date + '|' + (r.group || '');
+const feedRows = () => cfg.rundown.filter(r => !r.manual && !r.standings);
+async function loadStandings(sport, conf){
+  const gid = (STANDINGS_GROUPS[sport] || {})[conf]; if (!gid) throw new Error('no standings');
+  let j = null;
+  for (const base of ['https://site.api.espn.com/apis/v2/sports/', 'https://site.web.api.espn.com/apis/v2/sports/']) {
+    try { const r = await fetch(base + SPORTS[sport].path + '/standings?group=' + gid, {cache: 'no-store'}); if (r.ok) { j = await r.json(); break; } } catch(e) {}
+  }
+  if (!j) throw new Error('standings unavailable');
+  const rows = parseStandings(j); if (!rows.length) throw new Error('no standings rows');
+  STANDINGS[sport + ':' + conf] = {rows, at: Date.now()};
+}
+// refresh standings on the rundown that are missing or older than 15 minutes
+function refreshStandings(force){
+  return Promise.allSettled(cfg.rundown.filter(r => r.standings).filter(r => force || !STANDINGS[r.sport + ':' + r.conf] || Date.now() - STANDINGS[r.sport + ':' + r.conf].at > 900000)
+    .map(r => loadStandings(r.sport, r.conf)));
+}
 async function loadFeed(k){
   const [sport, date, group] = k.split('|');
   const url = API + SPORTS[sport].path + '/scoreboard?dates=' + date + '&limit=500' + (group ? '&groups=' + group : '');
-  const res = await fetch(url, {cache:'no-store'});
+  let res = null;
+  try { res = await fetch(url, {cache:'no-store'}); } catch(e) {}
+  // backup: ESPN serves the same scoreboard from a second host
+  if (!res || !res.ok) { try { res = await fetch(url.replace('://site.api.espn.com/', '://site.web.api.espn.com/'), {cache:'no-store'}); } catch(e) {} }
+  if (!res) throw new Error('network error');
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const j = await res.json();
   const list = (j.events || []).map(e => norm(e, sport)).filter(Boolean);
@@ -939,7 +1213,7 @@ async function loadFeed(k){
 }
 
 function rundownGames(){
-  return cfg.rundown.map(r => r.manual ? manualGame(r) : games[r.key]).filter(Boolean);
+  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf} : games[r.key]).filter(Boolean);
 }
 function pages(i){ return buildPages(rundownGames(), cfg.outputs[i]); }
 
@@ -961,13 +1235,13 @@ function renderBoard(holder, i){
   const now = Date.now();
   const b = cfg.outputs[i];
   // dissolve: the outgoing page stays layered on the board and fades out while the new page fades in
-  const prev = enter && b.fade > 0 ? holder.querySelector('.board > .grid:not(.leave)') : null;
+  const prev = enter && b.fade > 0 ? holder.querySelector('.board > .grid:not(.leave), .board > .stand:not(.leave)') : null;
   if (enter && b.fade > 0) rt.fadeUntil = Date.now() + b.fade * 1000;
-  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, bumped: k => (bumps[k] || 0) > now});
+  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, blank: !!rt.hidden, font: boardFont(b, i), bumped: k => (bumps[k] || 0) > now});
   if (prev) {
     const nb = holder.querySelector('.board');
     prev.classList.remove('enter'); prev.classList.add('leave');
-    nb.insertBefore(prev, nb.querySelector('.grid, .empty'));
+    nb.insertBefore(prev, nb.querySelector('.grid, .empty, .stand'));
     setTimeout(() => prev.remove(), b.fade * 1000 + 150);
   }
   fitNames(holder);
@@ -991,6 +1265,28 @@ function due(i){
   if (pages(i).length > 1) return true;
   rt.nextAt = now + cfg.outputs[i].secs * 1000; return false;
 }
+// font for an output's theme: built-in, a Google font (loaded on first use) or an uploaded font file
+function boardFont(b, i){
+  if (b.fontName === 'custom' && b.fontData) {
+    const fam = 'SBCustom' + i + 'x' + b.fontData.length;
+    if (!document.getElementById('ff-' + fam)) {
+      const st = document.createElement('style'); st.id = 'ff-' + fam;
+      st.textContent = "@font-face{font-family:'" + fam + "';src:url(" + b.fontData + ");font-display:block}";
+      document.head.appendChild(st); setTimeout(() => typeof renderAll === 'function' && renderAll(), 400);
+    }
+    return "'" + fam + "','Scoreboard Display',sans-serif";
+  }
+  const q = FONTS[b.fontName];
+  if (!q) return '';
+  const id = 'gf-' + b.fontName.replace(/\W/g, '');
+  if (!document.getElementById(id)) {
+    const l = document.createElement('link'); l.id = id; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + q + '&display=swap';
+    l.onload = () => setTimeout(() => typeof renderAll === 'function' && renderAll(), 300);
+    document.head.appendChild(l);
+  }
+  return "'" + b.fontName + "','Scoreboard Display',sans-serif";
+}
+
 function step(i, n){
   const len = pages(i).length || 1, rt = rts[i];
   rt.page = ((rt.page + n) % len + len) % len;
@@ -1005,7 +1301,7 @@ function bootOutput(){
   document.title = 'Output ' + (OUT_IDX + 1) + ' · College Scoreboard';
   const stage = document.querySelector('#outRoot .stage'), holder = document.getElementById('outHolder');
   const B = () => cfg.outputs[OUT_IDX], rt = rts[OUT_IDX];
-  let lastMsg = 0, idleT = 0, lastSig = '', knownLogos = cfg.outputs.map(b => b.logo);
+  let lastMsg = 0, idleT = 0, lastSig = '', knownLogos = cfg.outputs.map(assetOf);
   window.renderAll = () => {
     document.body.classList.toggle('trans', B().bg === 'transparent');
     holder.style.width = B().w + 'px'; holder.style.height = B().h + 'px';
@@ -1014,16 +1310,17 @@ function bootOutput(){
   const onMsg = (d, live = true) => {
     if (!d || d.type !== 'college-scoreboard' || !d.cfg || !d.cfg.outputs) return;
     if (live) { lastMsg = Date.now(); controlledAt = Date.now(); }
-    if (d.logos) knownLogos = d.logos;
+    if (d.logos) knownLogos = d.logos.map(normAsset);
     // heartbeats repeat the same data; only redraw when something actually changed
-    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0,
-      Object.entries(d.plays || {}).map(([k, p]) => k + p.head + p.text), knownLogos.map(l => (l || '').length + (l || '').slice(-24))]);
+    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at),
+      Object.entries(d.plays || {}).map(([k, p]) => k + p.head + p.text), knownLogos.map(a => a.logo.length + a.logo.slice(-24) + '/' + a.font.length)]);
     if (sig === lastSig) return;
     lastSig = sig;
-    cfg = mkCfg(d.cfg.rundown, d.cfg.outputs.map((b, j) => Object.assign({}, b, {logo: knownLogos[j] || ''})), d.cfg.prefs);
+    cfg = mkCfg(d.cfg.rundown, withAssets(d.cfg.outputs, knownLogos), d.cfg.prefs);
     (d.games || []).forEach(ingest);
+    Object.assign(STANDINGS, d.standings || {});
     Object.keys(PLAYS).forEach(k => delete PLAYS[k]); Object.assign(PLAYS, d.plays || {});
-    if (live) { rt.page = d.pages[OUT_IDX]; rt.paused = d.paused[OUT_IDX]; }
+    if (live) { rt.page = (d.pages || [])[OUT_IDX] || 0; rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
     renderAll();
   };
   window.addEventListener('message', e => onMsg(e.data));
@@ -1035,6 +1332,23 @@ function bootOutput(){
   if (ONLINE_ID) {
     window.__emptyText = 'Connecting to board ' + ONLINE_ID + '…';
     const seen = {ver: -1, logoVer: -1, upd: ''}; let state = null, beatAt = 0;
+    // last good board, kept on this computer: a DAK player that restarts without internet still shows the last rundown
+    const CACHE = STORE + '.cache.' + ONLINE_ID;
+    const saveCache = () => { try { localStorage.setItem(CACHE, JSON.stringify({state, logos: knownLogos})); } catch(e) { try { localStorage.setItem(CACHE, JSON.stringify({state, logos: []})); } catch(e2) {} } };
+    try { const c = JSON.parse(localStorage.getItem(CACHE) || 'null'); if (c && c.state && c.state.rundown) { state = c.state; knownLogos = (c.logos || []).map(normAsset);
+      onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: c.logos || [], games: state.games, standings: state.standings, plays: {}, pages: [], paused: []}, false); } } catch(e) {}
+    // check in every 10 s so the dashboard (and the Stream Deck status) can show which screens are up
+    const CLIENT = (() => { let c = ''; try { c = localStorage.getItem(STORE + '.client') || ''; if (!c) { c = Math.random().toString(36).slice(2, 12); localStorage.setItem(STORE + '.client', c); } } catch(e) { c = Math.random().toString(36).slice(2, 12); } return c; })();
+    let checkins = true;
+    const checkin = async () => {
+      if (!checkins) return;
+      try {
+        const r = await fetch(SB_URL + '/rest/v1/rpc/scoreboard_checkin', {method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, SB_H),
+          body: JSON.stringify({p_id: ONLINE_ID, p_client: CLIENT, p_out: OUT_IDX + 1, p_info: {w: innerWidth, h: innerHeight, page: rt.page + 1, pages: pages(OUT_IDX).length, mode: standalone() ? 'own' : 'live', hidden: !!rt.hidden, v: VERSION}})});
+        if (r.status === 404) checkins = false;   // part 2 setup not installed
+      } catch(e) {}
+    };
+    setInterval(checkin, 10000); setTimeout(checkin, 2500);
     const get = async cols => { const r = await fetch(SB_URL + '/rest/v1/scoreboard_boards?id=eq.' + ONLINE_ID + '&select=' + cols, {headers: SB_H, cache: 'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); return (await r.json())[0]; };
     const poll = async () => {
       try {
@@ -1043,14 +1357,15 @@ function bootOutput(){
         if (msg !== window.__emptyText) { window.__emptyText = msg; renderAll(); }
         if (row) {
           if (row.updated_at !== seen.upd) { if (seen.upd) beatAt = Date.now(); seen.upd = row.updated_at; }
-          if (row.logo_ver !== seen.logoVer) { const l = await get('logos'); knownLogos = (l && l.logos) || []; seen.logoVer = row.logo_ver; seen.ver = -1; }
-          if (row.ver !== seen.ver) { const st = await get('state'); state = st && st.state; seen.ver = row.ver; }
+          let fresh = false;
+          if (row.logo_ver !== seen.logoVer) { const l = await get('logos'); knownLogos = ((l && l.logos) || []).map(normAsset); seen.logoVer = row.logo_ver; seen.ver = -1; }
+          if (row.ver !== seen.ver) { const st = await get('state'); state = st && st.state; seen.ver = row.ver; fresh = true; }
+          if (fresh && state && state.rundown) saveCache();
           if (state && state.rundown) {
             const now = Date.now(), plays = {};
             Object.entries(state.plays || {}).forEach(([k, p]) => plays[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
-            const fresh = now - beatAt < 12000;
-            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays,
-              pages: (row.live && row.live.pages) || [], paused: (row.live && row.live.paused) || []}, fresh);
+            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays, standings: state.standings,
+              pages: (row.live && row.live.pages) || [], paused: (row.live && row.live.paused) || [], hidden: (row.live && row.live.hidden) || []}, now - beatAt < 12000);
           }
         }
       } catch(e) {}
@@ -1061,8 +1376,8 @@ function bootOutput(){
   // Runs on its own (fetching and rotating) whenever the control page isn't talking to it.
   async function selfRefresh(){
     if (standalone()) {
-      const keys = new Set(cfg.rundown.filter(r => !r.manual).map(feedKey));
-      await Promise.allSettled([...keys].map(loadFeed));
+      const keys = new Set(feedRows().map(feedKey));
+      await Promise.allSettled([...keys].map(loadFeed).concat([refreshStandings(false)]));
       renderAll();
     }
     setTimeout(selfRefresh, B().refresh * 1000);
@@ -1092,52 +1407,229 @@ let lastLogoSig = '', pushN = 0;
 function push(forceLogos){
   if (IS_OUT) return;
   // logos are large, so they ride along only when they change (and every 10th heartbeat as a safety net)
-  const sig = cfg.outputs.map(b => b.logo.length + ':' + b.logo.slice(-40)).join('|');
+  const sig = assetSig();
   const withLogos = forceLogos || sig !== lastLogoSig || (++pushN % 10 === 0); lastLogoSig = sig;
-  const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})), prefs: cfg.prefs},
-    logos: withLogos ? cfg.outputs.map(b => b.logo) : null, plays: PLAYS,
-    games: cfg.rundown.filter(r => !r.manual).map(r => games[r.key]).filter(Boolean),
-    pages: rts.map(r => r.page), paused: rts.map(r => r.paused)};
+  const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs},
+    logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(),
+    games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean),
+    pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)};
   outWins.forEach(w => { try { if (w && !w.closed) w.postMessage(msg, '*'); } catch(e) {} });
   try { chan && chan.postMessage(msg); } catch(e) {}
   publishOnline();
 }
 
 /* ---------- online outputs: this dashboard's board code + control key, kept in this browser ---------- */
+const VERSION = '2026.10.21';
 const ONLINE_STORE = STORE + '.online';
 const rid = (n, abc) => { const a = new Uint32Array(n); crypto.getRandomValues(a); return [...a].map(x => abc[x % abc.length]).join(''); };
-let online = (() => { try { const o = JSON.parse(localStorage.getItem(ONLINE_STORE) || 'null'); if (o && /^[a-z0-9]{4,12}$/.test(o.id) && o.key) return o; } catch(e) {} return null; })();
+let online = (() => { try { const o = JSON.parse(localStorage.getItem(ONLINE_STORE) || 'null'); if (o && /^[a-z0-9]{4,12}$/.test(o.id) && typeof o.key === 'string') return o; } catch(e) {} return null; })();
 if (!online && !IS_OUT) { online = {id: rid(6, 'abcdefghjkmnpqrstuvwxyz23456789'), key: rid(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), on: false}; try { localStorage.setItem(ONLINE_STORE, JSON.stringify(online)); } catch(e) {} }
 const onlineStatus = {ok: null, msg: ''};
-let pub = {busy: false, again: false, stateSig: '', logoSig: '', liveSig: '', beat: 0, stateAt: 0, logoAt: 0};
+let pub = {busy: false, again: false, stateSig: '', logoSig: '', liveSig: '', feedSig: '', beat: 0, stateAt: 0, logoAt: 0, feedAt: 0, v: 0};
+const resetPub = () => { pub.stateSig = pub.logoSig = pub.liveSig = pub.feedSig = ''; };
+
+// Supabase database function call; e.missing = the function isn't installed (setup SQL not run yet)
+async function rpc(name, body, opt){
+  const r = await fetch(SB_URL + '/rest/v1/rpc/' + name, Object.assign({method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, SB_H), body: JSON.stringify(body)}, opt || {}));
+  const t = await r.text();
+  if (!r.ok) {
+    let msg = t; try { const j = JSON.parse(t); msg = j.message || j.hint || t; } catch(e) {}
+    const e = new Error(msg || ('HTTP ' + r.status)); e.status = r.status; e.missing = r.status === 404 || /PGRST202|Could not find the function/.test(t); throw e;
+  }
+  return t ? JSON.parse(t) : null;
+}
+
+// ---------- control-room failover ----------
+// Each open dashboard (browser tab) has its own id. Only one is "in control" of a board at a time; any other
+// dashboard on the same board is on standby: it mirrors what's on air and takes over automatically if the one
+// in control goes quiet for 15 seconds (or when someone clicks Take control).
+const INST = (() => { let id = ''; try { id = sessionStorage.getItem(STORE + '.inst') || ''; } catch(e) {} if (!id) { id = rid(10, 'abcdefghijkmnpqrstuvwxyz23456789'); try { sessionStorage.setItem(STORE + '.inst', id); } catch(e) {} } return id; })();
+const FO = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem(STORE + '.fo') || '{}') || {}; } catch(e) {} return {name: String(o.name || 'Dashboard ' + INST.slice(0, 3).toUpperCase()).slice(0, 40), auto: o.auto !== false}; })();
+const saveFO = () => { try { localStorage.setItem(STORE + '.fo', JSON.stringify(FO)); } catch(e) {} };
+const FAIL = {role: 'solo', ctl: null, force: false, join: false, mirror: {ver: -1, logoVer: -1}, since: 0};
+
+// ---------- sign-in ----------
+const AUTH = {token: '', user: null, require: false, hasUsers: false, v2: null};
+const authKey = () => STORE + '.auth.' + (online ? online.id : '');
+const loadToken = () => { try { AUTH.token = localStorage.getItem(authKey()) || ''; } catch(e) { AUTH.token = ''; } };
+const saveToken = () => { try { AUTH.token ? localStorage.setItem(authKey(), AUTH.token) : localStorage.removeItem(authKey()); } catch(e) {} };
+if (online) loadToken();
+// what the signed-in user may do. With no one signed in, whoever holds the board key can do everything (until an admin requires sign-in).
+const can = p => FAIL.role === 'standby' && ['rundown', 'settings', 'sponsor', 'control'].includes(p) ? false :
+  !AUTH.user ? !AUTH.require : AUTH.user.role === 'admin' || !!(AUTH.user.perms || {})[p];
+
+const standingsFor = () => { const o = {}; cfg.rundown.filter(r => r.standings).forEach(r => { const k = r.sport + ':' + r.conf; if (STANDINGS[k]) o[k] = STANDINGS[k]; }); return o; };
+const assetsOut = () => cfg.outputs.map(b => b.fontData ? assetOf(b) : b.logo);   // plain logo strings unless a font was uploaded (older output pages understand those)
+const ESPN_LOGO = id => 'https://a.espncdn.com/i/teamlogos/ncaa/500-dark/' + id + '.png';
+
+// ---------- data feed for XPression / Daktronics / Ross DashBoard: what each output is showing right now ----------
+function feedGame(g, slot, b){
+  const s = statusInfo(g), now = Date.now();
+  let s1 = '', s2 = '';
+  if (g.manual) s1 = g.detail || (g.state === 'post' ? 'F' : '');
+  else if (g.state === 'pre') { s1 = s.short; const d = g.date ? new Date(g.date) : null; if (d && !sameDayCT(d, new Date())) s2 = d.toLocaleDateString('en-US', {weekday: 'short', timeZone: TZ}); }
+  else if (g.state === 'post' && /^\s*final/i.test(g.detail || 'Final')) s1 = finalLabel(g);
+  else [s1, s2] = splitDetail(g.detail || (g.state === 'post' ? 'Final' : ''));
+  const as = parseFloat(g.away.score), hs = parseFloat(g.home.score), p = activePlay(g, b, now);
+  const side = (t, pre) => {
+    const o = {}; o[pre + '_name'] = teamLabel(t, 'school'); o[pre + '_abbr'] = teamLabel(t, 'abbr'); o[pre + '_rank'] = b.ranks && t.rank ? t.rank : '';
+    o[pre + '_record'] = t.record || ''; o[pre + '_score'] = g.state === 'pre' ? '' : t.score; o[pre + '_logo'] = t.id ? ESPN_LOGO(t.id) : (t.logo || '');
+    o[pre + '_color'] = t.color || ''; o[pre + '_poss'] = g.state === 'in' && g.sit.poss && g.sit.poss === t.id ? '1' : ''; return o;
+  };
+  return Object.assign({slot, sport: SPORTS[g.sport].short, state: g.state, status1: s1, status2: s2, status: s.short,
+    down: g.sport === 'cfb' && g.state === 'in' && !isHalf(g) ? (g.sit.down || '') : '', network: g.tv || '',
+    start_time: g.date && !g.manual ? new Date(g.date).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', timeZone: TZ}) : '',
+    upset: upsetTag(g, b.upsets), leader: g.state !== 'pre' && isFinite(as) && isFinite(hs) && as !== hs ? (as > hs ? 'away' : 'home') : '',
+    play_head: p ? p.head : '', play_text: p ? p.text : ''}, side(g.away, 'away'), side(g.home, 'home'));
+}
+function buildFeed(){
+  return {updated: new Date().toISOString(), outputs: cfg.outputs.map((b, i) => {
+    const ps = pages(i), rt = rts[i], pg = ps[rt.page] || null;
+    const o = {out: i + 1, name: b.name, page: pg ? rt.page + 1 : 0, pages: ps.length, paused: !!rt.paused,
+      kind: rt.hidden ? 'hidden' : !pg ? 'empty' : pg.standings ? 'standings' : pg.games.length ? 'games' : 'empty', title: '', games: [], standings: null};
+    if (pg && pg.standings) {
+      const it = pg.standings, st = STANDINGS[it.sport + ':' + it.conf];
+      o.title = CONF_NAMES[it.conf] + ' Standings';
+      o.standings = {title: o.title, sport: SPORTS[it.sport].label, rows: (st ? st.rows : []).map((r, k) => {
+        const t = {id: r.id, name: r.name, abbr: r.abbr};
+        return {pos: k + 1, name: teamLabel(t, 'school'), abbr: teamLabel(t, 'abbr'), rank: '', conf: r.conf, overall: r.overall, logo: /^\d+$/.test(r.id) ? ESPN_LOGO(r.id) : r.logo};
+      })};
+    } else if (pg) {
+      o.title = b.hdMode === 'text' ? b.title : pg.sport ? SPORTS[pg.sport].label : b.title;
+      o.games = pg.games.map((g, k) => feedGame(g, k + 1, b));
+    }
+    return o;
+  })};
+}
+
+// standby: copy the board that's on air into this dashboard, so a takeover carries on exactly where it was
+async function mirrorBoard(){
+  const get = async cols => { const r = await fetch(SB_URL + '/rest/v1/scoreboard_boards?id=eq.' + online.id + '&select=' + cols, {headers: SB_H, cache: 'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); return (await r.json())[0]; };
+  const row = await get('ver,logo_ver,live,ctl');
+  if (!row) return false;
+  FAIL.ctl = row.ctl || null;
+  let assets = cfg.outputs.map(assetOf), changed = false;
+  if (row.logo_ver !== FAIL.mirror.logoVer) {
+    const l = await get('logos'); const a = (l && l.logos) || [];
+    assets = cfg.outputs.map((_, i) => normAsset(a[i])); FAIL.mirror.logoVer = row.logo_ver; changed = true;
+    cfg.outputs.forEach((b, i) => { b.logo = assets[i].logo || ''; b.fontData = assets[i].font || ''; });
+  }
+  if (row.ver !== FAIL.mirror.ver) {
+    const s = await get('state'), st = s && s.state;
+    if (st && st.rundown && st.outputs) {
+      cfg = mkCfg(st.rundown, withAssets(st.outputs, assets), st.prefs);
+      (st.games || []).forEach(ingest);
+      Object.assign(STANDINGS, st.standings || {});
+      const now = Date.now(); Object.keys(PLAYS).forEach(k => delete PLAYS[k]);
+      Object.entries(st.plays || {}).forEach(([k, p]) => PLAYS[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
+    }
+    FAIL.mirror.ver = row.ver; changed = true;
+  }
+  const lv = row.live || {};
+  rts.forEach((rt, i) => {
+    const pg = (lv.pages || [])[i], pz = !!(lv.paused || [])[i], hd = !!(lv.hidden || [])[i];
+    if ((pg != null && pg !== rt.page) || pz !== rt.paused || hd !== !!rt.hidden) changed = true;
+    if (pg != null) rt.page = pg; rt.paused = pz; rt.hidden = hd; rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
+  });
+  if (changed) { save(); window.__mirrored && window.__mirrored(); }
+  return true;
+}
+
+function enterStandby(ctl){
+  const was = FAIL.role;
+  FAIL.role = 'standby'; FAIL.ctl = ctl || FAIL.ctl; FAIL.mirror.ver = FAIL.mirror.logoVer = -1; FAIL.since = Date.now();
+  resetPub();
+  if (was !== 'standby') window.__roleChanged && window.__roleChanged(was);
+}
+function enterControl(){
+  const was = FAIL.role;
+  FAIL.role = 'control'; FAIL.since = Date.now();
+  if (was !== 'control') window.__roleChanged && window.__roleChanged(was);
+}
+
 async function publishOnline(){
   if (IS_OUT || !online || !online.on) return;
   if (pub.busy) { pub.again = true; return; }
   const now = Date.now();
+  // joining a board that may already be on air (signed in on a backup, or pasted a board code): copy it before sending anything
+  if (FAIL.join) {
+    pub.busy = true; FAIL.mirror.ver = FAIL.mirror.logoVer = -1;
+    try { await mirrorBoard(); FAIL.join = false; } catch(e) { FAIL.join = false; }
+    pub.busy = false; resetPub();
+  }
+  if (FAIL.role === 'standby' && !FAIL.force) {
+    if (now - pub.beat < 2000) return;
+    pub.busy = true;
+    try {
+      await mirrorBoard();
+      // automatic failover: the board hands control to this dashboard once the one in control has been quiet for 15 s
+      if (FO.auto && pub.v === 2) {
+        const r = await rpc('scoreboard_publish2', {p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_ctl: {id: INST, name: FO.name}, p_force: false, p_live: null, p_state: null, p_logos: null, p_feed: null});
+        if (r && r.ok) { enterControl(); pub.again = true; }
+        else if (r && r.reason === 'standby') FAIL.ctl = r.ctl || FAIL.ctl;
+      }
+      onlineStatus.ok = true; onlineStatus.msg = '';
+    } catch(e) { onlineStatus.ok = false; onlineStatus.msg = 'Can’t reach the online board. Retrying…'; }
+    pub.beat = now; pub.busy = false;
+    window.__onlineChanged && window.__onlineChanged();
+    if (pub.again) { pub.again = false; publishOnline(); }
+    return;
+  }
   const plays = {}; Object.entries(PLAYS).forEach(([k, p]) => { if (now - p.t < 60000) plays[k] = Object.assign({}, p, {age: now - p.t, t: undefined}); });
-  const state = {v: 1, rundown: cfg.rundown, outputs: cfg.outputs.map(b => Object.assign({}, b, {logo:''})), prefs: cfg.prefs,
-    games: cfg.rundown.filter(r => !r.manual).map(r => games[r.key]).filter(Boolean), plays};
+  const state = {v: 2, rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs,
+    games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean), plays, standings: standingsFor()};
   const stateSig = JSON.stringify(Object.assign({}, state, {plays: Object.keys(plays).map(k => k + plays[k].head + plays[k].text)}));
-  const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused)}, liveSig = JSON.stringify(live);
-  const logoSig = cfg.outputs.map(b => b.logo.length + ':' + b.logo.slice(-40)).join('|');
+  const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)}, liveSig = JSON.stringify(live);
+  const logoSig = assetSig();
+  const feed = buildFeed(), feedSig = JSON.stringify(feed.outputs);
   // full games/settings go out whenever they change AND at least every 30 s (logos every 5 min), so a board can never sit empty
   const sendState = stateSig !== pub.stateSig || now - pub.stateAt > 30000, sendLogos = logoSig !== pub.logoSig || now - pub.logoAt > 300000;
-  if (!sendState && !sendLogos && liveSig === pub.liveSig && now - pub.beat < 4000) return;   // 4-second heartbeat keeps DAK outputs "live"
+  const sendFeed = feedSig !== pub.feedSig || now - pub.feedAt > 30000;
+  if (!FAIL.force && !sendState && !sendLogos && !sendFeed && liveSig === pub.liveSig && now - pub.beat < 4000) return;   // 4-second heartbeat keeps DAK outputs "live"
   pub.busy = true;
   try {
-    const r = await fetch(SB_URL + '/rest/v1/rpc/scoreboard_publish', {method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, SB_H),
-      body: JSON.stringify({p_id: online.id, p_key: online.key, p_live: live, p_state: sendState ? state : null, p_logos: sendLogos ? cfg.outputs.map(b => b.logo) : null})});
-    if (!r.ok) {
-      const t = await r.text();
-      throw new Error(/scoreboard_publish|PGRST202|404/.test(t + r.status) ? 'Online outputs aren’t set up yet. Run scoreboard-setup.sql in Supabase.' : /wrong control key/.test(t) ? 'This board code belongs to another dashboard.' : 'Couldn’t reach the online board (HTTP ' + r.status + ').');
+    let done = false;
+    if (pub.v !== 1) {
+      let r = null;
+      try {
+        r = await rpc('scoreboard_publish2', {p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_ctl: {id: INST, name: FO.name}, p_force: !!FAIL.force,
+          p_live: live, p_state: sendState ? state : null, p_logos: sendLogos ? assetsOut() : null, p_feed: sendFeed ? feed : null});
+      } catch(e) { if (e.missing) { pub.v = 1; AUTH.v2 = false; } else throw e; }
+      if (r) {
+        pub.v = 2; const forced = FAIL.force; FAIL.force = false;
+        if (r.require_auth != null) AUTH.require = !!r.require_auth;
+        if (!r.ok && r.reason === 'standby') { enterStandby(r.ctl); pub.beat = 0; pub.busy = false; onlineStatus.ok = true; onlineStatus.msg = ''; window.__onlineChanged && window.__onlineChanged(); publishOnline(); return; }
+        if (!r.ok) {
+          if (r.reason === 'auth') { window.__authProblem && window.__authProblem(forced); throw new Error(forced ? 'You don’t have permission to take control of this board.' : AUTH.require ? 'Sign in (Admin tab) to send to board ' + online.id + '.' : 'This board code belongs to another dashboard.'); }
+          throw new Error(r.reason === 'too large' ? 'The sponsor logos or uploaded font are too large to send. Use smaller files.' : 'The online board refused the update (' + r.reason + ').');
+        }
+        enterControl(); done = true;
+      }
     }
-    if (sendState) { pub.stateSig = stateSig; pub.stateAt = now; } if (sendLogos) { pub.logoSig = logoSig; pub.logoAt = now; } pub.liveSig = liveSig; pub.beat = now;
+    if (!done) {   // the original online setup (before scoreboard-setup-2.sql): no failover, feeds or sign-in
+      const r = await fetch(SB_URL + '/rest/v1/rpc/scoreboard_publish', {method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, SB_H),
+        body: JSON.stringify({p_id: online.id, p_key: online.key, p_live: live, p_state: sendState ? state : null, p_logos: sendLogos ? assetsOut() : null})});
+      if (!r.ok) {
+        const t = await r.text();
+        throw new Error(/scoreboard_publish|PGRST202|404/.test(t + r.status) ? 'Online outputs aren’t set up yet. Run scoreboard-setup.sql in Supabase.' : /wrong control key/.test(t) ? 'This board code belongs to another dashboard.' : 'Couldn’t reach the online board (HTTP ' + r.status + ').');
+      }
+      FAIL.role = 'solo';
+    }
+    if (sendState) { pub.stateSig = stateSig; pub.stateAt = now; } if (sendLogos) { pub.logoSig = logoSig; pub.logoAt = now; }
+    if (sendFeed) { pub.feedSig = feedSig; pub.feedAt = now; }
+    pub.liveSig = liveSig; pub.beat = now;
     onlineStatus.ok = true; onlineStatus.msg = '';
-  } catch(e) { onlineStatus.ok = false; onlineStatus.msg = e.message || 'Couldn’t reach the online board.'; pub.beat = now; }
+  } catch(e) { onlineStatus.ok = false; onlineStatus.msg = e.message || 'Couldn’t reach the online board.'; pub.beat = now; FAIL.force = false; }
   pub.busy = false;
   window.__onlineChanged && window.__onlineChanged();
   if (pub.again) { pub.again = false; publishOnline(); }
 }
+// closing the dashboard in control hands the board over right away instead of after 15 s
+if (!IS_OUT) window.addEventListener('pagehide', () => {
+  if (FAIL.role !== 'control' || !online || !online.on || pub.v !== 2) return;
+  try { fetch(SB_URL + '/rest/v1/rpc/scoreboard_publish2', {method: 'POST', keepalive: true, headers: Object.assign({'Content-Type': 'application/json'}, SB_H),
+    body: JSON.stringify({p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_ctl: {release: INST}, p_force: false, p_live: null, p_state: null, p_logos: null, p_feed: null})}); } catch(e) {}
+});
 
 function bootControl(){
   const $ = id => document.getElementById(id);
@@ -1230,19 +1722,31 @@ function bootControl(){
     go:'<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>',
     x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
   };
-  function pageOf(i, key){ return pages(i).findIndex(p => p.games.some(g => g.key === key)); }
+  const onPage = (p, key) => (p.standings && p.standings.key === key) || p.games.some(g => g.key === key);
+  function pageOf(i, key){ return pages(i).findIndex(p => onPage(p, key)); }
   function renderRundown(){
     $('rdCount').textContent = cfg.rundown.length ? '· ' + cfg.rundown.length : '';
     const nStale = frozen ? 0 : cfg.rundown.filter(r => !r.manual && staleMins(games[r.key])).length;
     $('staleNote').hidden = !nStale; $('staleNote').textContent = nStale + (nStale === 1 ? ' game hasn’t' : ' games haven’t') + ' updated in a while';
     $('rdHint').hidden = cfg.rundown.length > 0;
     const psSel = pages(SEL);
+    const btns = r => '<span class="ib"><button data-a="go" title="Show this now on every output" aria-label="Show this now on every output">' + IC.go + '</button>' +
+        (r.manual ? '<button data-a="ed" title="Edit" aria-label="Edit manual game">' + IC.ed + '</button>' : '') +
+        '<button data-a="up" title="Move up" aria-label="Move up">' + IC.up + '</button><button data-a="dn" title="Move down" aria-label="Move down">' + IC.dn + '</button>' +
+        '<button data-a="x" title="Remove" aria-label="Remove">' + IC.x + '</button></span>';
     $('rdList').innerHTML = cfg.rundown.map((r, i) => {
+      if (r.standings) {
+        const st = STANDINGS[r.sport + ':' + r.conf], pg = psSel.findIndex(p => onPage(p, r.key));
+        return '<li data-key="' + esc(r.key) + '"><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu"><span>' + esc(CONF_NAMES[r.conf] + ' standings') + '</span>' +
+          '<span class="meta"><span class="tagx">' + SPORTS[r.sport].short + '</span><span class="tagx">Standings</span>' +
+          '<span>' + (st ? st.rows.length + ' teams · updated ' + new Date(st.at).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZone:TZ}) : 'Loading…') + '</span>' +
+          (pg >= 0 ? '<span class="pg">Pg ' + (pg+1) + '</span>' : '') + '</span></span>' + btns(r) + '</div></li>';
+      }
       const g = r.manual ? manualGame(r) : games[r.key];
       const s = g ? statusInfo(g) : null;
       const sc = s && (s.cls === 'in' || s.cls === 'post');
       const line = t => (t.rank ? '#' + t.rank + ' ' : '') + t.name + (sc ? '  ' + t.score : '');
-      const pIn = ps => ps.findIndex(p => p.games.some(x => x.key === r.key));
+      const pIn = ps => ps.findIndex(p => onPage(p, r.key));
       const pg = g ? pIn(psSel) : -1;
       let ed = '';
       if (r.manual && editing === r.key) {
@@ -1258,11 +1762,7 @@ function bootControl(){
         '<span class="meta"><span class="tagx">' + SPORTS[r.sport].short + '</span>' + (r.manual ? '<span class="tagx">Manual</span>' : '') +
         (s ? '<span class="' + s.cls + '">' + esc(s.short) + '</span>' : '') + (pg >= 0 ? '<span class="pg" title="Page on Output ' + (SEL+1) + ' (the output selected in Board settings)">Pg ' + (pg+1) + '</span>' : '') +
         (st ? '<span class="stale" title="Score, clock and situation haven’t changed. Check the game or freeze/remove it.">No update ' + st + ' min</span>' : '') +
-        (ups ? '<span class="ups">' + esc(ups) + '</span>' : '') + '</span></span>' +
-        '<span class="ib"><button data-a="go" title="Show this game now on every output" aria-label="Show this game now on every output">' + IC.go + '</button>' +
-        (r.manual ? '<button data-a="ed" title="Edit" aria-label="Edit manual game">' + IC.ed + '</button>' : '') +
-        '<button data-a="up" title="Move up" aria-label="Move up">' + IC.up + '</button><button data-a="dn" title="Move down" aria-label="Move down">' + IC.dn + '</button>' +
-        '<button data-a="x" title="Remove" aria-label="Remove">' + IC.x + '</button></span></div>' + ed + '</li>';
+        (ups ? '<span class="ups">' + esc(ups) + '</span>' : '') + '</span></span>' + btns(r) + '</div>' + ed + '</li>';
     }).join('');
   }
   $('rdList').addEventListener('click', e => {
@@ -1322,7 +1822,7 @@ function bootControl(){
       try { await loadFeed(k); } catch(e) { failed.push(SPORTS[sp].short); }
       (feeds[k] || []).filter(test).forEach(g => found.push({key: g.key, sport: sp, id: g.id, date, group}));
     }
-    if (replace) cfg.rundown = cfg.rundown.filter(r => r.manual);
+    if (replace) cfg.rundown = cfg.rundown.filter(r => r.manual || r.standings);
     let n = 0;
     found.sort((a, b) => rankKey(games[a.key]) - rankKey(games[b.key]) || (Date.parse(games[a.key].date) - Date.parse(games[b.key].date)))
       .forEach(e => { if (!inRd(e.key)) { addToRundown(e); n++; } });
@@ -1410,8 +1910,8 @@ function bootControl(){
     '<div class="pane-hd"><h2><b>Output ' + (i+1) + '</b> · <span class="onm"></span> <span class="osz"></span></h2>' +
     '<button class="btn sm primary" data-x="open">Open window</button><button class="btn sm" data-x="link">Copy link</button></div>' +
     '<div class="stage"><div class="holder"></div></div>' +
-    '<div class="transport"><button class="btn sm" data-x="prev">‹ Prev</button><button class="btn sm" data-x="play">Pause</button><button class="btn sm" data-x="next">Next ›</button><span class="info"></span></div></div>').join('');
-  const OB = cfg.outputs.map((_, i) => { const el = document.querySelector('.ob[data-o="' + i + '"]'); return {el, stage: el.querySelector('.stage'), holder: el.querySelector('.holder'), info: el.querySelector('.info'), play: el.querySelector('[data-x="play"]')}; });
+    '<div class="transport"><button class="btn sm" data-x="prev">‹ Prev</button><button class="btn sm" data-x="play">Pause</button><button class="btn sm" data-x="next">Next ›</button><button class="btn sm" data-x="hide" title="Blank this output (background only)">Hide</button><span class="info"></span></div></div>').join('');
+  const OB = cfg.outputs.map((_, i) => { const el = document.querySelector('.ob[data-o="' + i + '"]'); return {el, stage: el.querySelector('.stage'), holder: el.querySelector('.holder'), info: el.querySelector('.info'), play: el.querySelector('[data-x="play"]'), hide: el.querySelector('[data-x="hide"]')}; });
   window.renderAll = () => {
     OB.forEach((o, i) => {
       const b = cfg.outputs[i];
@@ -1429,8 +1929,9 @@ function bootControl(){
     OB.forEach((o, i) => {
       const n = pages(i).length, rt = rts[i];
       const left = Math.max(0, Math.ceil((rt.nextAt - Date.now())/1000));
-      o.info.textContent = n ? 'Page ' + (rt.page+1) + ' of ' + n + (n > 1 ? (rt.paused ? ' · paused' : ' · next in ' + left + 's') : '') : 'No pages';
+      o.info.textContent = (rt.hidden ? 'Hidden · ' : '') + (n ? 'Page ' + (rt.page+1) + ' of ' + n + (n > 1 ? (rt.paused ? ' · paused' : FAIL.role === 'standby' ? '' : ' · next in ' + left + 's') : '') : 'No pages');
       o.play.textContent = rt.paused ? 'Play' : 'Pause';
+      o.hide.textContent = rt.hidden ? 'Show' : 'Hide'; o.hide.classList.toggle('danger-armed', !!rt.hidden);
     });
   }
   const ro = new ResizeObserver(() => OB.forEach((o, i) => fit(o.stage, o.holder, cfg.outputs[i])));
@@ -1443,14 +1944,15 @@ function bootControl(){
     const a = x.dataset.x;
     if (a === 'prev') step(i, -1); else if (a === 'next') step(i, 1); else if (a === 'play') togglePlay(i);
     else if (a === 'open') openOutput(i); else if (a === 'link') copyLink(i);
+    else if (a === 'hide') { rts[i].hidden = !rts[i].hidden; renderAll(); push(); }
   });
   $('freeze').onchange = e => { frozen = e.target.checked; setFeed(feedErr); };
   document.addEventListener('keydown', e => {
-    if (e.target.closest('input,select,textarea')) return;
+    if (e.target.closest('input,select,textarea') || !can('control') || !$('adminView').hidden) return;
     if (e.key === ' ') { e.preventDefault(); togglePlay(SEL); } else if (e.key === 'ArrowRight') step(SEL, 1); else if (e.key === 'ArrowLeft') step(SEL, -1);
   });
   setInterval(() => {
-    rts.forEach((rt, i) => { if (due(i)) step(i, 1); });
+    rts.forEach((rt, i) => { if (FAIL.role !== 'standby' && due(i)) step(i, 1); });
     updInfo();
   }, 250);
   setInterval(push, 2000); // heartbeat keeps the output windows in sync
@@ -1458,12 +1960,17 @@ function bootControl(){
   // settings
   const inputs = [...document.querySelectorAll('[data-k]')];
   function syncSettings(){
-    inputs.forEach(el => { const v = cfg.board[el.dataset.k]; if (el.type === 'checkbox') el.checked = !!v; else el.value = v; });
+    $('sFont').innerHTML = Object.keys(FONTS).map(n => '<option value="' + esc(n) + '">' + esc(n === 'Scoreboard Display' ? 'Scoreboard Display (built in)' : n) + '</option>').join('') +
+      (cfg.board.fontData ? '<option value="custom">Uploaded font</option>' : '');
+    inputs.forEach(el => { const v = cfg.board[el.dataset.k];
+      if (el.type === 'checkbox') el.checked = !!v;
+      else if (el.type === 'color' && !v) el.value = el.dataset.k === 'panelColor' ? darken(cfg.board.bgColor, 0.16) : cfg.board.accent;
+      else el.value = v; });
     const p = cfg.board.w + 'x' + cfg.board.h;
     $('sPreset').value = [...$('sPreset').options].some(o => o.value === p) ? p : 'custom';
     $('fPer').hidden = cfg.board.layout === 'grid'; $('fGrid').hidden = cfg.board.layout !== 'grid';
     const hm = cfg.board.hdMode;
-    $('fHdAlign').hidden = $('fHdSize').hidden = hm === 'off'; $('fTitle').hidden = hm !== 'text';
+    $('fHdAlign').hidden = $('fHdSize').hidden = hm === 'off'; $('fTitle').hidden = hm !== 'text'; $('fPby').hidden = hm !== 'logo';
     $('logoThumb').setAttribute('src', cfg.board.logo || ''); $('logoRemove').hidden = !cfg.board.logo;
     $('logoTxt').textContent = cfg.board.logo ? (hm === 'logo' ? 'Showing in the header.' : 'Saved. Set Header to "Sponsor logo" to show it.') : 'Drop a PNG, JPG, SVG or WebP here. A transparent PNG or SVG works best.';
   }
@@ -1478,7 +1985,8 @@ function bootControl(){
   // copy colors, header/logo and display options (not size or layout) from the other output
   $('matchLook').onclick = () => {
     const from = +$('lookFrom').value, src = cfg.outputs[from];
-    ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets'].forEach(k => cfg.board[k] = src[k]);
+    ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets',
+     'presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
     cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
     toast('Output ' + (SEL+1) + ' now matches Output ' + (from+1) + '’s look');
   };
@@ -1552,10 +2060,13 @@ function bootControl(){
     const bar = $('onlineBar');
     bar.classList.toggle('ok', online.on && onlineStatus.ok === true); bar.classList.toggle('err', online.on && onlineStatus.ok === false);
     $('onlineTxt').textContent = !online.on ? 'Off · board ' + online.id + '. Click Copy link on an output to start sending.' :
-      onlineStatus.ok === false ? onlineStatus.msg : onlineStatus.ok ? 'Live · board ' + online.id + ' · ' + SITE.replace(/^https?:\/\//, '') + '/?' + online.id + '/1' : 'Connecting…';
+      onlineStatus.ok === false ? onlineStatus.msg : !onlineStatus.ok ? 'Connecting…' :
+      FAIL.role === 'standby' ? 'Standby · board ' + online.id + ' · ' + ((FAIL.ctl && FAIL.ctl.name) || 'another dashboard') + ' in control' :
+      'Live · board ' + online.id + ' · ' + SITE.replace(/^https?:\/\//, '') + '/?' + online.id + '/1';
+    if (window.__syncFailover) window.__syncFailover();
   };
   $('onlineOn').checked = !!online.on;
-  $('onlineOn').onchange = e => { online.on = e.target.checked; saveOnline(); window.__onlineChanged(); if (online.on) { pub.stateSig = pub.logoSig = ''; publishOnline(); } };
+  $('onlineOn').onchange = e => { online.on = e.target.checked; saveOnline(); window.__onlineChanged(); if (online.on) { resetPub(); publishOnline(); } };
   // move a board between dashboards (for example from this PC to the hosted page): copy "code:key" and paste it on the other one
   $('onlineMove').onclick = () => { $('moveBox').hidden = false; $('moveTxt').value = online.id + ':' + online.key; $('moveTxt').select(); };
   $('moveClose').onclick = () => $('moveBox').hidden = true;
@@ -1563,8 +2074,8 @@ function bootControl(){
     const m = $('moveTxt').value.trim().match(/^([a-z0-9]{4,12}):([A-Za-z0-9]{16,})$/);
     if (!m) { toast('Paste a board code and key in the form code:key.'); return; }
     if (m[1] === online.id && m[2] === online.key) { $('moveBox').hidden = true; return; }
-    online = {id: m[1], key: m[2], on: true}; saveOnline(); pub.stateSig = pub.logoSig = ''; $('onlineOn').checked = true;
-    $('moveBox').hidden = true; toast('This dashboard now controls board ' + m[1]); publishOnline(); window.__onlineChanged();
+    window.__switchBoard(m[1], m[2]);
+    $('moveBox').hidden = true; toast('This dashboard now uses board ' + m[1] + '. If another dashboard is in control, this one waits on standby.'); publishOnline(); window.__onlineChanged();
   };
   window.__onlineChanged();
   $('copyClose').onclick = () => $('copyBox').hidden = true;
@@ -1580,7 +2091,8 @@ function bootControl(){
   }
   async function refresh(){
     if (!frozen) {
-      const keys = new Set(cfg.rundown.filter(r => !r.manual).map(feedKey)); keys.add(pickerKey());
+      const keys = new Set(feedRows().map(feedKey)); keys.add(pickerKey());
+      refreshStandings(false).then(() => renderAll());
       const res = await Promise.allSettled([...keys].map(loadFeed));
       const bad = res.find(r => r.status === 'rejected');
       if (res.some(r => r.status === 'fulfilled')) lastUpdate = new Date();
@@ -1590,6 +2102,353 @@ function bootControl(){
     scheduleRefresh();
   }
   function scheduleRefresh(){ clearTimeout(refreshTimer); refreshTimer = setTimeout(refresh, cfg.outputs[0].refresh * 1000); }
+
+  // ================= conference standings on the rundown =================
+  $('stSport').value = pk.sport === 'bsb' ? 'cfb' : pk.sport;
+  $('stAdd').onclick = async () => {
+    const sport = $('stSport').value, conf = $('stConf').value, key = 'st:' + sport + ':' + conf;
+    if (inRd(key)) { toast(CONF_NAMES[conf] + ' ' + SPORTS[sport].short + ' standings are already in the rundown'); return; }
+    cfg.rundown.push({key, standings: true, sport, conf}); changed();
+    try { await loadStandings(sport, conf); toast(CONF_NAMES[conf] + ' standings added. They refresh every 15 minutes and after each conference game goes final.'); }
+    catch(e) { toast('Couldn’t load ' + CONF_NAMES[conf] + ' standings from ESPN right now. They’ll keep retrying.'); }
+    renderRundown(); renderAll(); push();
+  };
+
+  // ================= themes: template, colors and fonts, saved per signed-in user =================
+  const THEME_KEYS = ['tpl', 'fontName', 'fontData', 'textColor', 'panelColor', 'leadColor', 'rankColor', 'upper', 'bg', 'bgColor', 'accent', 'fade', 'hdAlign'];
+  const HOUSE = {name: 'House package (default)', builtin: true, look: {tpl: 'package', fontName: 'Scoreboard Display', fontData: '', textColor: '#FFFFFF', panelColor: '', leadColor: '', rankColor: '', upper: true, bg: 'board', bgColor: '#102A5E', accent: '#E87722', fade: 0.6, hdAlign: 'left'}};
+  let THEMES = [];
+  const themeStore = () => STORE + '.themes' + (AUTH.user ? '.' + AUTH.user.id : '');
+  const syncThemes = () => {
+    $('themeSel').innerHTML = '<option value="">Saved themes' + (AUTH.user ? ' (' + esc(AUTH.user.name || AUTH.user.email) + ')' : '') + '…</option>' +
+      [HOUSE].concat(THEMES).map((t, i) => '<option value="' + i + '">' + esc(t.name) + '</option>').join('');
+  };
+  async function loadThemes(){
+    try { THEMES = JSON.parse(localStorage.getItem(themeStore()) || '[]'); } catch(e) { THEMES = []; }
+    syncThemes();
+    if (AUTH.user && AUTH.v2) {
+      try { const r = await rpc('scoreboard_my_prefs', {p_id: online.id, p_session: AUTH.token, p_prefs: null}); if (r && r.ok && r.prefs && Array.isArray(r.prefs.themes)) { THEMES = r.prefs.themes; try { localStorage.setItem(themeStore(), JSON.stringify(THEMES)); } catch(e) {} syncThemes(); } } catch(e) {}
+    }
+  }
+  async function saveThemes(){
+    let local = true; try { localStorage.setItem(themeStore(), JSON.stringify(THEMES)); } catch(e) { local = false; }
+    if (AUTH.user && AUTH.v2) { try { const r = await rpc('scoreboard_my_prefs', {p_id: online.id, p_session: AUTH.token, p_prefs: {themes: THEMES}}); if (r && r.ok) return 'account'; } catch(e) {} }
+    return local ? 'computer' : '';
+  }
+  $('themeSave').onclick = async () => {
+    const name = $('themeName').value.trim(); if (!name) { $('themeName').focus(); toast('Name the theme first.'); return; }
+    const look = {}; THEME_KEYS.forEach(k => look[k] = cfg.board[k]);
+    THEMES = THEMES.filter(t => t.name.toLowerCase() !== name.toLowerCase()); THEMES.push({name, look});
+    const where = await saveThemes(); $('themeName').value = ''; syncThemes();
+    toast(where === 'account' ? 'Theme “' + name + '” saved to your sign-in, so it’s on any dashboard you use' : where ? 'Theme “' + name + '” saved on this computer' : 'Couldn’t save the theme (the uploaded font may be too large).');
+  };
+  $('themeApply').onclick = () => {
+    const i = $('themeSel').value; if (i === '') { toast('Pick a theme.'); return; }
+    const t = [HOUSE].concat(THEMES)[+i]; if (!t) return;
+    THEME_KEYS.forEach(k => { if (k in t.look) cfg.board[k] = t.look[k]; });
+    cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
+    toast('Output ' + (SEL + 1) + ' now uses “' + t.name + '”');
+  };
+  let themeDelArm = 0;
+  $('themeDel').onclick = async () => {
+    const i = +$('themeSel').value - 1, t = THEMES[i]; if ($('themeSel').value === '' || !t) { toast('Pick one of your saved themes.'); return; }
+    if (Date.now() > themeDelArm) { themeDelArm = Date.now() + 3000; toast('Click Delete again to remove “' + t.name + '”'); return; }
+    THEMES.splice(i, 1); themeDelArm = 0; await saveThemes(); syncThemes(); toast('Theme deleted');
+  };
+  // fonts: built-in, Google fonts, or the station's own font file
+  $('fontFile').addEventListener('change', e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    if (!/\.(woff2?|ttf|otf)$/i.test(f.name)) { toast('Use a .woff2, .woff, .ttf or .otf font file.'); return; }
+    if (f.size > 1100000) { toast('That font file is over 1 MB. A .woff2 version is usually much smaller.'); return; }
+    const rd = new FileReader();
+    rd.onload = () => { cfg.board.fontData = String(rd.result).replace(/^data:[^;,]*/, 'data:font/' + f.name.split('.').pop().toLowerCase()); cfg.board.fontName = 'custom'; cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push(); toast('Font “' + f.name + '” added to Output ' + (SEL + 1)); };
+    rd.onerror = () => toast('Couldn’t read that font file.');
+    rd.readAsDataURL(f);
+  });
+  document.querySelectorAll('[data-auto]').forEach(b => b.addEventListener('click', () => {
+    b.dataset.auto.split(',').forEach(k => cfg.board[k] = ''); cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
+  }));
+
+  // ================= remote commands (Stream Deck / Ross DashBoard) =================
+  window.__runCmd = c => {
+    if (!c || !c.c) return;
+    if (c.c === 'freeze' || c.c === 'unfreeze') { frozen = c.c === 'freeze'; $('freeze').checked = frozen; setFeed(feedErr); renderRundown(); return; }
+    const outs = c.out === 'all' || !c.out ? rts.map((_, i) => i) : [Math.min(N_OUT, Math.max(1, +c.out)) - 1];
+    outs.forEach(i => {
+      const rt = rts[i], len = pages(i).length || 1, again = () => rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
+      if (c.c === 'next') { rt.page = (rt.page + 1) % len; again(); }
+      else if (c.c === 'prev') { rt.page = (rt.page - 1 + len) % len; again(); }
+      else if (c.c === 'toggle') { rt.paused = !rt.paused; again(); }
+      else if (c.c === 'pause') rt.paused = true;
+      else if (c.c === 'play') { rt.paused = false; again(); }
+      else if (c.c === 'first') { rt.page = 0; again(); }
+      else if (c.c === 'goto') { rt.page = Math.min(len - 1, Math.max(0, (+c.n || 1) - 1)); again(); }
+      else if (c.c === 'hide') rt.hidden = true;
+      else if (c.c === 'show') rt.hidden = false;
+      else if (c.c === 'togglehide') rt.hidden = !rt.hidden;
+    });
+    renderAll(); push();
+  };
+  let cmdBusy = false;
+  setInterval(async () => {
+    if (cmdBusy || !online.on || pub.v !== 2 || FAIL.role !== 'control') return;
+    cmdBusy = true;
+    try { const list = await rpc('scoreboard_take_commands', {p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_ctl_id: INST}); (list || []).forEach(window.__runCmd); } catch(e) {}
+    cmdBusy = false;
+  }, 1000);
+
+  // ================= failover status =================
+  const ctlName = () => (FAIL.ctl && FAIL.ctl.name) || 'another dashboard';
+  function syncFailover(){
+    const sb = FAIL.role === 'standby' && online.on;
+    $('foBar').hidden = !sb;
+    $('foTxt').textContent = 'Standby · ' + ctlName() + ' is in control of board ' + online.id + '. This dashboard mirrors what’s on air' + (FO.auto ? ' and takes over automatically if it goes quiet.' : '. Automatic failover is off.');
+    $('takeCtl').hidden = !can('failover');
+    document.body.classList.toggle('standby', sb);
+    $('foState').textContent = !online.on ? 'Not sending to online outputs. Turn on “Send to online outputs” to use failover.' :
+      pub.v === 1 ? 'Failover needs the part 2 database setup (scoreboard-setup-2.sql).' :
+      FAIL.role === 'control' ? 'In control: this dashboard is driving board ' + online.id + '.' :
+      FAIL.role === 'standby' ? 'Standby: ' + ctlName() + ' is in control.' : 'Connecting…';
+    $('foTake').disabled = FAIL.role !== 'standby' || !can('failover');
+    applyPerms();
+  }
+  window.__roleChanged = was => {
+    if (FAIL.role === 'standby') toast(was === 'control' ? 'Control passed to ' + ctlName() + '. This dashboard is now on standby.' : ctlName() + ' is in control. This dashboard is on standby.');
+    else if (FAIL.role === 'control' && was === 'standby') toast('This dashboard is now in control of board ' + online.id);
+    window.__syncFailover = syncFailover; syncFailover();
+  };
+  window.__mirrored = () => { selectOutput(SEL); renderNames(); renderList(); renderRundown(); renderAll(); push(); };
+  const takeControl = () => {
+    if (!can('failover')) { toast('You don’t have permission to take control.'); return; }
+    FAIL.force = true; resetPub(); publishOnline();
+  };
+  $('takeCtl').onclick = takeControl; $('foTake').onclick = takeControl;
+  $('foName').value = FO.name;
+  $('foName').addEventListener('change', () => { FO.name = $('foName').value.trim().slice(0, 40) || FO.name; $('foName').value = FO.name; saveFO(); resetPub(); publishOnline(); });
+  $('foAuto').checked = FO.auto;
+  $('foAuto').onchange = () => { FO.auto = $('foAuto').checked; saveFO(); syncFailover(); };
+
+  // screens (DAK / online outputs) that have checked in during the last 40 seconds
+  let SCREENS = [];
+  async function loadScreens(){
+    if (!online.on) { SCREENS = []; renderScreens(); return; }
+    try {
+      const since = new Date(Date.now() - 40000).toISOString();
+      const r = await fetch(SB_URL + '/rest/v1/scoreboard_outputs?board_id=eq.' + online.id + '&seen_at=gt.' + encodeURIComponent(since) + '&select=out,client,info,seen_at&order=out', {headers: SB_H, cache: 'no-store'});
+      SCREENS = r.ok ? await r.json() : [];
+    } catch(e) {}
+    renderScreens();
+  }
+  function renderScreens(){
+    const n = SCREENS.length;
+    $('screensTxt').textContent = online.on && pub.v === 2 ? n + (n === 1 ? ' screen' : ' screens') + ' online' : '';
+    $('screenList').innerHTML = !n ? '<p class="hint">No online outputs have checked in during the last 40 seconds.</p>' :
+      '<table class="tbl"><thead><tr><th>Output</th><th>Screen</th><th>Running</th><th>Page</th><th>Last seen</th></tr></thead><tbody>' + SCREENS.map(s => {
+        const i = s.info || {}, ago = Math.max(0, Math.round((Date.now() - Date.parse(s.seen_at)) / 1000));
+        return '<tr><td>' + esc(s.out) + ' · ' + esc((cfg.outputs[s.out - 1] || {}).name || '') + '</td><td>' + esc((i.w || '?') + '×' + (i.h || '?')) + '</td><td>' + (i.mode === 'own' ? '<span class="warn">On its own</span>' : 'Following dashboard') + '</td><td>' + esc(i.page ? i.page + '/' + i.pages : '–') + '</td><td>' + ago + 's ago</td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+  setInterval(loadScreens, 10000); setTimeout(loadScreens, 3000);
+
+  // ================= sign-in and permissions =================
+  const PERMS = [['rundown', 'Rundown & games'], ['settings', 'Board settings & themes'], ['sponsor', 'Sponsor logo & presented-by'], ['control', 'Pages, pause & freeze'],
+    ['outputs', 'Output windows & links'], ['failover', 'Take control (failover)'], ['users', 'Admin: users & connections']];
+  // areas of the dashboard and the permission each needs (sponsor items sit inside Board settings but follow their own permission)
+  function applyPerms(){
+    const lock = (el, ok) => { if (!el) return; el.inert = !ok; el.classList.toggle('locked', !ok); };
+    document.querySelectorAll('.pane.picker, .pane.rundown').forEach(el => lock(el, can('rundown')));
+    document.querySelectorAll('#boardSettings .sgrid > *, #boardSettings .themes, #lookFrom, #matchLook, #namesBox .names').forEach(el => lock(el, can(el.dataset.perm || 'settings')));
+    document.querySelectorAll('.ob .transport, #freezeLbl').forEach(el => lock(el, can('control')));
+    document.querySelectorAll('.ob [data-x="open"], .ob [data-x="link"], #onlineOnLbl, #onlineMove').forEach(el => lock(el, can('outputs')));
+    document.querySelectorAll('[data-need="users"]').forEach(el => lock(el, AUTH.v2 !== false && (can('users') || (!AUTH.hasUsers && !AUTH.user && !AUTH.require))));
+    document.querySelectorAll('[data-need="failover"]').forEach(el => lock(el, can('failover')));
+  }
+  window.__canKeys = () => can('control');
+  function applyAuth(){
+    const needSignIn = AUTH.require && !AUTH.user;
+    $('signin').hidden = !needSignIn;
+    if (needSignIn) { $('siBoard').value = online.id; setTimeout(() => ($('siEmail').value ? $('siPw') : $('siEmail')).focus(), 50); }
+    $('whoBox').hidden = !AUTH.user;
+    $('whoTxt').textContent = AUTH.user ? (AUTH.user.name || AUTH.user.email) + (AUTH.user.role === 'admin' ? ' · Admin' : '') : '';
+    $('authState').innerHTML = AUTH.v2 === false ? 'Sign-in needs the part 2 database setup. Run <b>scoreboard-setup-2.sql</b> in Supabase (CallTime Demo → SQL Editor).' :
+      AUTH.user ? 'Signed in as <b>' + esc(AUTH.user.name || AUTH.user.email) + '</b> (' + esc(AUTH.user.role) + ') on board ' + esc(online.id) + '.' :
+      AUTH.hasUsers ? 'Not signed in. You’re using this computer’s board key for board ' + esc(online.id) + '.' :
+      'No users yet. Anyone with this computer’s board key controls board ' + esc(online.id) + '. Create the first admin (you) below.';
+    $('reqAuth').checked = AUTH.require;
+    $('signOutAdm').hidden = !AUTH.user; $('signInAdm').hidden = !!AUTH.user || !AUTH.hasUsers;
+    window.__syncFailover = syncFailover; syncFailover();
+  }
+  async function checkAuth(){
+    if (!online || !online.id) return;
+    try {
+      const r = await rpc('scoreboard_whoami', {p_id: online.id, p_session: AUTH.token || null});
+      AUTH.v2 = true; AUTH.require = !!r.require_auth; AUTH.hasUsers = !!r.has_users;
+      const before = AUTH.user && AUTH.user.id; AUTH.user = r.user || null;
+      if (!AUTH.user && AUTH.token) { AUTH.token = ''; saveToken(); }
+      if ((AUTH.user && AUTH.user.id) !== before) loadThemes();
+    } catch(e) { if (e.missing) AUTH.v2 = false; }
+    applyAuth();
+  }
+  window.__authProblem = () => checkAuth();
+  const KEYS_STORE = STORE + '.keys';
+  const keysMap = () => { try { return JSON.parse(localStorage.getItem(KEYS_STORE) || '{}') || {}; } catch(e) { return {}; } };
+  // use another board (e.g. a backup computer signing in to the main board); keeps this computer's key for the old one
+  function switchBoard(id, key){
+    const m = keysMap(); if (online.key) m[online.id] = online.key; try { localStorage.setItem(KEYS_STORE, JSON.stringify(m)); } catch(e) {}
+    online = {id, key: key != null ? key : (m[id] || ''), on: true}; saveOnline(); loadToken();
+    AUTH.user = null; FAIL.role = 'solo'; FAIL.ctl = null; FAIL.join = true; resetPub();
+    $('onlineOn').checked = true; window.__onlineChanged(); syncCode(); checkAuth();
+  }
+  window.__switchBoard = switchBoard;
+  $('siForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const code = $('siBoard').value.trim().toLowerCase(), email = $('siEmail').value.trim(), pw = $('siPw').value;
+    $('siErr').textContent = '';
+    if (!/^[a-z0-9]{4,12}$/.test(code)) { $('siErr').textContent = 'Board codes are 4–12 letters and numbers (the part before the slash in the DAK link).'; return; }
+    if (!email || !pw) { $('siErr').textContent = 'Enter your email and password.'; return; }
+    $('siGo').disabled = true;
+    try {
+      const r = await rpc('scoreboard_signin', {p_id: code, p_email: email, p_password: pw});
+      if (!r || !r.ok) { $('siErr').textContent = r && r.reason === 'locked' ? 'Too many tries. Wait 10 minutes and try again.' : 'That email and password don’t match board ' + code + '.'; }
+      else {
+        if (code !== online.id) switchBoard(code);
+        AUTH.token = r.token; AUTH.user = r.user; saveToken(); $('siPw').value = '';
+        await checkAuth(); loadThemes(); resetPub(); publishOnline();
+        toast('Signed in as ' + (r.user.name || r.user.email));
+      }
+    } catch(err) { $('siErr').textContent = err.missing ? 'Sign-in isn’t set up yet (run scoreboard-setup-2.sql in Supabase).' : 'Couldn’t reach the board. Check the internet connection.'; }
+    $('siGo').disabled = false;
+  });
+  const signOut = async () => {
+    try { await rpc('scoreboard_signout', {p_id: online.id, p_session: AUTH.token}); } catch(e) {}
+    AUTH.token = ''; AUTH.user = null; saveToken(); loadThemes(); await checkAuth(); toast('Signed out');
+  };
+  $('signOut').onclick = signOut; $('signOutAdm').onclick = signOut;
+  $('signInAdm').onclick = () => { $('signin').hidden = false; $('siBoard').value = online.id; $('siEmail').focus(); };
+  $('siCancel').onclick = () => { if (AUTH.require && !AUTH.user) { toast('This board requires sign-in.'); return; } $('signin').hidden = true; };
+
+  // ---------- users ----------
+  let USERS = [];
+  const adminCall = async (action, data) => {
+    const r = await rpc('scoreboard_users_admin', {p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_action: action, p_data: data || {}});
+    if (!r || !r.ok) throw new Error(r && r.reason === 'auth' ? (online.on ? 'Only admins can manage users.' : 'Turn on “Send to online outputs” first so board ' + online.id + ' exists online.') : (r && r.reason) || 'Couldn’t save.');
+    USERS = r.users || []; AUTH.require = !!r.require_auth; AUTH.hasUsers = USERS.length > 0; return r;
+  };
+  const userRow = u => {
+    const isNew = !u.id, perms = u.perms || {}, first = isNew && !AUTH.hasUsers;
+    return '<div class="urow" data-id="' + esc(u.id || '') + '">' +
+      '<div class="uf"><input type="text" data-u="name" placeholder="Name" value="' + esc(u.name || '') + '" aria-label="Name"><input type="email" data-u="email" placeholder="Email" value="' + esc(u.email || '') + '" aria-label="Email">' +
+      '<select data-u="role" aria-label="Role"' + (first ? ' disabled' : '') + '><option value="operator"' + (u.role !== 'admin' && !first ? ' selected' : '') + '>Operator</option><option value="admin"' + (u.role === 'admin' || first ? ' selected' : '') + '>Admin (everything)</option></select>' +
+      '<input type="password" data-u="password" autocomplete="new-password" placeholder="' + (isNew ? 'Password (8+ characters)' : 'New password (optional)') + '" aria-label="Password"></div>' +
+      '<div class="up2">' + PERMS.map(([k, l]) => '<label class="ck"><input type="checkbox" data-p="' + k + '"' + (perms[k] ? ' checked' : '') + '> ' + esc(l) + '</label>').join('') + '</div>' +
+      '<div class="ua"><button class="btn sm primary" type="button" data-ua="save">' + (first ? 'Create admin' : isNew ? 'Add user' : 'Save') + '</button>' + (isNew ? '' : '<button class="btn sm" type="button" data-ua="del">Remove</button>') + '</div></div>';
+  };
+  function renderUsers(){
+    $('userList').innerHTML = USERS.map(userRow).join('') + '<h4>' + (AUTH.hasUsers ? 'Add a user' : 'Create the first admin') + '</h4>' + userRow({});
+    $('userList').querySelectorAll('.urow').forEach(row => { const adm = row.querySelector('[data-u="role"]').value === 'admin'; row.querySelectorAll('[data-p]').forEach(c => { c.disabled = adm; if (adm) c.checked = true; }); });
+  }
+  async function loadUsers(){
+    if (AUTH.v2 === false) { $('userList').innerHTML = ''; return; }
+    if (!(can('users') || !AUTH.hasUsers)) { $('userList').innerHTML = '<p class="hint">Only admins can see and change users.</p>'; return; }
+    try { await adminCall('list'); renderUsers(); } catch(e) { $('userList').innerHTML = '<p class="hint">' + esc(e.message) + '</p>' + (AUTH.hasUsers ? '' : userRow({})); }
+  }
+  $('userList').addEventListener('change', e => {
+    if (e.target.dataset.u !== 'role') return;
+    const adm = e.target.value === 'admin'; e.target.closest('.urow').querySelectorAll('[data-p]').forEach(c => { c.disabled = adm; if (adm) c.checked = true; });
+  });
+  let userDelArm = 0;
+  $('userList').addEventListener('click', async e => {
+    const b = e.target.closest('[data-ua]'); if (!b) return;
+    const row = b.closest('.urow'), id = row.dataset.id, val = k => row.querySelector('[data-u="' + k + '"]').value.trim();
+    try {
+      if (b.dataset.ua === 'del') {
+        if (Date.now() > userDelArm) { userDelArm = Date.now() + 3000; toast('Click Remove again to remove ' + (val('name') || val('email'))); return; }
+        userDelArm = 0; await adminCall('delete', {id}); toast('User removed');
+      } else {
+        const perms = {}; row.querySelectorAll('[data-p]').forEach(c => perms[c.dataset.p] = c.checked);
+        if (!/^\S+@\S+\.\S+$/.test(val('email'))) { toast('Enter an email address.'); return; }
+        if (!id && val('password').length < 8) { toast('Passwords need at least 8 characters.'); return; }
+        const firstAdmin = !AUTH.hasUsers;
+        await adminCall('save', {id: id || null, name: val('name'), email: val('email'), role: val('role') || 'operator', perms, password: row.querySelector('[data-u="password"]').value});
+        toast(id ? 'Saved' : firstAdmin ? 'Admin created. Sign in with it to manage users from any computer.' : 'User added');
+        if (firstAdmin) { $('siEmail').value = val('email'); }
+      }
+      renderUsers(); applyAuth();
+    } catch(err) { toast(err.message || 'Couldn’t save.'); }
+  });
+  $('reqAuth').onchange = async () => {
+    const want = $('reqAuth').checked;
+    try {
+      if (want && !AUTH.user) throw new Error('Sign in as an admin first, so you don’t lock yourself out.');
+      await adminCall('require', {require: want}); toast(want ? 'Sign-in is now required for board ' + online.id : 'Sign-in is no longer required');
+    } catch(e) { toast(e.message); }
+    $('reqAuth').checked = AUTH.require; applyAuth();
+  };
+
+  // ================= connections: Stream Deck (Companion), Ross DashBoard, XPression / Daktronics feeds =================
+  const FN = SB_URL + '/functions/v1/scoreboard';
+  const TOKEN_STORE = () => STORE + '.ctltoken.' + online.id;
+  const ctlToken = () => { try { return localStorage.getItem(TOKEN_STORE()) || ''; } catch(e) { return ''; } };
+  const cmdURL = (cmd, out, n) => FN + '?op=cmd&board=' + online.id + '&token=' + (ctlToken() || 'YOUR-TOKEN') + '&cmd=' + cmd + '&out=' + out + (n ? '&n=' + n : '');
+  const feedURL = (out, fmt) => FN + '?op=feed&board=' + online.id + '&out=' + out + '&format=' + fmt;
+  const ACTIONS = [['next', 'Next page'], ['prev', 'Previous page'], ['toggle', 'Pause / play'], ['first', 'First page'], ['goto', 'Go to page 2', 2], ['togglehide', 'Hide / show'], ['hide', 'Hide (blank board)'], ['show', 'Show'], ['freeze', 'Freeze scores'], ['unfreeze', 'Unfreeze scores']];
+  const urlRow = (label, url) => '<div class="url"><span>' + esc(label) + '</span><input type="text" readonly value="' + esc(url) + '" aria-label="' + esc(label) + ' URL"><button class="btn sm" type="button" data-copy>Copy</button></div>';
+  function renderConnections(){
+    const out = $('sdOut').value || '1', tok = ctlToken();
+    $('tokState').textContent = tok ? 'A control token is set up on this computer. Making a new one stops the old Stream Deck buttons.' : 'No control token on this computer yet. Make one to turn on remote control.';
+    $('sdUrls').innerHTML = ACTIONS.map(([c, l, n]) => urlRow(l, cmdURL(c, /freeze/.test(c) ? 'all' : out, n))).join('') + urlRow('Status (for feedback)', FN + '?op=status&board=' + online.id);
+    $('feedUrls').innerHTML = cfg.outputs.map((b, i) => '<h4>Output ' + (i + 1) + ' · ' + esc(b.name) + '</h4>' + urlRow('XML (XPression)', feedURL(i + 1, 'xml')) + urlRow('JSON', feedURL(i + 1, 'json')) + urlRow('Flat JSON', feedURL(i + 1, 'flat')) + urlRow('CSV', feedURL(i + 1, 'csv'))).join('');
+    $('dakUrls').innerHTML = cfg.outputs.map((b, i) => urlRow('Output ' + (i + 1) + ' · ' + b.name, SITE + '/?' + online.id + '/' + (i + 1))).join('');
+  }
+  $('sdOut').onchange = renderConnections;
+  $('adminView').addEventListener('click', e => {
+    const b = e.target.closest('[data-copy]'); if (!b) return;
+    const inp = b.parentNode.querySelector('input'); inp.select();
+    try { navigator.clipboard.writeText(inp.value).then(() => toast('Copied'), () => toast('Press Ctrl+C to copy')); } catch(err) { toast('Press Ctrl+C to copy'); }
+  });
+  $('tokMake').onclick = async () => {
+    if (!online.on) { toast('Turn on “Send to online outputs” first.'); return; }
+    if (ctlToken() && Date.now() > ($('tokMake').arm || 0)) { $('tokMake').arm = Date.now() + 3000; toast('Click again to replace the token. Existing Stream Deck buttons will stop working.'); return; }
+    const tok = rid(28, 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789');
+    try {
+      const ok = await rpc('scoreboard_set_control_token', {p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_token: tok});
+      if (!ok) throw new Error('Only admins (or this computer’s board key) can make a control token.');
+      try { localStorage.setItem(TOKEN_STORE(), tok); } catch(e) {}
+      renderConnections(); toast('Control token ready. Copy the button URLs into Companion.');
+    } catch(e) { toast(e.missing ? 'Remote control needs scoreboard-setup-2.sql run in Supabase first.' : e.message); }
+  };
+  // Ross DashBoard custom panel: one row of buttons per output; each button calls the control URL
+  $('rossDl').onclick = () => {
+    if (!ctlToken()) { toast('Make a control token first.'); return; }
+    const x = s => String(s).replace(/[<>&"]/g, c => ({'<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;'}[c]));
+    const btn = (label, url, left, top) => '  <button buttontype="push" height="54" left="' + left + '" name="' + x(label) + '" top="' + top + '" width="130">\n' +
+      '    <task tasktype="ogscript">' + x("var u = '" + url + "';\ntry { ogscript.asyncPost(u, '', function (r) {}); }\ncatch (e) { var c = new java.net.URL(u).openConnection(); c.setConnectTimeout(3000); c.getResponseCode(); c.disconnect(); }") + '</task>\n  </button>\n';
+    let g = '<abs contexttype="opengear" id="_top" keepalive="false">\n  <label height="36" left="20" name="College Scoreboard · board ' + x(online.id) + '" top="10" width="700"/>\n';
+    const rows = cfg.outputs.map((b, i) => [String(i + 1), 'Output ' + (i + 1) + ' · ' + b.name]).concat([['all', 'All outputs']]);
+    rows.forEach(([o, name], r) => {
+      const top = 56 + r * 70;
+      g += '  <label height="54" left="20" name="' + x(name) + '" top="' + top + '" width="190"/>\n';
+      [['prev', '‹ Prev'], ['next', 'Next ›'], ['toggle', 'Pause / Play'], ['first', 'First page'], ['togglehide', 'Hide / Show']].forEach(([c, l], k) => g += btn(l, cmdURL(c, o), 220 + k * 140, top));
+    });
+    const top = 56 + rows.length * 70;
+    g += btn('Freeze scores', cmdURL('freeze', 'all'), 220, top) + btn('Unfreeze', cmdURL('unfreeze', 'all'), 360, top) + '</abs>\n';
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([g], {type: 'application/xml'})); a.download = 'College Scoreboard ' + online.id + '.grid';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast('Ross DashBoard panel downloaded. Open it in DashBoard (File > Open).');
+  };
+
+  // ================= Control / Admin tabs =================
+  function setView(v){
+    document.body.classList.toggle('vw-admin', v === 'admin');
+    $('adminView').hidden = v !== 'admin';
+    [...$('viewTabs').children].forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v));
+    if (v === 'admin') { checkAuth().then(loadUsers); renderConnections(); loadScreens(); $('foName').value = FO.name; }
+  }
+  $('viewTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); });
+  const syncCode = () => document.querySelectorAll('.bcode').forEach(e => e.textContent = online.id); syncCode();
+  setInterval(checkAuth, 60000);
+  checkAuth().then(() => { loadThemes(); });
+  window.__syncFailover = syncFailover; syncFailover();
 
   syncPicker(); selectOutput(0); renderList(); renderRundown(); renderAll();
   // rankings first (so football ranks are right from the start), then scores; rankings re-check every 30 minutes
