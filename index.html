@@ -116,6 +116,23 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .ed label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);min-width:0}
 .ed .full{grid-column:1/-1}
 .hled .hlchips{display:flex;flex-wrap:wrap;gap:4px}
+.plres{display:flex;flex-direction:column;gap:4px;max-height:320px;overflow:auto}
+.plres:empty{display:none}
+.plrh{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);justify-content:space-between}
+.plr{display:grid;grid-template-columns:30px minmax(0,1fr) 22px;gap:8px;align-items:center;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 8px;cursor:pointer}
+.plr.on{border-color:var(--sel);background:var(--sel-bg)}
+.plr .add{width:22px;height:22px;border-radius:5px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.plr.on .add{background:var(--sel);border-color:var(--sel);color:#09142A}
+.plr b{display:block;font-weight:600;font-size:13px}
+.plk{display:block;font-size:11px;color:var(--muted)}
+.phs{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:var(--raise)}
+#plList{display:flex;flex-direction:column;gap:4px}
+.plrow{display:grid;grid-template-columns:30px minmax(0,1fr) 30px;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
+.plm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.plm input{font-size:13px;padding:3px 6px}
+.plw{font-size:11px;color:var(--sel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plw.off{color:var(--muted)}
+#playersBox summary b{color:var(--fg)}
 .hled .hlchips .chip-btn{font-size:11px;padding:3px 9px}
 .hled select{width:100%}
 .ed .tline{display:grid;grid-template-columns:minmax(0,1fr) 52px 56px 38px;gap:6px;align-items:end}
@@ -290,6 +307,21 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .g .play .px{display:flex;align-items:center;padding:0 .9em;font:800 1.45em/1.05 var(--f-score);text-transform:uppercase;letter-spacing:.01em;min-width:0;overflow:hidden}
 .g .play .px span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @keyframes drop{from{transform:scaleY(0);opacity:0}to{transform:none;opacity:1}}
+/* tracked NFL / NBA players: stat strip under the game */
+.g .pl{position:absolute;left:1.15em;right:.55em;top:calc(100% + .05em);height:3em;display:flex;gap:.45em;z-index:1;animation:drop .5s cubic-bezier(.2,.8,.2,1);transform-origin:top}
+.g.mir .pl{left:0;right:1.7em}
+.g .pl .ps{flex:1 1 0;min-width:0;display:flex;align-items:stretch;background:var(--panel);box-shadow:.4em .4em 0 var(--shade)}
+.g .pl .pt{display:flex;align-items:center;gap:.4em;padding:0 .75em 0 .3em;background:var(--accent);color:#fff;flex:none}
+.g .pl .pt span{font:800 1.5em/1 var(--f-score);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap}
+.g .pl .phs{height:2.5em;width:2.5em;flex:none;object-fit:cover;object-position:50% 12%;border-radius:50%;background:rgba(0,0,0,.18)}
+.g .pl .pv{display:flex;align-items:center;gap:.65em;padding:0 .8em;font:800 1.55em/1 var(--f-score);text-transform:uppercase;white-space:nowrap;overflow:hidden;min-width:0;flex:1 1 auto}
+.g .pl .pi{display:inline-flex;align-items:baseline;gap:.18em}
+.g .pl .pv b{font-weight:800;color:var(--txt);font-variant-numeric:tabular-nums}
+.g .pl .pv i{font-style:normal;font-size:.68em;letter-spacing:.06em;opacity:.65}
+.g .pl .pv i.ss{opacity:1;color:var(--accent);font-size:.62em;letter-spacing:.12em}
+.g.wide .pl{top:auto;bottom:.55em;height:46%;left:1.15em;right:.55em;animation:none}
+.board.lower .g .pl .pt span,.board.lower .g .pl .pv{text-transform:none}
+#sportSeg{grid-template-columns:repeat(6,1fr)}
 /* themes: card templates and lower-case names */
 .board.tpl-clean .g,.board.tpl-bar .g,.board.tpl-clean .g.mir,.board.tpl-bar .g.mir{grid-template-columns:minmax(0,1fr)}
 .board.tpl-clean .g .br,.board.tpl-bar .g .br{display:none}
@@ -387,7 +419,7 @@ body.out.trans{background:transparent}
             <option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option><option value="all">All games</option>
           </select>
           <div class="chips" id="qbSports" role="group" aria-label="Sports">
-            <button class="chip-btn" data-s="cfb">CFB</button><button class="chip-btn" data-s="mbb">MBB</button><button class="chip-btn" data-s="wbb">WBB</button><button class="chip-btn" data-s="bsb">BSB</button>
+            <button class="chip-btn" data-s="cfb">CFB</button><button class="chip-btn" data-s="mbb">MBB</button><button class="chip-btn" data-s="wbb">WBB</button><button class="chip-btn" data-s="bsb">BSB</button><button class="chip-btn" data-s="nfl">NFL</button><button class="chip-btn" data-s="nba">NBA</button>
           </div>
         </div>
         <div class="qrow"><span class="qd" id="qbDate"></span><button class="btn sm primary" id="qbReplace" type="button">Build rundown</button><button class="btn sm" id="qbAdd" type="button">Add to rundown</button></div>
@@ -416,6 +448,16 @@ body.out.trans{background:transparent}
       <div class="copybox" id="moveBox" hidden><input type="text" id="moveTxt" aria-label="Board code and key"><button class="btn sm" id="moveUse" type="button">Use this board</button><button class="btn sm" id="moveClose" type="button">Done</button></div>
       <div class="outs" id="outs"></div>
       <div class="copybox" id="copyBox" hidden><input type="text" id="copyTxt" readonly aria-label="Standalone output link"><button class="btn sm" id="copyClose">Done</button></div>
+      <details class="settings" id="playersBox">
+        <summary>NFL &amp; NBA players <b id="plCount"></b></summary>
+        <div class="names">
+          <div class="row-ctl"><input type="text" id="plQ" placeholder="Type a player’s name (e.g. Walker Kessler)" aria-label="Player name"><button class="btn sm primary" id="plFind" type="button">Search</button></div>
+          <div class="row-ctl"><input type="text" id="plCollege" value="Auburn" aria-label="School"><button class="btn sm" id="plCollegeFind" type="button">Find every NFL &amp; NBA player from this school</button></div>
+          <div id="plResults" class="plres"></div>
+          <div id="plList"></div>
+          <p class="hint">A tracked player’s stats show in a strip under his team’s game on every output, once that NFL or NBA game is in the rundown: season numbers before the game, that game’s line once it starts. Edit the name to change how it reads on the board. Turn the strip off for an output in Board settings.</p>
+        </div>
+      </details>
       <details class="settings" id="namesBox">
         <summary>Team names &amp; warnings</summary>
         <div class="names">
@@ -512,6 +554,9 @@ body.out.trans{background:transparent}
           </label>
           <label class="f">Scoring play seconds<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
           <label class="f">Page dissolve (seconds, 0 = cut)<input type="number" id="sFade" data-k="fade" min="0" max="3" step="0.1"></label>
+          <label class="f">NFL / NBA player stats
+            <select id="sPlayers" data-k="players"><option value="below">Under their game</option><option value="off">Off</option></select>
+          </label>
           <label class="f">Upset alerts
             <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
           </label>
@@ -599,7 +644,9 @@ const SPORTS = {
   cfb:{label:'College Football', short:'CFB', path:'football/college-football', groups:[['80','FBS'],['81','FCS']]},
   mbb:{label:"Men's Basketball", short:'MBB', path:'basketball/mens-college-basketball', groups:[['50','Division I']]},
   wbb:{label:"Women's Basketball", short:'WBB', path:'basketball/womens-college-basketball', groups:[['50','Division I']]},
-  bsb:{label:'College Baseball', short:'BSB', path:'baseball/college-baseball', groups:[['','Division I']]}
+  bsb:{label:'College Baseball', short:'BSB', path:'baseball/college-baseball', groups:[['','Division I']]},
+  nfl:{label:'NFL', short:'NFL', path:'football/nfl', groups:[['','NFL']], pro:true},
+  nba:{label:'NBA', short:'NBA', path:'basketball/nba', groups:[['','NBA']], pro:true}
 };
 // ESPN team IDs for SEC schools (same ID across every sport)
 const SEC_IDS = new Set(['333','8','2','57','61','96','99','344','142','201','145','2579','2633','251','245','238']);
@@ -611,7 +658,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'below',presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -643,7 +690,7 @@ function norm(ev, sport){
     const recs = x.records || [];
     const rec = recs.find(r => r.type === 'total' || r.name === 'overall' || r.name === 'All Splits') || recs[0];
     return {
-      id: String(t.id || ''), name: t.shortDisplayName || t.location || t.displayName || 'TBD',
+      id: t.id ? pfxTeam(sport, t.id) : '', name: t.shortDisplayName || t.location || t.displayName || 'TBD',
       abbr: t.abbreviation || '', school: t.location || '', mascot: t.name || '',
       rank: (sport === 'cfb' && CFP_RANKS) ? (CFP_RANKS[String(t.id)] || null) : (rk && rk <= 25) ? rk : null, record: rec ? rec.summary || '' : '',
       score: (x.score == null || x.score === '') ? '' : String(typeof x.score === 'object' ? (x.score.displayValue||x.score.value||'') : x.score),
@@ -656,7 +703,7 @@ function norm(ev, sport){
   const down = s.shortDownDistanceText || (atI > 0 ? ddt.slice(0, atI) : ddt);
   const spot = s.possessionText || (atI > 0 ? ddt.slice(atI + 4) : '');
   let tv = '';
-  if (c.broadcasts && c.broadcasts.length) tv = [].concat(...c.broadcasts.map(b => b.names || [])).filter(Boolean).slice(0,2).join(' / ');
+  if (c.broadcasts && c.broadcasts.length) { const nets = [].concat(...c.broadcasts.map(b => b.names || [])).filter(Boolean); tv = (nets.filter(n => !/league pass|nfl\+|sunday ticket/i.test(n)).length ? nets.filter(n => !/league pass|nfl\+|sunday ticket/i.test(n)) : nets).slice(0, 2).join(' / '); }
   if (!tv && c.geoBroadcasts && c.geoBroadcasts.length) tv = (c.geoBroadcasts[0].media || {}).shortName || '';
   return {
     key: sport + ':' + ev.id, id: String(ev.id), sport, date: ev.date || c.date,
@@ -664,10 +711,10 @@ function norm(ev, sport){
     timeValid: c.timeValid !== false, tv,
     away: side('away'), home: side('home'),
     sit: {
-      poss: s.possession ? String(s.possession) : '', red: !!s.isRedZone,
+      poss: s.possession ? pfxTeam(sport, s.possession) : '', red: !!s.isRedZone,
       down: down, spot: spot,
       outs: +s.outs || 0, on1: !!s.onFirst, on2: !!s.onSecond, on3: !!s.onThird, has: s.outs != null,
-      last: s.lastPlay ? {text: s.lastPlay.text || '', type: (s.lastPlay.type && s.lastPlay.type.text) || '', team: s.lastPlay.team && s.lastPlay.team.id ? String(s.lastPlay.team.id) : ''} : null
+      last: s.lastPlay ? {text: s.lastPlay.text || '', type: (s.lastPlay.type && s.lastPlay.type.text) || '', team: s.lastPlay.team && s.lastPlay.team.id ? pfxTeam(sport, s.lastPlay.team.id) : ''} : null
     }
   };
 }
@@ -700,7 +747,7 @@ function statusInfo(g){
   }
   if (g.state === 'in') {
     const lines = [];
-    if (g.sport === 'cfb' && g.sit.down) {
+    if (isFB(g.sport) && g.sit.down) {
       lines.push({t:g.sit.down, c: g.sit.red ? 'rz' : 'hi'});
       if (g.sit.spot) lines.push({t:g.sit.spot, c: g.sit.red ? 'rz' : ''});
     }
@@ -734,7 +781,7 @@ function upsetTag(g, mode){
   if (g.state !== 'in' || isHalf(g)) return '';
   const p = g.period || 0, m = String(g.detail || '').match(/^(\d+):\d+/), minLeft = m ? +m[1] : 99;
   const late = mode === 'late';
-  const ok = {cfb: p >= (late ? 4 : 3), wbb: p >= (late ? 4 : 3), mbb: late ? (p >= 3 || (p === 2 && minLeft < 10)) : p >= 2, bsb: p >= (late ? 7 : 5)}[g.sport];
+  const ok = {nfl: false, nba: false, cfb: p >= (late ? 4 : 3), wbb: p >= (late ? 4 : 3), mbb: late ? (p >= 3 || (p === 2 && minLeft < 10)) : p >= 2, bsb: p >= (late ? 7 : 5)}[g.sport];
   return ok ? 'Upset Alert' : '';
 }
 
@@ -800,6 +847,36 @@ const FONTS = {'Scoreboard Display': '', 'Oswald': 'Oswald:wght@500;600;700', 'B
   'Anton': 'Anton', 'Teko': 'Teko:wght@500;600;700', 'Saira Extra Condensed': 'Saira+Extra+Condensed:wght@600;700;800', 'Roboto Condensed': 'Roboto+Condensed:wght@600;700;800',
   'Archivo Narrow': 'Archivo+Narrow:wght@600;700', 'Fjalla One': 'Fjalla+One', 'League Gothic': 'League+Gothic', 'Big Shoulders Display': 'Big+Shoulders+Display:wght@700;800;900'};
 
+
+// ---------- NFL / NBA players we follow (e.g. Auburn alumni) ----------
+// TRACKED comes from the dashboard's settings; PSTATS holds each player's current line, worked out by whoever owns the data
+// (the dashboard, or an output running on its own) and sent along to the outputs.
+var TRACKED = [], PSTATS = {};
+const isPro = s => !!(SPORTS[s] && SPORTS[s].pro);
+const headshot = p => 'https://a.espncdn.com/i/headshots/' + p.sport + '/players/full/' + p.id + '.png';
+function playersFor(g){
+  if (!g || g.manual || !isPro(g.sport)) return [];
+  return TRACKED.filter(p => PSTATS[p.id] && PSTATS[p.id].game === g.key).map(p => ({p, s: PSTATS[p.id]}));
+}
+// one player's line as text (feed, dashboard)
+function plText(s){
+  if (!s) return '';
+  if (s.kind === 'dnp') return 'DNP' + (s.note ? ' (' + s.note.toLowerCase() + ')' : '');
+  if (s.kind === 'out') return s.final ? 'No stats' : 'No stats yet';
+  return (s.kind === 'season' ? 'Season: ' : '') + (s.items || []).map(x => x.v + (x.l ? ' ' + x.l : '')).join(', ');
+}
+function plStripHTML(list){
+  return '<div class="pl">' + list.map(({p, s}) => {
+    let v;
+    if (s.kind === 'dnp') v = '<b>DNP</b>' + (s.note ? '<i>' + esc(s.note) + '</i>' : '');
+    else if (s.kind === 'out') v = '<i class="ss">' + (s.final ? 'No stats' : 'No stats yet') + '</i>';
+    else v = (s.kind === 'season' ? '<i class="ss">' + (p.sport === 'nba' ? 'Season avg' : 'Season') + '</i>' : '') +
+      (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
+    return '<span class="ps"><span class="pt"><img class="phs" alt="" src="' + headshot(p) + '" onerror="this.style.display=\'none\'"><span>' + esc(p.label || p.name) + '</span></span><span class="pv">' + v + '</span></span>';
+  }).join('') + '</div>';
+}
+const isFB = s => s === 'cfb' || s === 'nfl';
+const pfxTeam = (sport, id) => isPro(sport) ? sport + '-' + id : String(id);
 function perPage(b){ return b.layout === 'grid' ? Math.max(1, b.cols * b.rows) : Math.max(1, b.perPage); }
 
 function buildPages(items, board){
@@ -823,17 +900,18 @@ function buildPages(items, board){
 // whatever size the output is (on a 16:9 board that gives the house package: 1-3 games stacked, 4 in a 2x2).
 // Very wide boards (fascia, ribbon) put every game on the page in one row. "Custom grid" uses fixed columns x rows.
 const isWide = b => b.w / b.h >= 4;
-function geometry(b, n){
+function geometry(b, n, strip){
   const W = b.w, H = b.h, m = Math.min(W, H), wide = isWide(b);
   n = Math.max(1, n);
   const hh = b.header && !wide ? Math.round(Math.max(30, H * b.hdSize / 100)) : 0;
   const hw = b.header && wide ? Math.round(Math.max(H * 1.5, W * b.hdSize / 100)) : 0;
   const padX = wide ? Math.round(H * 0.12) : Math.round(W * 0.035);
   const padY = wide ? Math.round(H * 0.08) : Math.round(H * (b.header ? 0.03 : 0.05));
-  const gw = W - hw - padX*2, gh = H - hh - padY*2;
+  // room under the last row for tracked-player stat strips
+  const gw = W - hw - padX*2, gh = H - hh - padY*2 - (strip && !wide ? Math.round(m * 0.055) : 0);
   const cgap = wide ? Math.round(H * 0.16) : Math.round(m * 0.025);
   const size = (cols, rows, mode) => {
-    const rgap = Math.round(m * (mode === 'fill' ? 0.025 : b.plays !== 'off' && !wide ? 0.06 : 0.04));
+    const rgap = Math.round(m * (strip && !wide ? 0.065 : mode === 'fill' ? 0.025 : b.plays !== 'off' && !wide ? 0.06 : 0.04));
     const colW = (gw - cgap*(cols-1)) / cols, rowH = (gh - rgap*(rows-1)) / rows;
     let cw, ch;
     if (mode === 'fill') { cw = colW; ch = rowH; }
@@ -855,7 +933,8 @@ function logoHTML(t, cls){
   cls = cls || 'logo';
   const badge = '<span class="badge" style="background:' + esc(t.color || '#3A4556') + '">' + esc((t.abbr || t.name || '').slice(0,4)) + '</span>';
   if (!t.id && !t.logo) return cls === 'logo' ? badge : '<span class="' + cls + '"></span>';
-  const dark = /^\d+$/.test(t.id) ? 'https://a.espncdn.com/i/teamlogos/ncaa/500-dark/' + t.id + '.png' : '';
+  const proLogo = /teamlogos\/(nfl|nba)\/500\//.test(t.logo || '');
+  const dark = /^\d+$/.test(t.id) ? 'https://a.espncdn.com/i/teamlogos/ncaa/500-dark/' + t.id + '.png' : proLogo ? t.logo.replace('/500/', '/500-dark/') : '';
   const src = dark || t.logo; const fb = dark ? t.logo || ('https://a.espncdn.com/i/teamlogos/ncaa/500/' + t.id + '.png') : '';
   return '<img class="' + cls + '" alt="" src="' + esc(src) + '" data-fb="' + esc(fb) + '" onerror="__sbLogo(this)">';
 }
@@ -888,7 +967,7 @@ const isHalf = g => /^half\s*time$/i.test(g.detail || '') || g.statusName === 'S
 function finalLabel(g){
   const m = String(g.detail || '').match(/^\s*Final\s*\/?\s*(.*)$/i);
   let ex = m ? m[1].trim() : '';
-  const reg = {cfb:4, mbb:2, wbb:4, bsb:9}[g.sport];
+  const reg = {cfb:4, mbb:2, wbb:4, bsb:9, nfl:4, nba:4}[g.sport];
   if (!ex && reg && g.period > reg) { const n = g.period - reg; ex = g.sport === 'bsb' ? String(g.period) : (n > 1 ? n + 'OT' : 'OT'); }
   return 'F' + (ex ? '/' + ex.toUpperCase().replace(/\s+/g, '') : '');
 }
@@ -915,7 +994,7 @@ function brandStatus(g, b, tag){
     p1 = esc(a); p2 = esc(c);
     // once a game has started the network never shows; between plays and in breaks the line is left blank
     if (s.cls === 'in') {
-      if (g.sport === 'cfb' && g.sit.down && !isHalf(g)) { below = esc(g.sit.down); if (g.sit.red) belowCls = 'rz'; }
+      if (isFB(g.sport) && g.sit.down && !isHalf(g)) { below = esc(g.sit.down); if (g.sit.red) belowCls = 'rz'; }
       else if (g.sport === 'bsb' && g.sit.has) { below = diamondHTML(g.sit); plain = false; }
     }
   }
@@ -926,7 +1005,7 @@ function brandStatus(g, b, tag){
 
 function playHead(sport, delta, type){
   const t = String(type || '').toLowerCase();
-  if (sport === 'cfb') {
+  if (isFB(sport)) {
     if (/touchdown/.test(t)) return 'Touchdown';
     if (/field goal/.test(t)) return 'Field Goal';
     if (/safety/.test(t)) return 'Safety';
@@ -940,7 +1019,7 @@ function playHead(sport, delta, type){
 // a scoring play shows on this output if the output's setting covers the sport and it's still fresh
 function activePlay(g, b, now){
   const p = PLAYS[g.key];
-  if (!p || b.plays === 'off' || (b.plays === 'cfb' && g.sport !== 'cfb')) return null;
+  if (!p || b.plays === 'off' || (b.plays === 'cfb' && !isFB(g.sport))) return null;
   return now < p.t + b.playSecs * 1000 ? p : null;
 }
 function playHTML(g, p){
@@ -962,7 +1041,7 @@ function cardHTML(g, ctx){
     const cl = ['row'];
     if (lead === side) cl.push('lead');
     if (ctx.bumped(g.key + side)) cl.push('bump');
-    const poss = live && g.sport === 'cfb' && !isHalf(g) && g.sit.poss && g.sit.poss === t.id;
+    const poss = live && isFB(g.sport) && !isHalf(g) && g.sit.poss && g.sit.poss === t.id;
     return '<div class="' + cl.join(' ') + '">' + (b.logos ? logoHTML(t) : '<span></span>') +
       '<span class="nb">' + (ctx.rankSlot ? '<span class="rk">' + (t.rank || '') + '</span>' : '') +
       '<span class="nm">' + esc(teamLabel(t, b.names, ctx.narrow)) + '</span>' +
@@ -971,9 +1050,10 @@ function cardHTML(g, ctx){
       '<span class="sc" style="' + scW + '">' + (showScore ? esc(t.score) : '') + '</span></div>';
   };
   const play = activePlay(g, b, ctx.now), upset = upsetTag(g, b.upsets);
+  const pls = !play && b.players !== 'off' ? playersFor(g) : [], plShow = pls.length && (!ctx.wide || ctx.flip);
   return '<div class="g' + (ctx.mirror ? ' mir' : '') + (play ? ' has-play' : '') + (ctx.wide ? ' wide' : '') + '">' + (upset ? '<span class="upset">' + esc(upset) + '</span>' : '') + '<div class="br"><i></i><i class="o"></i><i></i></div>' +
     '<div class="pn"><div class="tm">' + row(g.away, 'a') + row(g.home, 'h') + '</div>' + brandStatus(g, b, ctx.tag) + '</div>' +
-    (play ? playHTML(g, play) : '') + '</div>';
+    (play ? playHTML(g, play) : '') + (plShow ? plStripHTML(pls) : '') + '</div>';
 }
 
 // Shrink any team name that overflows its slot so names aren't cut off on air; drop the record if still too long
@@ -987,6 +1067,15 @@ function fitNames(root){
     while (over() && f > 0.7) { f -= 0.03; el.style.fontSize = (base * f).toFixed(3) + 'em'; }
     if (over() && rec) { rec.style.display = 'none'; el.style.fontSize = ''; f = 1; while (over() && f > 0.7) { f -= 0.03; el.style.fontSize = (base * f).toFixed(3) + 'em'; } }
     while (over() && f > 0.5) { f -= 0.03; el.style.fontSize = (base * f).toFixed(3) + 'em'; }
+  });
+  // player strips: the name keeps up to ~45% of its box (shrinking if needed), then the stat line shrinks to fit the rest
+  root.querySelectorAll('.g .pl .ps').forEach(ps => {
+    const nm = ps.querySelector('.pt span'), pv = ps.querySelector('.pv'), pt = ps.querySelector('.pt');
+    [nm, pv].forEach(el => el.style.fontSize = '');
+    let f = 1; const fn = parseFloat(getComputedStyle(nm).fontSize);
+    while (pt.offsetWidth > ps.clientWidth * 0.45 && f > 0.55) { f -= 0.04; nm.style.fontSize = (fn * f) + 'px'; }
+    f = 1; const fv = parseFloat(getComputedStyle(pv).fontSize);
+    while (pv.scrollWidth > pv.clientWidth + 1 && f > 0.5) { f -= 0.04; pv.style.fontSize = (fv * f) + 'px'; }
   });
   root.querySelectorAll('.g .st').forEach(el => {
     [...el.querySelectorAll('.p1,.p2,.bl')].forEach(x => { x.style.fontSize = ''; let f = 1; const fs = parseFloat(getComputedStyle(x).fontSize);
@@ -1003,7 +1092,8 @@ function darken(hex, amt){
 }
 function boardHTML(pages, idx, b, opt){
   const page = pages[idx] || {sport:null, games:[]};
-  const geo = geometry(b, page.games.length);
+  const strip = b.players !== 'off' && !page.standings && page.games.some(g => playersFor(g).length);
+  const geo = geometry(b, page.games.length, strip);
   const bg = b.bg === 'transparent' ? 'transparent' : b.bg === 'green' ? '#00B140' : b.bgColor;
   const panel = b.panelColor || darken(b.bgColor, 0.16);
   let h = '<div class="board tpl-' + b.tpl + (b.upper ? '' : ' lower') + '" style="width:' + geo.W + 'px;height:' + geo.H + 'px;--accent:' + esc(b.accent) + ';--bgc:' + esc(b.bgColor) +
@@ -1033,7 +1123,7 @@ function boardHTML(pages, idx, b, opt){
     const now = Date.now();
     h += '<div class="grid' + (opt.enter && b.fade > 0 ? ' enter' : '') + '" style="left:' + (geo.hw + geo.padX) + 'px;top:' + (geo.hh + geo.padY) + 'px;width:' + geo.gw + 'px;height:' + geo.gh + 'px;' +
       'grid-template-columns:repeat(' + geo.cols + ',' + geo.cw.toFixed(1) + 'px);grid-template-rows:repeat(' + geo.rows + ',' + geo.ch.toFixed(1) + 'px);column-gap:' + geo.cgap + 'px;row-gap:' + geo.rgap + 'px;font-size:' + geo.u.toFixed(2) + 'px">' +
-      page.games.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide})).join('') + '</div>';
+      page.games.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide, flip: Math.floor(now / 6000) % 2 === 1})).join('') + '</div>';
   }
   return h + '</div>';
 }
@@ -1073,6 +1163,7 @@ function fixBoard(b, i){
   o.header = o.hdMode !== 'off'; o.hdAlign = o.hdAlign === 'center' ? 'center' : 'left'; o.hdSize = clampN(o.hdSize,6,45,d.hdSize);
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
   o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
+  o.players = o.players === 'off' ? 'off' : 'below';
   o.presentedOn = !!o.presentedOn; o.presented = String(o.presented == null ? d.presented : o.presented).slice(0, 30);
   o.tpl = ['package','clean','bar'].includes(o.tpl) ? o.tpl : 'package';
   if (o.fontName !== 'custom' && !(o.fontName in FONTS)) o.fontName = d.fontName;
@@ -1090,11 +1181,13 @@ function fixBoard(b, i){
 function fixPrefs(p){
   p = p || {};
   const names = (p.names && typeof p.names === 'object') ? p.names : {'344': {orig: 'Mississippi St', name: 'Miss State', abbr: ''}};
-  return {staleMin: clampN(p.staleMin, 1, 30, 4), names};
+  const players = (Array.isArray(p.players) ? p.players : []).filter(x => x && /^\d+$/.test(String(x.id)) && isPro(x.sport)).slice(0, 60)
+    .map(x => ({id: String(x.id), name: String(x.name || ''), label: String(x.label == null ? x.name || '' : x.label).slice(0, 30), sport: x.sport, team: String(x.team || ''), teamAbbr: String(x.teamAbbr || ''), pos: String(x.pos || ''), jersey: String(x.jersey || '')}));
+  return {staleMin: clampN(p.staleMin, 1, 30, 4), names, players};
 }
 function mkCfg(rundown, outputs, prefs){
   const c = {rundown: Array.isArray(rundown) ? rundown : [], outputs: Array.from({length: N_OUT}, (_, i) => fixBoard(outputs && outputs[i], i)), prefs: fixPrefs(prefs)};
-  NAME_OVR = c.prefs.names;
+  NAME_OVR = c.prefs.names; TRACKED = c.prefs.players;
   Object.defineProperty(c, 'board', {get(){ return c.outputs[SEL]; }, set(v){ c.outputs[SEL] = v; }});
   return c;
 }
@@ -1160,16 +1253,16 @@ async function scoringPlay(g, side, delta){
   const last = g.sit.last;
   const p = {t: Date.now(), side, head: playHead(g.sport, delta, last && last.type), text: (last && last.text) || ''};
   PLAYS[g.key] = p;
-  if (g.sport !== 'cfb') return;
+  if (!isFB(g.sport)) return;
   // football: ESPN's game summary has the full scoring play ("Smith 34 Yd pass from Jones (Doe Kick)")
   try {
-    const r = await fetch(API + SPORTS.cfb.path + '/summary?event=' + g.id, {cache:'no-store'});
+    const r = await fetch(API + SPORTS[g.sport].path + '/summary?event=' + g.id, {cache:'no-store'});
     if (!r.ok) return;
     const j = await r.json(), sp = j.scoringPlays || [], lp = sp[sp.length - 1];
     if (lp && PLAYS[g.key] === p) {
       if (lp.text) p.text = lp.text;
-      p.head = playHead('cfb', delta, lp.type && lp.type.text);
-      if (lp.team && lp.team.id) p.side = String(lp.team.id) === g.home.id ? 'h' : String(lp.team.id) === g.away.id ? 'a' : p.side;
+      p.head = playHead(g.sport, delta, lp.type && lp.type.text);
+      if (lp.team && lp.team.id) { const tid = pfxTeam(g.sport, lp.team.id); p.side = tid === g.home.id ? 'h' : tid === g.away.id ? 'a' : p.side; }
       if (typeof renderAll === 'function') renderAll();
       push();
     }
@@ -1192,6 +1285,104 @@ async function loadRankings(){
       rankSource = 'CFP';
     } else { CFP_RANKS = null; rankSource = 'AP'; }
   } catch(e) {}
+}
+
+
+// ---------- tracked NFL / NBA players: box scores during and after games, season numbers before ----------
+async function espnJSON(url){
+  for (const u of [url, url.replace('://site.api.espn.com/', '://site.web.api.espn.com/')]) {
+    try { const r = await fetch(u, {cache: 'no-store'}); if (r.ok) return await r.json(); } catch(e) {}
+    if (u === url && !/site\.api\.espn\.com/.test(url)) break;
+  }
+  return null;
+}
+const BOX = {};      // game key -> {at, final, players}  (just the box score, kept small)
+const SEASON = {};   // player id -> {at, items}
+const slimBox = j => ((j.boxscore || {}).players || []).map(t => ({team: String((t.team || {}).id || ''), cats: (t.statistics || []).map(s => ({name: s.name || 'stats', labels: s.labels || s.names || [],
+  athletes: (s.athletes || []).map(a => ({id: String((a.athlete || {}).id || ''), stats: a.stats || [], dnp: !!a.didNotPlay, reason: a.reason || ''}))}))}));
+function findInBox(box, pid){
+  let found = null;
+  box.forEach(t => t.cats.forEach(c => c.athletes.forEach(a => {
+    if (a.id !== pid) return;
+    found = found || {team: t.team, cats: {}, dnp: false, reason: ''};
+    if (a.dnp) { found.dnp = true; found.reason = a.reason; }
+    if (a.stats.length) found.cats[c.name] = {labels: c.labels, stats: a.stats};
+  })));
+  return found;
+}
+const num = v => parseFloat(String(v).replace(/[^\d.\-]/g, '')) || 0;
+function nbaItems(c){
+  if (!c) return [];
+  const v = k => c.stats[c.labels.indexOf(k)];
+  const it = [{v: v('PTS'), l: 'PTS'}, {v: v('REB'), l: 'REB'}, {v: v('AST'), l: 'AST'}];
+  const three = String(v('3PT') || ''); if (num(three.split('-')[0]) >= 2) it.push({v: three, l: '3PT'});
+  if (num(v('BLK')) >= 2) it.push({v: v('BLK'), l: 'BLK'});
+  if (num(v('STL')) >= 2) it.push({v: v('STL'), l: 'STL'});
+  return it.filter(x => x.v != null && x.v !== '').slice(0, 5);
+}
+function nflItems(cats){
+  const out = [], get = (name, k) => { const c = cats[name]; return c ? c.stats[c.labels.indexOf(k)] : undefined; };
+  const add = (v, l, keepZero) => { if (v != null && v !== '' && (keepZero || num(v) !== 0)) out.push({v: String(v), l}); };
+  if (cats.passing) { add(get('passing', 'C/ATT'), '', true); add(get('passing', 'YDS'), 'YDS', true); add(get('passing', 'TD'), 'TD'); add(get('passing', 'INT'), 'INT'); }
+  // a passer's runs only make the line when they matter (20+ yards or a touchdown)
+  if (cats.rushing && (!cats.passing || num(get('rushing', 'YDS')) >= 20 || num(get('rushing', 'TD')) > 0)) { add(get('rushing', 'CAR'), 'CAR', true); add(get('rushing', 'YDS'), 'RUSH YDS', true); add(get('rushing', 'TD'), 'RUSH TD'); }
+  if (cats.receiving) { add(get('receiving', 'REC'), 'REC', true); add(get('receiving', 'YDS'), 'REC YDS', true); add(get('receiving', 'TD'), 'REC TD'); }
+  if (cats.defensive) { add(get('defensive', 'TOT'), 'TKL', true); add(get('defensive', 'SACKS'), 'SACK'); add(get('defensive', 'TFL'), 'TFL'); add(get('defensive', 'PD'), 'PD'); }
+  if (cats.interceptions) add(get('interceptions', 'INT'), 'INT');
+  if (cats.kicking) { add(get('kicking', 'FG'), 'FG', true); add(get('kicking', 'XP'), 'XP', true); }
+  if (cats.punting) { add(get('punting', 'NO'), 'PUNTS', true); add(get('punting', 'AVG'), 'AVG', true); }
+  if (cats.kickReturns) add(get('kickReturns', 'YDS'), 'KR YDS');
+  if (cats.puntReturns) add(get('puntReturns', 'YDS'), 'PR YDS');
+  return out.slice(0, 5);
+}
+const SEASON_KEYS = {
+  nba: [['avgPoints', 'PPG'], ['avgRebounds', 'RPG'], ['avgAssists', 'APG']],
+  nfl: [['passingYards', 'PASS YDS'], ['passingTouchdowns', 'PASS TD'], ['rushingYards', 'RUSH YDS'], ['rushingTouchdowns', 'RUSH TD'], ['receptions', 'REC'],
+    ['receivingYards', 'REC YDS'], ['receivingTouchdowns', 'REC TD'], ['totalTackles', 'TKL'], ['sacks', 'SACKS'], ['interceptions', 'INT'], ['passesDefended', 'PD'],
+    ['fieldGoalsMade', 'FG'], ['punts', 'PUNTS']]
+};
+function seasonItems(sport, j){
+  const st = (j && j.statistics) || {}, names = st.names || [], sp = (st.splits || []).find(x => /regular|season/i.test(x.displayName || '')) || (st.splits || [])[0];
+  if (!sp) return [];
+  const out = [];
+  (SEASON_KEYS[sport] || []).forEach(([k, l]) => { const i = names.indexOf(k); if (i >= 0 && out.length < 4 && (sport === 'nba' || num(sp.stats[i]) !== 0)) out.push({v: sp.stats[i], l}); });
+  return out;
+}
+let plBusy = false;
+async function refreshPlayerStats(){
+  if (plBusy || !TRACKED.length) { if (!TRACKED.length && Object.keys(PSTATS).length) { PSTATS = {}; return true; } return false; }
+  plBusy = true;
+  const before = JSON.stringify(PSTATS), next = {};
+  try {
+    const now = Date.now(), gl = rundownGames().filter(g => !g.standings && !g.manual && isPro(g.sport));
+    for (const p of TRACKED) {
+      const g = gl.find(x => x.sport === p.sport && (x.away.id === p.team || x.home.id === p.team));
+      if (!g) continue;
+      const side = g.away.id === p.team ? 'a' : 'h';
+      if (g.state === 'pre') {
+        let s = SEASON[p.id];
+        if (!s || now - s.at > 6 * 3600e3) {
+          const j = await espnJSON('https://site.web.api.espn.com/apis/common/v3/sports/' + SPORTS[p.sport].path + '/athletes/' + p.id + '/overview');
+          s = SEASON[p.id] = {at: j ? now : now - 6 * 3600e3 + 120000, items: j ? seasonItems(p.sport, j) : (s ? s.items : [])};
+        }
+        next[p.id] = {game: g.key, side, kind: 'season', items: s.items};
+        continue;
+      }
+      let bx = BOX[g.key];
+      if (!bx || (!bx.final && now - bx.at > 25000)) {
+        const j = await espnJSON(API + SPORTS[g.sport].path + '/summary?event=' + g.id);
+        if (j) bx = BOX[g.key] = {at: now, final: g.state === 'post', players: slimBox(j)};
+      }
+      if (!bx) { if (PSTATS[p.id] && PSTATS[p.id].game === g.key) next[p.id] = PSTATS[p.id]; continue; }
+      const f = findInBox(bx.players, p.id), fin = g.state === 'post';
+      next[p.id] = !f ? {game: g.key, side, kind: 'out', final: fin, items: []} :
+        f.dnp ? {game: g.key, side, kind: 'dnp', note: f.reason, items: []} :
+        {game: g.key, side, kind: 'game', final: fin, items: p.sport === 'nba' ? nbaItems(f.cats.stats) : nflItems(f.cats)};
+      if (f && f.team && pfxTeam(p.sport, f.team) !== p.team && !IS_OUT) { p.team = pfxTeam(p.sport, f.team); }   // traded: the box score knows best
+    }
+  } catch(e) {}
+  PSTATS = next; plBusy = false;
+  return JSON.stringify(PSTATS) !== before;
 }
 
 const feedKey = r => r.sport + '|' + r.date + '|' + (r.group || '');
@@ -1260,6 +1451,10 @@ function renderBoard(holder, i){
     setTimeout(() => prev.remove(), b.fade * 1000 + 150);
   }
   fitNames(holder);
+  // wide boards swap the bottom team for the player strip every 6 seconds
+  if (isWide(b) && b.players !== 'off' && (ps[rt.page] || {games: []}).games.some(g => playersFor(g).length)) {
+    clearTimeout(window.__flipT); window.__flipT = setTimeout(() => renderAll(), 6000 - now % 6000 + 30);
+  }
   clearTimeout(bumpT);
   const pending = Object.values(bumps).concat(Object.values(PLAYS).map(p => p.t + b.playSecs * 1000)).filter(t => t > now);
   if (pending.length) bumpT = setTimeout(renderAll, Math.max(...pending) - now + 50);
@@ -1327,13 +1522,14 @@ function bootOutput(){
     if (live) { lastMsg = Date.now(); controlledAt = Date.now(); }
     if (d.logos) knownLogos = d.logos.map(normAsset);
     // heartbeats repeat the same data; only redraw when something actually changed
-    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at),
+    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at), d.pstats || 0,
       Object.entries(d.plays || {}).map(([k, p]) => k + p.head + p.text), knownLogos.map(a => a.logo.length + a.logo.slice(-24) + '/' + a.font.length)]);
     if (sig === lastSig) return;
     lastSig = sig;
     cfg = mkCfg(d.cfg.rundown, withAssets(d.cfg.outputs, knownLogos), d.cfg.prefs);
     (d.games || []).forEach(ingest);
     Object.assign(STANDINGS, d.standings || {});
+    if (d.pstats) PSTATS = d.pstats;
     Object.keys(PLAYS).forEach(k => delete PLAYS[k]); Object.assign(PLAYS, d.plays || {});
     if (live) { rt.page = (d.pages || [])[OUT_IDX] || 0; rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
     renderAll();
@@ -1351,7 +1547,7 @@ function bootOutput(){
     const CACHE = STORE + '.cache.' + ONLINE_ID;
     const saveCache = () => { try { localStorage.setItem(CACHE, JSON.stringify({state, logos: knownLogos})); } catch(e) { try { localStorage.setItem(CACHE, JSON.stringify({state, logos: []})); } catch(e2) {} } };
     try { const c = JSON.parse(localStorage.getItem(CACHE) || 'null'); if (c && c.state && c.state.rundown) { state = c.state; knownLogos = (c.logos || []).map(normAsset);
-      onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: c.logos || [], games: state.games, standings: state.standings, plays: {}, pages: [], paused: []}, false); } } catch(e) {}
+      onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: c.logos || [], games: state.games, standings: state.standings, pstats: state.pstats, plays: {}, pages: [], paused: []}, false); } } catch(e) {}
     // check in every 10 s so the dashboard (and the Stream Deck status) can show which screens are up
     const CLIENT = (() => { let c = ''; try { c = localStorage.getItem(STORE + '.client') || ''; if (!c) { c = Math.random().toString(36).slice(2, 12); localStorage.setItem(STORE + '.client', c); } } catch(e) { c = Math.random().toString(36).slice(2, 12); } return c; })();
     let checkins = true;
@@ -1379,7 +1575,7 @@ function bootOutput(){
           if (state && state.rundown) {
             const now = Date.now(), plays = {};
             Object.entries(state.plays || {}).forEach(([k, p]) => plays[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
-            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays, standings: state.standings,
+            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays, standings: state.standings, pstats: state.pstats,
               pages: (row.live && row.live.pages) || [], paused: (row.live && row.live.paused) || [], hidden: (row.live && row.live.hidden) || []}, now - beatAt < 12000);
           }
         }
@@ -1393,6 +1589,7 @@ function bootOutput(){
     if (standalone()) {
       const keys = new Set(feedRows().map(feedKey));
       await Promise.allSettled([...keys].map(loadFeed).concat([refreshStandings(false)]));
+      await refreshPlayerStats();
       renderAll();
     }
     setTimeout(selfRefresh, B().refresh * 1000);
@@ -1425,7 +1622,7 @@ function push(forceLogos){
   const sig = assetSig();
   const withLogos = forceLogos || sig !== lastLogoSig || (++pushN % 10 === 0); lastLogoSig = sig;
   const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs},
-    logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(),
+    logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(), pstats: PSTATS,
     games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean),
     pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)};
   outWins.forEach(w => { try { if (w && !w.closed) w.postMessage(msg, '*'); } catch(e) {} });
@@ -1488,14 +1685,14 @@ function feedGame(g, slot, b){
   const as = parseFloat(g.away.score), hs = parseFloat(g.home.score), p = activePlay(g, b, now);
   const side = (t, pre) => {
     const o = {}; o[pre + '_name'] = teamLabel(t, 'school'); o[pre + '_abbr'] = teamLabel(t, 'abbr'); o[pre + '_rank'] = b.ranks && t.rank ? t.rank : '';
-    o[pre + '_record'] = t.record || ''; o[pre + '_score'] = g.state === 'pre' ? '' : t.score; o[pre + '_logo'] = t.id ? ESPN_LOGO(t.id) : (t.logo || '');
+    o[pre + '_record'] = t.record || ''; o[pre + '_score'] = g.state === 'pre' ? '' : t.score; o[pre + '_logo'] = /^\d+$/.test(t.id) ? ESPN_LOGO(t.id) : (t.logo || '');
     o[pre + '_color'] = t.color || ''; o[pre + '_poss'] = g.state === 'in' && g.sit.poss && g.sit.poss === t.id ? '1' : ''; return o;
   };
   return Object.assign({slot, sport: SPORTS[g.sport].short, state: g.state, status1: s1, status2: s2, status: s.short,
-    down: g.sport === 'cfb' && g.state === 'in' && !isHalf(g) ? (g.sit.down || '') : '', network: g.tv || '',
+    down: isFB(g.sport) && g.state === 'in' && !isHalf(g) ? (g.sit.down || '') : '', network: g.tv || '',
     start_time: g.date && !g.manual ? new Date(g.date).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', timeZone: TZ}) : '',
     upset: upsetTag(g, b.upsets), leader: g.state !== 'pre' && isFinite(as) && isFinite(hs) && as !== hs ? (as > hs ? 'away' : 'home') : '',
-    play_head: p ? p.head : '', play_text: p ? p.text : ''}, side(g.away, 'away'), side(g.home, 'home'));
+    play_head: p ? p.head : '', play_text: p ? p.text : '', players: playersFor(g).map(x => (x.p.label || x.p.name) + ': ' + plText(x.s)).join(' | ')}, side(g.away, 'away'), side(g.home, 'home'));
 }
 function buildFeed(){
   return {updated: new Date().toISOString(), outputs: cfg.outputs.map((b, i) => {
@@ -1534,7 +1731,7 @@ async function mirrorBoard(){
     if (st && st.rundown && st.outputs) {
       cfg = mkCfg(st.rundown, withAssets(st.outputs, assets), st.prefs);
       (st.games || []).forEach(ingest);
-      Object.assign(STANDINGS, st.standings || {});
+      Object.assign(STANDINGS, st.standings || {}); PSTATS = st.pstats || {};
       const now = Date.now(); Object.keys(PLAYS).forEach(k => delete PLAYS[k]);
       Object.entries(st.plays || {}).forEach(([k, p]) => PLAYS[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
     }
@@ -1592,7 +1789,7 @@ async function publishOnline(){
   }
   const plays = {}; Object.entries(PLAYS).forEach(([k, p]) => { if (now - p.t < 60000) plays[k] = Object.assign({}, p, {age: now - p.t, t: undefined}); });
   const state = {v: 2, rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs,
-    games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean), plays, standings: standingsFor()};
+    games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean), plays, standings: standingsFor(), pstats: PSTATS};
   const stateSig = JSON.stringify(Object.assign({}, state, {plays: Object.keys(plays).map(k => k + plays[k].head + plays[k].text)}));
   const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)}, liveSig = JSON.stringify(live);
   const logoSig = assetSig();
@@ -1657,7 +1854,7 @@ function bootControl(){
   const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600); };
 
   // sport tabs
-  $('sportSeg').innerHTML = Object.entries(SPORTS).map(([k, s]) => '<button data-s="' + k + '" title="' + esc(s.label) + '">' + esc(s.label.replace("Men's ", "Men's ").replace('College ','')) + '</button>').join('');
+  $('sportSeg').innerHTML = Object.entries(SPORTS).map(([k, s]) => '<button data-s="' + k + '" title="' + esc(s.label) + '">' + esc(s.short) + '</button>').join('');
   $('sportSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; pk.sport = b.dataset.s; pk.group = SPORTS[pk.sport].groups[0][0]; syncPicker(); loadPicker(); });
   $('groupSel').addEventListener('change', e => { pk.group = e.target.value; loadPicker(); });
   $('chips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; pk.filter = b.dataset.f; syncPicker(); renderList(); });
@@ -1670,6 +1867,9 @@ function bootControl(){
 
   function syncPicker(){
     [...$('sportSeg').children].forEach(b => b.setAttribute('aria-pressed', b.dataset.s === pk.sport));
+    const pro = isPro(pk.sport);
+    [...$('chips').children].forEach(b => b.hidden = pro && !['all', 'live'].includes(b.dataset.f));
+    if (pro && !['all', 'live'].includes(pk.filter)) pk.filter = 'all';
     [...$('chips').children].forEach(b => b.setAttribute('aria-pressed', b.dataset.f === pk.filter));
     const gs = SPORTS[pk.sport].groups;
     $('groupSel').innerHTML = gs.map(([v, l]) => '<option value="' + v + '">' + esc(l) + '</option>').join('');
@@ -2031,7 +2231,7 @@ function bootControl(){
   $('matchLook').onclick = () => {
     const from = +$('lookFrom').value, src = cfg.outputs[from];
     ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets',
-     'presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
+     'players','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
     cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
     toast('Output ' + (SEL+1) + ' now matches Output ' + (from+1) + '’s look');
   };
@@ -2143,13 +2343,128 @@ function bootControl(){
       if (res.some(r => r.status === 'fulfilled')) lastUpdate = new Date();
       setFeed(bad ? (bad.reason && bad.reason.message || 'network error') : '');
       renderList(); renderRundown(); renderAll(); push();
+      refreshPlayerStats().then(ch => { if (ch) { renderAll(); push(); } window.__renderPlayers && window.__renderPlayers(); });
     }
     scheduleRefresh();
   }
   function scheduleRefresh(){ clearTimeout(refreshTimer); refreshTimer = setTimeout(refresh, cfg.outputs[0].refresh * 1000); }
 
+  // ================= NFL / NBA players we follow =================
+  const plSave = () => { cfg.prefs = fixPrefs(cfg.prefs); TRACKED = cfg.prefs.players; save(); };
+  const plKind = p => p.sport.toUpperCase() + (p.teamAbbr ? ' · ' + p.teamAbbr : ' · no team') + (p.pos ? ' · ' + p.pos : '');
+  function renderPlayers(){
+    const list = cfg.prefs.players;
+    $('plCount').textContent = list.length ? '· ' + list.length : '';
+    $('plList').innerHTML = list.map(p => {
+      const s = PSTATS[p.id], g = s && games[s.game];
+      const where = g ? (teamLabel(g.away, 'abbr') + ' at ' + teamLabel(g.home, 'abbr') + ' · ' + plText(s)) : 'Not on the board: add ' + (p.teamAbbr || 'their team') + '’s ' + p.sport.toUpperCase() + ' game to the rundown';
+      return '<div class="plrow" data-id="' + esc(p.id) + '"><img class="phs" alt="" src="' + headshot(p) + '" onerror="this.style.visibility=\'hidden\'">' +
+        '<span class="plm"><input type="text" data-f="label" maxlength="30" value="' + esc(p.label || p.name) + '" aria-label="Name on the board for ' + esc(p.name) + '">' +
+        '<span class="plk">' + esc(plKind(p)) + '</span><span class="plw' + (g ? '' : ' off') + '">' + esc(where) + '</span></span>' +
+        '<div class="ib"><button type="button" data-x="del" title="Stop tracking" aria-label="Stop tracking ' + esc(p.name) + '">' + IC.x + '</button></div></div>';
+    }).join('');
+  }
+  window.__renderPlayers = renderPlayers;
+  const addPlayer = r => {
+    if (cfg.prefs.players.some(p => p.id === r.id)) return false;
+    cfg.prefs.players.push({id: r.id, name: r.name, label: r.name, sport: r.sport, team: r.team, teamAbbr: r.teamAbbr, pos: r.pos || '', jersey: r.jersey || ''});
+    return true;
+  };
+  const afterPlayers = () => { plSave(); renderPlayers(); refreshPlayerStats().then(() => { renderPlayers(); renderAll(); push(); }); renderAll(); push(); };
+  // every NFL and NBA roster (fetched on demand, kept for this session): the backup search, and "find our players"
+  let ROSTERS = null;
+  async function allRosters(progress){
+    if (ROSTERS) return ROSTERS;
+    const out = [];
+    for (const sport of ['nba', 'nfl']) {
+      const tj = await espnJSON(API + SPORTS[sport].path + '/teams');
+      const teams = ((((tj || {}).sports || [])[0] || {}).leagues || [{}])[0].teams || [];
+      for (let i = 0; i < teams.length; i += 8) {
+        progress && progress(sport.toUpperCase() + ' rosters ' + Math.min(i + 8, teams.length) + '/' + teams.length);
+        const batch = await Promise.all(teams.slice(i, i + 8).map(x => espnJSON(API + SPORTS[sport].path + '/teams/' + x.team.id + '/roster')));
+        batch.forEach((rj, k) => {
+          const t = teams[i + k].team;
+          let ath = (rj && rj.athletes) || [];
+          if (ath.length && ath[0].items) ath = [].concat(...ath.filter(gr => !/practice|suspend/i.test(gr.position || '')).map(gr => gr.items || []));
+          ath.forEach(a => out.push({id: String(a.id), name: a.displayName || a.fullName || '', sport, team: sport + '-' + t.id, teamAbbr: t.abbreviation || '', teamName: t.displayName || '',
+            pos: (a.position || {}).abbreviation || '', jersey: a.jersey || '', college: a.college ? [a.college.name, a.college.shortName, a.college.abbrev, a.college.mascot && (a.college.name + ' ' + a.college.mascot)].filter(Boolean).map(x => String(x).toLowerCase()) : []}));
+        });
+      }
+    }
+    if (out.length) ROSTERS = out;
+    return out;
+  }
+  async function searchPlayers(q){
+    // ESPN's player search first; if the browser can't use it, look through the NFL and NBA rosters
+    try {
+      const r = await fetch('https://site.web.api.espn.com/apis/common/v3/search?query=' + encodeURIComponent(q) + '&limit=25&type=player', {cache: 'no-store'});
+      if (r.ok) {
+        const j = await r.json();
+        return (j.items || []).filter(x => (x.league === 'nba' || x.league === 'nfl') && x.isActive !== false).map(x => {
+          const t = (((x.teamRelationships || [])[0]) || {}).core || {};
+          return {id: String(x.id), name: x.displayName, sport: x.league, team: t.id ? x.league + '-' + t.id : '', teamAbbr: t.abbreviation || '', teamName: t.displayName || '', pos: (x.position || {}).abbreviation || '', jersey: x.jersey || ''};
+        });
+      }
+    } catch(e) {}
+    const qq = q.toLowerCase(), all = await allRosters(m => $('plResults').innerHTML = '<p class="hint">Searching ' + esc(m) + '…</p>');
+    return all.filter(a => a.name.toLowerCase().includes(qq)).slice(0, 25);
+  }
+  let plFound = [];
+  const showFound = (list, title) => {
+    plFound = list;
+    $('plResults').innerHTML = !list.length ? '<p class="hint">No active NFL or NBA players found.</p>' :
+      (title ? '<div class="plrh"><span>' + esc(title) + '</span>' + (list.length > 1 ? '<button class="btn sm primary" type="button" data-addall>Add all ' + list.length + '</button>' : '') + '</div>' : '') +
+      list.map((r, i) => '<button type="button" class="plr' + (cfg.prefs.players.some(p => p.id === r.id) ? ' on' : '') + '" data-i="' + i + '"><img class="phs" alt="" src="' + headshot(r) + '" onerror="this.style.visibility=\'hidden\'">' +
+        '<span><b>' + esc(r.name) + '</b><span class="plk">' + esc(r.sport.toUpperCase() + ' · ' + (r.teamName || 'no team') + (r.pos ? ' · ' + r.pos : '') + (r.jersey ? ' #' + r.jersey : '')) + '</span></span><span class="add">' + (cfg.prefs.players.some(p => p.id === r.id) ? '✓' : '+') + '</span></button>').join('');
+  };
+  $('plFind').onclick = async () => {
+    const q = $('plQ').value.trim(); if (q.length < 3) { toast('Type at least 3 letters of the player’s name.'); return; }
+    $('plResults').innerHTML = '<p class="hint">Searching…</p>';
+    showFound(await searchPlayers(q));
+  };
+  $('plQ').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('plFind').click(); } });
+  $('plCollegeFind').onclick = async () => {
+    const c = $('plCollege').value.trim().toLowerCase(); if (!c) { $('plCollege').focus(); return; }
+    $('plResults').innerHTML = '<p class="hint">Loading every NFL and NBA roster…</p>';
+    const all = await allRosters(m => $('plResults').innerHTML = '<p class="hint">Loading ' + esc(m) + '…</p>');
+    if (!all.length) { $('plResults').innerHTML = '<p class="hint">Couldn’t load the rosters from ESPN. Try again in a minute.</p>'; return; }
+    const hits = all.filter(a => a.college.some(x => x === c || x.startsWith(c + ' ')));
+    hits.sort((a, b) => a.sport.localeCompare(b.sport) || a.name.localeCompare(b.name));
+    showFound(hits, hits.length + ' active NFL and NBA players from ' + $('plCollege').value.trim());
+  };
+  $('plResults').addEventListener('click', e => {
+    if (e.target.closest('[data-addall]')) { let n = 0; plFound.forEach(r => { if (addPlayer(r)) n++; }); afterPlayers(); showFound(plFound, $('plResults').querySelector('.plrh span').textContent); toast('Tracking ' + n + ' more player' + (n === 1 ? '' : 's')); return; }
+    const b = e.target.closest('.plr'); if (!b) return;
+    const r = plFound[+b.dataset.i]; if (!r) return;
+    const i = cfg.prefs.players.findIndex(p => p.id === r.id);
+    if (i >= 0) cfg.prefs.players.splice(i, 1); else { addPlayer(r); if (!r.team) toast(r.name + ' isn’t on a team right now, so no game will show him.'); }
+    afterPlayers(); b.classList.toggle('on', i < 0); b.querySelector('.add').textContent = i < 0 ? '✓' : '+';
+  });
+  $('plList').addEventListener('input', e => {
+    const row = e.target.closest('.plrow'); if (!row || e.target.dataset.f !== 'label') return;
+    const p = cfg.prefs.players.find(x => x.id === row.dataset.id); if (p) { p.label = e.target.value.trim(); plSave(); renderAll(); push(); }
+  });
+  $('plList').addEventListener('click', e => {
+    const b = e.target.closest('[data-x="del"]'); if (!b) return;
+    const id = b.closest('.plrow').dataset.id;
+    cfg.prefs.players = cfg.prefs.players.filter(p => p.id !== id); delete PSTATS[id]; afterPlayers();
+  });
+  // once a day, check tracked players' teams (trades, signings)
+  (async () => {
+    let last = 0; try { last = +localStorage.getItem(STORE + '.plTeams') || 0; } catch(e) {}
+    if (!cfg.prefs.players.length || Date.now() - last < 12 * 3600e3) return;
+    let moved = 0;
+    for (const p of cfg.prefs.players.slice()) {
+      const r = (await searchPlayers(p.name)).find(x => x.id === p.id);
+      if (r && r.team && r.team !== p.team) { p.team = r.team; p.teamAbbr = r.teamAbbr; moved++; }
+    }
+    try { localStorage.setItem(STORE + '.plTeams', String(Date.now())); } catch(e) {}
+    if (moved) { plSave(); renderPlayers(); toast(moved + ' tracked player' + (moved === 1 ? ' has' : 's have') + ' a new team'); }
+  })();
+  renderPlayers();
+
   // ================= conference standings on the rundown =================
-  $('stSport').value = pk.sport === 'bsb' ? 'cfb' : pk.sport;
+  $('stSport').value = ['cfb', 'mbb', 'wbb'].includes(pk.sport) ? pk.sport : 'cfb';
   $('stAdd').onclick = async () => {
     const sport = $('stSport').value, conf = $('stConf').value, key = 'st:' + sport + ':' + conf;
     if (inRd(key)) { toast(CONF_NAMES[conf] + ' ' + SPORTS[sport].short + ' standings are already in the rundown'); return; }
