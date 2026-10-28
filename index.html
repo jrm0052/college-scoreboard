@@ -299,7 +299,8 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .g .dia circle{fill:transparent;stroke:rgba(255,255,255,.6);stroke-width:1.5}
 .g .dia circle.on{fill:#fff;stroke:#fff}
 /* scoring play: drops out from under the game, then clears on its own */
-.g .play{position:absolute;left:1.15em;right:.55em;top:calc(100% - .2em);height:3.3em;display:flex;align-items:stretch;background:#fff;color:var(--panel);box-shadow:.4em .4em 0 var(--shade);transform-origin:top;animation:drop .5s cubic-bezier(.2,.8,.2,1)}
+.g .play{position:absolute;left:1.15em;right:.55em;top:calc(100% - .2em);height:3.3em;display:flex;align-items:stretch;background:#fff;color:var(--panel);box-shadow:.4em .4em 0 var(--shade);transform-origin:top}
+.g .play.fresh{animation:drop .5s cubic-bezier(.2,.8,.2,1)}
 .g.mir .play{left:0;right:1.7em}
 .g.wide .play{top:auto;bottom:.55em;height:48%;right:.55em}
 .g .play .ph{display:flex;align-items:center;gap:.4em;padding:0 .8em;background:var(--accent);color:#fff;font:800 1.75em/1 var(--f-score);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;flex:none}
@@ -308,7 +309,7 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .g .play .px span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @keyframes drop{from{transform:scaleY(0);opacity:0}to{transform:none;opacity:1}}
 /* tracked NFL / NBA players: stat strip under the game */
-.g .pl{position:absolute;left:1.15em;right:.55em;top:calc(100% + .05em);height:3em;display:flex;gap:.45em;z-index:1;animation:drop .5s cubic-bezier(.2,.8,.2,1);transform-origin:top}
+.g .pl{position:absolute;left:1.15em;right:.55em;top:calc(100% + .05em);height:3em;display:flex;gap:.45em;z-index:1}
 .g.mir .pl{left:0;right:1.7em}
 .g .pl .ps{flex:1 1 0;min-width:0;display:flex;align-items:stretch;background:var(--panel);box-shadow:.4em .4em 0 var(--shade)}
 .g .pl .pt{display:flex;align-items:center;gap:.4em;padding:0 .75em 0 .3em;background:var(--accent);color:#fff;flex:none}
@@ -319,7 +320,7 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .g .pl .pv b{font-weight:800;color:var(--txt);font-variant-numeric:tabular-nums}
 .g .pl .pv i{font-style:normal;font-size:.68em;letter-spacing:.06em;opacity:.65}
 .g .pl .pv i.ss{opacity:1;color:var(--accent);font-size:.62em;letter-spacing:.12em}
-.g.wide .pl{top:auto;bottom:.55em;height:46%;left:1.15em;right:.55em;animation:none}
+.g.wide .pl{top:auto;bottom:.55em;height:46%;left:1.15em;right:.55em}
 .board.lower .g .pl .pt span,.board.lower .g .pl .pv{text-transform:none}
 #sportSeg{grid-template-columns:repeat(6,1fr)}
 /* themes: card templates and lower-case names */
@@ -703,8 +704,9 @@ function norm(ev, sport){
   const down = s.shortDownDistanceText || (atI > 0 ? ddt.slice(0, atI) : ddt);
   const spot = s.possessionText || (atI > 0 ? ddt.slice(atI + 4) : '');
   let tv = '';
-  if (c.broadcasts && c.broadcasts.length) { const nets = [].concat(...c.broadcasts.map(b => b.names || [])).filter(Boolean); tv = (nets.filter(n => !/league pass|nfl\+|sunday ticket/i.test(n)).length ? nets.filter(n => !/league pass|nfl\+|sunday ticket/i.test(n)) : nets).slice(0, 2).join(' / '); }
-  if (!tv && c.geoBroadcasts && c.geoBroadcasts.length) tv = (c.geoBroadcasts[0].media || {}).shortName || '';
+  if (c.broadcasts && c.broadcasts.length && sport === 'nba') { tv = [...new Set([].concat(...c.broadcasts.map(b => b.names || [])).filter(n => /\b(espn\w*|abc|nbc|peacock|fox)\b/i.test(n)))].slice(0, 2).join(' / '); }
+  else if (c.broadcasts && c.broadcasts.length) { const nets = [].concat(...c.broadcasts.map(b => b.names || [])).filter(Boolean); tv = (nets.filter(n => !/league pass|nfl\+|sunday ticket/i.test(n)).length ? nets.filter(n => !/league pass|nfl\+|sunday ticket/i.test(n)) : nets).slice(0, 2).join(' / '); }
+  if (!tv && sport !== 'nba' && c.geoBroadcasts && c.geoBroadcasts.length) tv = (c.geoBroadcasts[0].media || {}).shortName || '';
   return {
     key: sport + ':' + ev.id, id: String(ev.id), sport, date: ev.date || c.date,
     state: ty.state || 'pre', statusName: ty.name || '', detail: ty.shortDetail || ty.detail || '', period: +st.period || 0,
@@ -1024,7 +1026,7 @@ function activePlay(g, b, now){
 }
 function playHTML(g, p){
   const t = p.side === 'a' ? g.away : g.home;
-  return '<div class="play"><span class="ph">' + (t.id || t.logo ? logoHTML(t, 'plg') : '') + '<span>' + esc(p.head) + '</span></span>' +
+  return '<div class="play' + (Date.now() - p.t < 700 ? ' fresh' : '') + '"><span class="ph">' + (t.id || t.logo ? logoHTML(t, 'plg') : '') + '<span>' + esc(p.head) + '</span></span>' +
     '<span class="px"><span>' + esc(p.text || (t.name + ' scores')) + '</span></span></div>';
 }
 
@@ -1080,7 +1082,7 @@ function fitNames(root){
   root.querySelectorAll('.g .st').forEach(el => {
     [...el.querySelectorAll('.p1,.p2,.bl')].forEach(x => { x.style.fontSize = ''; let f = 1; const fs = parseFloat(getComputedStyle(x).fontSize);
       const cs = getComputedStyle(el), room = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      while (x.scrollWidth > room && f > 0.6) { f -= 0.06; x.style.fontSize = (fs * f) + 'px'; } });
+      while (x.scrollWidth > room && f > 0.4) { f -= 0.05; x.style.fontSize = (fs * f) + 'px'; } });
   });
 }
 
