@@ -456,7 +456,7 @@ body.out.trans{background:transparent}
           <div class="row-ctl"><input type="text" id="plCollege" value="Auburn" aria-label="School"><button class="btn sm" id="plCollegeFind" type="button">Find every NFL &amp; NBA player from this school</button></div>
           <div id="plResults" class="plres"></div>
           <div id="plList"></div>
-          <p class="hint">A tracked player’s stats show in a strip under his team’s game on every output, once that NFL or NBA game is in the rundown: season numbers before the game, that game’s line once it starts. Edit the name to change how it reads on the board. Turn the strip off for an output in Board settings.</p>
+          <p class="hint">A tracked player’s stats show in a strip under his team’s game on large outputs (960×540 and up, e.g. Output 1), once that NFL or NBA game is in the rundown: season numbers before the game, that game’s line once it starts. Edit the name to change how it reads on the board. Change it per output in Board settings (NFL / NBA player stats).</p>
         </div>
       </details>
       <details class="settings" id="namesBox">
@@ -556,7 +556,7 @@ body.out.trans{background:transparent}
           <label class="f">Scoring play seconds<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
           <label class="f">Page dissolve (seconds, 0 = cut)<input type="number" id="sFade" data-k="fade" min="0" max="3" step="0.1"></label>
           <label class="f">NFL / NBA player stats
-            <select id="sPlayers" data-k="players"><option value="below">Under their game</option><option value="off">Off</option></select>
+            <select id="sPlayers" data-k="players"><option value="auto">Large outputs only (960×540 and up)</option><option value="always">Always</option><option value="off">Off</option></select>
           </label>
           <label class="f">Upset alerts
             <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
@@ -659,7 +659,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'below',presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -878,6 +878,9 @@ function plStripHTML(list){
   }).join('') + '</div>';
 }
 const isFB = s => s === 'cfb' || s === 'nfl';
+// tracked-player strips: by default only on big outputs (the main board), never on small corners or fascias
+const PL_MIN_W = 960, PL_MIN_H = 540;
+const showPlayers = b => b.players === 'always' || (b.players === 'auto' && b.w >= PL_MIN_W && b.h >= PL_MIN_H && b.w / b.h < 4);
 const pfxTeam = (sport, id) => isPro(sport) ? sport + '-' + id : String(id);
 function perPage(b){ return b.layout === 'grid' ? Math.max(1, b.cols * b.rows) : Math.max(1, b.perPage); }
 
@@ -1069,7 +1072,7 @@ function cardHTML(g, ctx){
       '<span class="sc" style="' + scW + bst + '">' + (showScore ? esc(t.score) : '') + '</span></div>';
   };
   const play = activePlay(g, b, ctx.now), upset = upsetTag(g, b.upsets);
-  const pls = !play && b.players !== 'off' ? playersFor(g) : [], plShow = pls.length && (!ctx.wide || ctx.flip);
+  const pls = !play && showPlayers(b) ? playersFor(g) : [], plShow = pls.length && (!ctx.wide || ctx.flip);
   return '<div class="g' + (ctx.mirror ? ' mir' : '') + (play ? ' has-play' : '') + (ctx.wide ? ' wide' : '') + '">' + (upset ? '<span class="upset">' + esc(upset) + '</span>' : '') + '<div class="br"><i></i><i class="o"></i><i></i></div>' +
     '<div class="pn"><div class="tm">' + row(g.away, 'a') + row(g.home, 'h') + '</div>' + brandStatus(g, b, ctx.tag) + '</div>' +
     (play ? playHTML(g, play) : '') + (plShow ? plStripHTML(pls) : '') + '</div>';
@@ -1111,7 +1114,7 @@ function darken(hex, amt){
 }
 function boardHTML(pages, idx, b, opt){
   const page = pages[idx] || {sport:null, games:[]};
-  const strip = b.players !== 'off' && !page.standings && page.games.some(g => playersFor(g).length);
+  const strip = showPlayers(b) && !page.standings && page.games.some(g => playersFor(g).length);
   const geo = geometry(b, page.games.length, strip);
   const bg = b.bg === 'transparent' ? 'transparent' : b.bg === 'green' ? '#00B140' : b.bgColor;
   const panel = b.panelColor || darken(b.bgColor, 0.16);
@@ -1182,7 +1185,7 @@ function fixBoard(b, i){
   o.header = o.hdMode !== 'off'; o.hdAlign = o.hdAlign === 'center' ? 'center' : 'left'; o.hdSize = clampN(o.hdSize,6,45,d.hdSize);
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
   o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
-  o.players = o.players === 'off' ? 'off' : 'below';
+  o.players = ['off', 'always'].includes(o.players) ? o.players : 'auto';   // older 'below' setting becomes the size rule
   o.presentedOn = !!o.presentedOn; o.presented = String(o.presented == null ? d.presented : o.presented).slice(0, 30);
   o.tpl = ['package','clean','bar'].includes(o.tpl) ? o.tpl : 'package';
   if (o.fontName !== 'custom' && !(o.fontName in FONTS)) o.fontName = d.fontName;
@@ -1473,7 +1476,7 @@ function renderBoard(holder, i){
   }
   fitNames(holder);
   // wide boards swap the bottom team for the player strip every 6 seconds
-  if (isWide(b) && b.players !== 'off' && (ps[rt.page] || {games: []}).games.some(g => playersFor(g).length)) {
+  if (isWide(b) && showPlayers(b) && (ps[rt.page] || {games: []}).games.some(g => playersFor(g).length)) {
     clearTimeout(window.__flipT); window.__flipT = setTimeout(() => renderAll(), 6000 - now % 6000 + 30);
   }
   clearTimeout(bumpT);
