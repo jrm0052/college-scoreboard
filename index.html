@@ -909,23 +909,27 @@ function geometry(b, n, strip){
   const hw = b.header && wide ? Math.round(Math.max(H * 1.5, W * b.hdSize / 100)) : 0;
   const padX = wide ? Math.round(H * 0.12) : Math.round(W * 0.035);
   const padY = wide ? Math.round(H * 0.08) : Math.round(H * (b.header ? 0.03 : 0.05));
-  // room under the last row for tracked-player stat strips
-  const gw = W - hw - padX*2, gh = H - hh - padY*2 - (strip && !wide ? Math.round(m * 0.055) : 0);
+  const gw = W - hw - padX*2, gh = H - hh - padY*2;
   const cgap = wide ? Math.round(H * 0.16) : Math.round(m * 0.025);
+  // tracked-player stat strips hang under each card and grow with it (3em tall + shadow, in card units),
+  // so every row is sized as card + strip: big cards (2 games stacked) get a big enough gap and bottom margin
+  const SP = strip && !wide ? 3.6 : 0;
   const size = (cols, rows, mode) => {
-    const rgap = Math.round(m * (strip && !wide ? 0.065 : mode === 'fill' ? 0.025 : b.plays !== 'off' && !wide ? 0.06 : 0.04));
-    const colW = (gw - cgap*(cols-1)) / cols, rowH = (gh - rgap*(rows-1)) / rows;
+    const base = Math.round(m * (mode === 'fill' ? 0.025 : b.plays !== 'off' && !wide ? 0.06 : 0.04));
+    const gap0 = SP ? Math.round(m * 0.03) : base;
+    const colW = (gw - cgap*(cols-1)) / cols, rowH = (gh - gap0*(rows-1)) / rows / (1 + SP / 10.6);
     let cw, ch;
     if (mode === 'fill') { cw = colW; ch = rowH; }
     else if (mode === 'wide') { ch = gh; cw = Math.min(colW, ch * 6.5); }
     else { ch = Math.min(rowH, colW / 3.2); cw = Math.min(colW, ch * 4.6); }  // cards stay between 3.2:1 and 4.6:1
-    return {cols, rows, rgap, cw, ch, u: Math.max(3, Math.min(ch / 10.6, cw / 37.5))};
+    const u = Math.max(3, Math.min(ch / 10.6, cw / 37.5)), stripPx = Math.round(SP * u);
+    return {cols, rows, rgap: gap0 + stripPx, stripPx, cw, ch, u};
   };
   let L;
   if (b.layout === 'grid') L = size(b.cols, b.rows, 'fill');
   else if (wide) L = size(n, 1, 'wide');
   else L = [1, 2, 3].filter(c => c <= n).map(c => size(c, Math.ceil(n / c), 'auto')).reduce((a, x) => x.u > a.u * 1.02 ? x : a);
-  return {W, H, hh, hw, wide, padX, padY, gw, gh, rgap: L.rgap, cgap, cw: L.cw, ch: L.ch, u: L.u, cols: L.cols, rows: L.rows, narrow: L.cw / L.u < 31};
+  return {W, H, hh, hw, wide, padX, padY, gw, gh, stripPx: L.stripPx, rgap: L.rgap, cgap, cw: L.cw, ch: L.ch, u: L.u, cols: L.cols, rows: L.rows, narrow: L.cw / L.u < 31};
 }
 
 const FOOTBALL = '<svg class="fb" viewBox="0 0 26 14" aria-label="Possession"><ellipse cx="13" cy="7" rx="12.5" ry="6.6"/><path d="M8.5 7h9M10.5 5.3v3.4M13 5.3v3.4M15.5 5.3v3.4"/></svg>';
@@ -1136,7 +1140,7 @@ function boardHTML(pages, idx, b, opt){
     // if any team on the page is ranked, every row keeps a rank slot so names line up
     const rankSlot = b.ranks && page.games.some(g => g.away.rank || g.home.rank);
     const now = Date.now();
-    h += '<div class="grid' + (opt.enter && b.fade > 0 ? ' enter' : '') + '" style="left:' + (geo.hw + geo.padX) + 'px;top:' + (geo.hh + geo.padY) + 'px;width:' + geo.gw + 'px;height:' + geo.gh + 'px;' +
+    h += '<div class="grid' + (opt.enter && b.fade > 0 ? ' enter' : '') + '" style="left:' + (geo.hw + geo.padX) + 'px;top:' + (geo.hh + geo.padY) + 'px;width:' + geo.gw + 'px;height:' + (geo.gh - geo.stripPx) + 'px;' +
       'grid-template-columns:repeat(' + geo.cols + ',' + geo.cw.toFixed(1) + 'px);grid-template-rows:repeat(' + geo.rows + ',' + geo.ch.toFixed(1) + 'px);column-gap:' + geo.cgap + 'px;row-gap:' + geo.rgap + 'px;font-size:' + geo.u.toFixed(2) + 'px">' +
       page.games.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide, flip: Math.floor(now / 6000) % 2 === 1})).join('') + '</div>';
   }
