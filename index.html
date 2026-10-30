@@ -865,14 +865,14 @@ function plText(s){
   if (!s) return '';
   if (s.kind === 'dnp') return 'DNP' + (s.note ? ' (' + s.note.toLowerCase() + ')' : '');
   if (s.kind === 'out') return s.final ? 'No stats' : 'No stats yet';
-  return (s.kind === 'season' ? 'Season: ' : '') + (s.items || []).map(x => x.v + (x.l ? ' ' + x.l : '')).join(', ');
+  return (s.kind === 'season' ? (s.note ? s.note + ' · ' : '') + 'Season: ' : '') + (s.items || []).map(x => x.v + (x.l ? ' ' + x.l : '')).join(', ');
 }
 function plStripHTML(list){
   return '<div class="pl">' + list.map(({p, s}) => {
     let v;
     if (s.kind === 'dnp') v = '<b>DNP</b>' + (s.note ? '<i>' + esc(s.note) + '</i>' : '');
     else if (s.kind === 'out') v = '<i class="ss">' + (s.final ? 'No stats' : 'No stats yet') + '</i>';
-    else v = (s.kind === 'season' ? '<i class="ss">' + (p.sport === 'nba' ? 'Season avg' : 'Season') + '</i>' : '') +
+    else v = (s.kind === 'season' ? '<i class="ss">' + (s.note ? esc(s.note) + ' · ' : '') + (p.sport === 'nba' ? 'Season avg' : 'Season') + '</i>' : '') +
       (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
     return '<span class="ps"><span class="pt"><img class="phs" alt="" src="' + headshot(p) + '" onerror="this.style.display=\'none\'"><span>' + esc(p.label || p.name) + '</span></span><span class="pv">' + v + '</span></span>';
   }).join('') + '</div>';
@@ -1024,9 +1024,20 @@ function activePlay(g, b, now){
   if (!p || b.plays === 'off' || (b.plays === 'cfb' && !isFB(g.sport))) return null;
   return now < p.t + b.playSecs * 1000 ? p : null;
 }
+// The board redraws often (score refreshes, play text arriving, heartbeats). A CSS animation restarts on every redraw,
+// so each animation remembers when it first appeared and later redraws continue it (negative delay) instead of restarting.
+const ANIM_SEEN = {};
+function animStyle(key, ms){
+  const now = Date.now();
+  if (!ANIM_SEEN[key]) ANIM_SEEN[key] = now;
+  const age = now - ANIM_SEEN[key];
+  return age < ms ? {cls: ' fresh', style: ' style="animation-delay:-' + age + 'ms"'} : {cls: '', style: ''};
+}
 function playHTML(g, p){
   const t = p.side === 'a' ? g.away : g.home;
-  return '<div class="play' + (Date.now() - p.t < 700 ? ' fresh' : '') + '"><span class="ph">' + (t.id || t.logo ? logoHTML(t, 'plg') : '') + '<span>' + esc(p.head) + '</span></span>' +
+  // tied to the score it came with, so the full play text arriving later doesn't replay the drop
+  const a = animStyle('play|' + g.key + '|' + g.away.score + '-' + g.home.score, 520);
+  return '<div class="play' + a.cls + '"' + a.style + '><span class="ph">' + (t.id || t.logo ? logoHTML(t, 'plg') : '') + '<span>' + esc(p.head) + '</span></span>' +
     '<span class="px"><span>' + esc(p.text || (t.name + ' scores')) + '</span></span></div>';
 }
 
@@ -1042,14 +1053,16 @@ function cardHTML(g, ctx){
   const row = (t, side) => {
     const cl = ['row'];
     if (lead === side) cl.push('lead');
-    if (ctx.bumped(g.key + side)) cl.push('bump');
+    const be = ctx.bumped(g.key + side);   // when the score flash ends (0 = no flash)
+    let bst = '';
+    if (be) { cl.push('bump'); bst = ';animation-delay:-' + Math.max(0, 3600 - (be - Date.now())) + 'ms'; }
     const poss = live && isFB(g.sport) && !isHalf(g) && g.sit.poss && g.sit.poss === t.id;
     return '<div class="' + cl.join(' ') + '">' + (b.logos ? logoHTML(t) : '<span></span>') +
       '<span class="nb">' + (ctx.rankSlot ? '<span class="rk">' + (t.rank || '') + '</span>' : '') +
       '<span class="nm">' + esc(teamLabel(t, b.names, ctx.narrow)) + '</span>' +
       (poss ? FOOTBALL : '') +
       (b.records && t.record ? '<span class="rec">' + esc(t.record) + '</span>' : '') + '</span>' +
-      '<span class="sc" style="' + scW + '">' + (showScore ? esc(t.score) : '') + '</span></div>';
+      '<span class="sc" style="' + scW + bst + '">' + (showScore ? esc(t.score) : '') + '</span></div>';
   };
   const play = activePlay(g, b, ctx.now), upset = upsetTag(g, b.upsets);
   const pls = !play && b.players !== 'off' ? playersFor(g) : [], plShow = pls.length && (!ctx.wide || ctx.flip);
@@ -1361,15 +1374,15 @@ async function refreshPlayerStats(){
       const g = gl.find(x => x.sport === p.sport && (x.away.id === p.team || x.home.id === p.team));
       if (!g) continue;
       const side = g.away.id === p.team ? 'a' : 'h';
-      if (g.state === 'pre') {
+      const season = async () => {
         let s = SEASON[p.id];
         if (!s || now - s.at > 6 * 3600e3) {
           const j = await espnJSON('https://site.web.api.espn.com/apis/common/v3/sports/' + SPORTS[p.sport].path + '/athletes/' + p.id + '/overview');
           s = SEASON[p.id] = {at: j ? now : now - 6 * 3600e3 + 120000, items: j ? seasonItems(p.sport, j) : (s ? s.items : [])};
         }
-        next[p.id] = {game: g.key, side, kind: 'season', items: s.items};
-        continue;
-      }
+        return s.items;
+      };
+      if (g.state === 'pre') { next[p.id] = {game: g.key, side, kind: 'season', items: await season()}; continue; }
       let bx = BOX[g.key];
       if (!bx || (!bx.final && now - bx.at > 25000)) {
         const j = await espnJSON(API + SPORTS[g.sport].path + '/summary?event=' + g.id);
@@ -1377,9 +1390,11 @@ async function refreshPlayerStats(){
       }
       if (!bx) { if (PSTATS[p.id] && PSTATS[p.id].game === g.key) next[p.id] = PSTATS[p.id]; continue; }
       const f = findInBox(bx.players, p.id), fin = g.state === 'post';
-      next[p.id] = !f ? {game: g.key, side, kind: 'out', final: fin, items: []} :
-        f.dnp ? {game: g.key, side, kind: 'dnp', note: f.reason, items: []} :
-        {game: g.key, side, kind: 'game', final: fin, items: p.sport === 'nba' ? nbaItems(f.cats.stats) : nflItems(f.cats)};
+      // a game line only once he's actually played (NBA: minutes on the clock; NFL: any stat); until then, his season numbers
+      const c = f && f.cats.stats, played = f && !f.dnp && (p.sport === 'nba' ? !!c && num(c.stats[c.labels.indexOf('MIN')]) > 0 : Object.keys(f.cats).length > 0);
+      const items = played ? (p.sport === 'nba' ? nbaItems(c) : nflItems(f.cats)) : [];
+      next[p.id] = items.length ? {game: g.key, side, kind: 'game', final: fin, items} :
+        {game: g.key, side, kind: 'season', note: f && f.dnp ? 'DNP' : '', items: await season()};
       if (f && f.team && pfxTeam(p.sport, f.team) !== p.team && !IS_OUT) { p.team = pfxTeam(p.sport, f.team); }   // traded: the box score knows best
     }
   } catch(e) {}
@@ -1445,7 +1460,7 @@ function renderBoard(holder, i){
   // dissolve: the outgoing page stays layered on the board and fades out while the new page fades in
   const prev = enter && b.fade > 0 ? holder.querySelector('.board > .grid:not(.leave), .board > .stand:not(.leave)') : null;
   if (enter && b.fade > 0) rt.fadeUntil = Date.now() + b.fade * 1000;
-  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, blank: !!rt.hidden, font: boardFont(b, i), bumped: k => (bumps[k] || 0) > now});
+  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, blank: !!rt.hidden, font: boardFont(b, i), bumped: k => (bumps[k] || 0) > now ? bumps[k] : 0});
   if (prev) {
     const nb = holder.querySelector('.board');
     prev.classList.remove('enter'); prev.classList.add('leave');
