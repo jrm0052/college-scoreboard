@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>College Scoreboard</title>
+<title>Out of Town Scores</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -140,17 +140,73 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .stage{position:relative;width:100%;background:repeating-conic-gradient(#0E1A33 0 25%,#0B162C 0 50%) 0 0/20px 20px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .holder{position:absolute;left:0;top:0;transform-origin:0 0}
 .transport{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.online .switch{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .sw{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;transition:background .15s;flex:none}
+.switch .sw::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked + .sw{background:var(--ok)}
+.switch input:checked + .sw::after{transform:translateX(14px)}
+.switch input:focus-visible + .sw{outline:2px solid var(--sel);outline-offset:2px}
+.links{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.livenote{font-size:12px;color:var(--muted)}
+.guide{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;padding:10px max(16px,env(safe-area-inset-left,0px));background:#11264F;border-bottom:1px solid var(--line);font-size:13px}
+.guide ol{display:flex;gap:6px 18px;flex-wrap:wrap;margin:0;padding:0;list-style:none;counter-reset:g;flex:1}
+.guide li{display:flex;align-items:center;gap:7px;counter-increment:g;color:var(--fg)}
+.guide li i{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font:600 11px var(--f-ui);font-style:normal;color:var(--muted);flex:none}
+.guide li i::before{content:counter(g)}
+.guide li.done{color:var(--muted);text-decoration:line-through}
+.guide li.done i{background:var(--ok);border-color:var(--ok);color:#09142A}
+.guide li.done i::before{content:"✓"}
+.build{border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.build summary{cursor:pointer;padding:8px 10px;font:600 12px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.build .qb{border:0;padding:0 10px 10px;background:none}
+.qh{font:600 11px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.qh .qd{text-transform:none;letter-spacing:0;font-weight:400}
+.ql{font-size:12px;color:var(--muted)}
+.psform{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px dashed var(--line);border-radius:7px}
+.psform .ck{font-size:12px}
+.stabs{margin:0 12px 10px;grid-template-columns:repeat(4,1fr)}
+.stabs button{font-size:12px;padding:7px 4px}
+.otabs .editing{font-size:12px;color:var(--muted)}
+.copylook{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.names h4.sub{margin:6px 0 0;font:600 12px var(--f-ui);color:var(--fg)}
+.admin .intro .whofor{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.admin .steps{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.admin .steps .btn{margin:0 6px}
+.admin details.more{border-top:1px solid var(--line);padding-top:8px}
+.admin details.more summary{cursor:pointer;font-size:12px;color:var(--sel);margin-bottom:8px}
+.warnline{color:var(--warn)}
 .online{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:13px}
-.online .od{display:flex;align-items:center;gap:8px;margin-right:auto;min-width:0}
+.online .od{display:flex;align-items:center;gap:8px;margin-right:auto;min-width:0;flex-wrap:wrap}
 .online .od i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .online.ok .od i{background:var(--ok)} .online.err .od i{background:var(--warn)} .online.err #onlineTxt{color:var(--warn)}
 #onlineTxt{color:var(--muted)}
-.outs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
-.ob.wide{grid-column:1/-1;order:2}
-.ob{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);cursor:pointer}
+.outs{display:flex;flex-direction:column;gap:10px}
+.ob{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "stage" "tr" "note";gap:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);cursor:pointer}
 .ob.sel{border-color:var(--sel);box-shadow:0 0 0 1px var(--sel)}
-.ob .pane-hd h2{color:var(--muted);letter-spacing:.08em}
-.ob .pane-hd h2 b{color:var(--fg)}
+.ob .obh{grid-area:head;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.ob .obh h2{margin:0 auto 0 0;font:600 12px/1.3 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ob .obh h2 b{color:var(--fg);font-weight:600}
+.ob .obb{display:flex;gap:6px}
+.ob .stage{grid-area:stage;max-height:34vh}
+.ob.wide .stage{max-height:16vh}
+.ob .transport{grid-area:tr}
+.ob .pnote{grid-area:note;text-align:left;background:none;border:1px dashed var(--line);border-radius:6px;padding:5px 8px;color:var(--muted);font-size:12px;cursor:pointer}
+.ob .pnote:hover{color:var(--fg);border-color:#3A4554}
+/* 16:9 outputs on a wide screen: preview on the left, title and controls on the right */
+@media (min-width:1500px){
+  .ob:not(.wide){grid-template-columns:minmax(260px,min(48%,520px)) minmax(220px,1fr);grid-template-areas:"stage head" "stage tr" "stage note" "stage .";grid-template-rows:auto auto auto 1fr;align-items:start}
+  .ob:not(.wide) .obh{flex-direction:column;align-items:flex-start}
+  .ob:not(.wide) .stage{max-height:none}
+}
+.ob .air{font:700 10px/1 var(--f-ui);letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:4px}
+.ob .air:empty{display:none}
+.ob .air.on{background:#C62828;color:#fff}
+.ob .air.hid{background:var(--warn);color:#09142A}
+.ob .stage .hidmask{position:absolute;inset:0;display:none;place-items:center;background:rgba(9,20,42,.78);color:var(--warn);font:700 12px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:8px}
+.ob.is-hidden .stage .hidmask{display:grid}
+.ob.is-hidden{border-color:var(--warn)}
+.transport .hidebtn.on{border-color:var(--warn);color:var(--warn)}
 .ob .osz{font:500 11px var(--f-mono);letter-spacing:0;color:var(--muted)}
 .seg.two{grid-template-columns:repeat(2,1fr)}
 .seg.four{grid-template-columns:repeat(4,1fr)}
@@ -178,8 +234,10 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .up input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .hint{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
 kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;color:var(--fg)}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--raise);border:1px solid var(--line);padding:9px 14px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px)}
+#toast{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);background:var(--raise);border:1px solid var(--line);padding:9px 14px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1}
+#toast.act{pointer-events:auto}
+#toast .btn{border-color:var(--sel);color:var(--sel)}
 .copybox{display:flex;gap:6px}
 .copybox input{flex:1;font:12px var(--f-mono)}
 
@@ -369,15 +427,25 @@ body.out.trans{background:transparent}
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><span class="mark"></span><h1>College Scoreboard</h1></div>
+    <div class="brand"><span class="mark"></span><h1>Out of Town Scores</h1></div>
     <div class="seg two vt" id="viewTabs" role="group" aria-label="View"><button data-v="control" aria-pressed="true">Control</button><button data-v="admin" aria-pressed="false">Admin</button></div>
     <div class="feed" id="feed"><i></i><span id="feedTxt">Connecting to ESPN…</span></div>
     <div class="acts">
       <span class="stale-note" id="staleNote" hidden></span>
-      <label class="ck" id="freezeLbl"><input type="checkbox" id="freeze"> Freeze scores</label>
+      <span class="livenote" id="liveNote" title="There’s no Save button: every change you make here goes to the boards right away.">Changes go live immediately</span>
+      <label class="ck" id="freezeLbl" title="Stop pulling new scores from ESPN. Boards keep showing the scores they have until you turn this off. Use it if ESPN sends a wrong score."><input type="checkbox" id="freeze"> Freeze scores</label>
       <span class="who" id="whoBox" hidden><span id="whoTxt"></span><button class="btn sm" id="signOut" type="button">Sign out</button></span>
     </div>
   </header>
+  <div class="guide" id="guide" hidden>
+    <b>Getting started</b>
+    <ol>
+      <li data-step="games"><i></i>Pick games on the left (or use <b>Build &amp; presets</b> in the rundown)</li>
+      <li data-step="preview"><i></i>Check the previews on the right; click one to edit its settings</li>
+      <li data-step="send"><i></i>Put it on screen: <b>Open here</b> for this computer, or <b>Get screen links</b> for the venue computers</li>
+    </ol>
+    <button class="btn sm" id="guideHide" type="button">Hide</button>
+  </div>
   <main class="cols">
     <section class="pane picker" aria-label="Game picker">
       <div class="pane-hd"><h2>Games</h2></div>
@@ -410,31 +478,46 @@ body.out.trans{background:transparent}
         <h2>Rundown <b id="rdCount"></b></h2>
         <button class="btn sm" id="sortRank" title="Top 25 games first, by ranking">Sort by ranking</button>
         <button class="btn sm" id="sortTime" title="Earliest start time first">Sort by game time</button>
-        <button class="btn sm" id="addManual">Add manual game</button>
-        <button class="btn sm" id="clearRd">Clear</button>
+        <button class="btn sm" id="addManual" title="A game ESPN doesn’t have: type the teams, score and status yourself">Add manual game</button>
+        <button class="btn sm" id="clearRd" title="Remove everything from the rundown (you can undo)">Clear</button>
       </div>
-      <div class="qb">
-        <div class="qrow">
-          <select id="qbRecipe" aria-label="Which games">
-            <option value="sec+top25">SEC + Top 25</option><option value="top25">Top 25</option><option value="sec">SEC</option>
-            <option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option><option value="all">All games</option>
-          </select>
-          <div class="chips" id="qbSports" role="group" aria-label="Sports">
-            <button class="chip-btn" data-s="cfb">CFB</button><button class="chip-btn" data-s="mbb">MBB</button><button class="chip-btn" data-s="wbb">WBB</button><button class="chip-btn" data-s="bsb">BSB</button><button class="chip-btn" data-s="nfl">NFL</button><button class="chip-btn" data-s="nba">NBA</button>
+      <details class="build" id="buildBox">
+        <summary>Build &amp; presets</summary>
+        <div class="qb">
+          <div class="qh">Quick build <span class="qd" id="qbDate"></span></div>
+          <div class="qrow">
+            <select id="qbRecipe" aria-label="Which games">
+              <option value="sec+top25">SEC + Top 25</option><option value="top25">Top 25</option><option value="sec">SEC</option>
+              <option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option><option value="all">All games</option>
+            </select>
+          </div>
+          <div class="qrow"><span class="ql">Sports</span>
+            <div class="chips" id="qbSports" role="group" aria-label="Sports">
+              <button class="chip-btn" data-s="cfb">CFB</button><button class="chip-btn" data-s="mbb">MBB</button><button class="chip-btn" data-s="wbb">WBB</button><button class="chip-btn" data-s="bsb">BSB</button><button class="chip-btn" data-s="nfl">NFL</button><button class="chip-btn" data-s="nba">NBA</button>
+            </div>
+          </div>
+          <div class="qrow"><button class="btn sm primary" id="qbAdd" type="button">Add these games</button><button class="btn sm" id="qbReplace" type="button" title="Takes out the current games (keeps manual games and standings) and builds a new rundown. You can undo.">Replace rundown</button></div>
+          <div class="qh">Standings page</div>
+          <div class="qrow">
+            <select id="stConf" aria-label="Conference"><option value="sec">SEC</option><option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option></select>
+            <select id="stSport" aria-label="Standings sport"><option value="cfb">Football</option><option value="mbb">Men’s basketball</option><option value="wbb">Women’s basketball</option></select>
+            <button class="btn sm" id="stAdd" type="button" title="Adds a standings page; it updates as conference games go final">Add standings</button>
+          </div>
+          <div class="qh">Presets <span class="qd" id="psWhere"></span></div>
+          <div class="qrow">
+            <select id="psSel" aria-label="Presets"><option value="">Pick a preset…</option></select>
+            <button class="btn sm" id="psLoad" type="button">Load</button><button class="btn sm" id="psNew" type="button">Save…</button><button class="btn sm" id="psDel" type="button">Delete</button>
+          </div>
+          <div class="psform" id="psForm" hidden>
+            <input type="text" id="psName" maxlength="40" placeholder="Preset name (e.g. Football Saturday)" aria-label="Preset name">
+            <label class="ck"><input type="checkbox" id="psGames" checked> Which games (the quick-build choice and sports)</label>
+            <label class="ck"><input type="checkbox" id="psLook" checked> Look of every output (template, colors, fonts)</label>
+            <label class="ck"><input type="checkbox" id="psSponsor"> Header, sponsor logo &amp; presented-by</label>
+            <label class="ck"><input type="checkbox" id="psLayout"> Output sizes, layout &amp; what shows</label>
+            <div class="qrow"><button class="btn sm primary" id="psSave" type="button">Save preset</button><button class="btn sm" id="psCancel" type="button">Cancel</button></div>
           </div>
         </div>
-        <div class="qrow"><span class="qd" id="qbDate"></span><button class="btn sm primary" id="qbReplace" type="button">Build rundown</button><button class="btn sm" id="qbAdd" type="button">Add to rundown</button></div>
-        <div class="qrow">
-          <select id="setupSel" aria-label="Saved setups"><option value="">Saved setups…</option></select>
-          <button class="btn sm" id="setupLoad" type="button">Load</button><button class="btn sm" id="setupDel" type="button">Delete</button>
-        </div>
-        <div class="qrow"><input type="text" id="setupName" maxlength="40" placeholder="Name this setup (e.g. Football Saturday)" aria-label="Setup name"><button class="btn sm" id="setupSave" type="button">Save setup</button></div>
-        <div class="qrow">
-          <select id="stConf" aria-label="Conference"><option value="sec">SEC</option><option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option></select>
-          <select id="stSport" aria-label="Standings sport"><option value="cfb">Football</option><option value="mbb">Men’s basketball</option><option value="wbb">Women’s basketball</option></select>
-          <button class="btn sm" id="stAdd" type="button" title="Adds a standings page; it updates as conference games go final">Add standings</button>
-        </div>
-      </div>
+      </details>
       <ol class="rd" id="rdList"></ol>
       <p class="hint" id="rdHint">Click games on the left to add them. Games show on the board in this order.</p>
     </section>
@@ -442,61 +525,26 @@ body.out.trans{background:transparent}
     <section class="pane right" aria-label="Preview and settings">
       <div class="fobar" id="foBar" hidden><span id="foTxt"></span><button class="btn sm primary" id="takeCtl" type="button">Take control</button></div>
       <div class="online" id="onlineBar">
-        <span class="od"><i id="onlineDot"></i><b>DAK / online outputs</b> <span id="onlineTxt">Connecting…</span> <span class="scr" id="screensTxt"></span></span>
-        <label class="ck" id="onlineOnLbl"><input type="checkbox" id="onlineOn"> Send to online outputs</label>
-        <button class="btn sm" id="onlineMove" type="button">Board code</button>
+        <span class="od"><i id="onlineDot"></i><b>Venue screens</b> <span id="onlineTxt">Connecting…</span> <span class="scr" id="screensTxt"></span></span>
+        <label class="switch" id="onlineOnLbl" title="Send this dashboard’s boards over the internet to the venue computers (DAK players, videoboard PCs)"><input type="checkbox" id="onlineOn"><span class="sw" aria-hidden="true"></span> Send to venue screens</label>
+        <button class="btn sm primary" id="linksBtn" type="button">Get screen links</button>
       </div>
-      <div class="copybox" id="moveBox" hidden><input type="text" id="moveTxt" aria-label="Board code and key"><button class="btn sm" id="moveUse" type="button">Use this board</button><button class="btn sm" id="moveClose" type="button">Done</button></div>
+      <div class="links" id="linksBox" hidden>
+        <div id="linksList" class="urls"></div>
+        <p class="hint">Open a link in Chrome on each venue computer (DAK player, videoboard PC) and double-click for full screen. Screens follow this dashboard live. If this tab closes, they keep running on their own with live ESPN scores and the last rundown.</p>
+        <div class="row-ctl"><button class="btn sm" id="linksClose" type="button">Done</button></div>
+      </div>
       <div class="outs" id="outs"></div>
-      <div class="copybox" id="copyBox" hidden><input type="text" id="copyTxt" readonly aria-label="Standalone output link"><button class="btn sm" id="copyClose">Done</button></div>
-      <details class="settings" id="playersBox">
-        <summary>NFL &amp; NBA players <b id="plCount"></b></summary>
-        <div class="names">
-          <div class="row-ctl"><input type="text" id="plQ" placeholder="Type a player’s name (e.g. Walker Kessler)" aria-label="Player name"><button class="btn sm primary" id="plFind" type="button">Search</button></div>
-          <div class="row-ctl"><input type="text" id="plCollege" value="Auburn" aria-label="School"><button class="btn sm" id="plCollegeFind" type="button">Find every NFL &amp; NBA player from this school</button></div>
-          <div id="plResults" class="plres"></div>
-          <div id="plList"></div>
-          <p class="hint">A tracked player’s stats show in a strip under his team’s game on large outputs (960×540 and up, e.g. Output 1), once that NFL or NBA game is in the rundown: season numbers before the game, that game’s line once it starts. Edit the name to change how it reads on the board. Change it per output in Board settings (NFL / NBA player stats).</p>
-        </div>
-      </details>
-      <details class="settings" id="namesBox">
-        <summary>Team names &amp; warnings</summary>
-        <div class="names">
-          <div class="row-ctl"><input type="text" id="nameFind" list="teamList" placeholder="Find a team from today’s games" aria-label="Find a team"><datalist id="teamList"></datalist><button class="btn sm" id="nameAdd" type="button">Add name</button></div>
-          <div id="nameRows"></div>
-          <p class="hint">Board names for any team, on every output and sport. Leave a box empty to use ESPN’s.</p>
-          <label class="f">Warn when a live game hasn’t updated for (minutes)<input type="number" id="pStale" min="1" max="30"></label>
-        </div>
-      </details>
       <details class="settings" id="boardSettings" open>
         <summary>Board settings</summary>
         <div class="otabs">
           <div class="seg four" id="outTabs" role="group" aria-label="Output to edit"><button data-o="0">Output 1</button><button data-o="1">Output 2</button><button data-o="2">Output 3</button><button data-o="3">Output 4</button></div>
-          <span class="pair"><select id="lookFrom" aria-label="Output to copy the look from"></select><button class="btn sm" id="matchLook" type="button">Copy look</button></span>
+          <span class="editing" id="editingTxt"></span>
         </div>
-        <div class="themes">
-          <span class="tl">Theme</span>
-          <select id="themeSel" aria-label="Saved themes"><option value="">Saved themes…</option></select>
-          <button class="btn sm" id="themeApply" type="button">Apply to this output</button>
-          <input type="text" id="themeName" maxlength="40" placeholder="Name (e.g. Auburn house)" aria-label="Theme name">
-          <button class="btn sm" id="themeSave" type="button">Save theme</button>
-          <button class="btn sm" id="themeDel" type="button">Delete</button>
+        <div class="seg four stabs" id="setTabs" role="tablist" aria-label="Settings group">
+          <button data-t="size" role="tab">Size &amp; layout</button><button data-t="look" role="tab">Look</button><button data-t="header" role="tab">Header &amp; sponsor</button><button data-t="show" role="tab">What shows</button>
         </div>
-        <div class="sgrid">
-          <label class="f">Card template
-            <select id="sTpl" data-k="tpl"><option value="package">House package (brackets)</option><option value="clean">Clean (rounded)</option><option value="bar">Bar (accent edge)</option></select>
-          </label>
-          <label class="f">Font
-            <span class="pair"><select id="sFont" data-k="fontName"></select><label class="btn sm" for="fontFile" title="Upload a font file">Upload</label></span>
-            <input type="file" id="fontFile" accept=".woff2,.woff,.ttf,.otf" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
-          </label>
-          <label class="f">Text / panel color
-            <span class="pair"><input type="color" id="sTxt" data-k="textColor" aria-label="Text color"><input type="color" id="sPanel" data-k="panelColor" aria-label="Panel color"><button class="btn sm" type="button" data-auto="panelColor" title="Panel follows the board color">Auto</button></span>
-          </label>
-          <label class="f">Leading score / ranking color
-            <span class="pair"><input type="color" id="sLead" data-k="leadColor" aria-label="Leading score color"><input type="color" id="sRank" data-k="rankColor" aria-label="Ranking color"><button class="btn sm" type="button" data-auto="leadColor,rankColor" title="Use the accent color">Accent</button></span>
-          </label>
-          <label class="ck"><input type="checkbox" id="sUpper" data-k="upper"> All-caps names</label>
+        <div class="sgrid" data-pane="size">
           <label class="f wide">Output name<input type="text" id="sName" data-k="name" maxlength="30"></label>
           <label class="f">Output size
             <select id="sPreset">
@@ -512,7 +560,7 @@ body.out.trans{background:transparent}
           <label class="f">Width × height (px)
             <span class="pair"><input type="number" id="sW" data-k="w" min="200" max="8000" step="1"><input type="number" id="sH" data-k="h" min="60" max="8000" step="1"></span>
           </label>
-          <label class="f">Layout
+          <label class="f" title="Auto picks the number of columns that makes the games biggest for this board size. Custom grid lets you set columns and rows yourself.">Layout
             <select id="sLayout" data-k="layout"><option value="auto">Auto (fills the board)</option><option value="grid">Custom grid</option></select>
           </label>
           <label class="f" id="fPer">Games per page<input type="number" id="sPer" data-k="perPage" min="1" max="8"></label>
@@ -520,17 +568,45 @@ body.out.trans{background:transparent}
             <span class="pair"><input type="number" id="sCols" data-k="cols" min="1" max="8"><input type="number" id="sRows" data-k="rows" min="1" max="8"></span>
           </label>
           <label class="f">Seconds per page<input type="number" id="sSecs" data-k="secs" min="2" max="120"></label>
-          <label class="f">Score refresh, all outputs (s)<input type="number" id="sRefresh" data-k="refresh" min="10" max="300"></label>
+          <label class="f">Page dissolve (seconds, 0 = cut)<input type="number" id="sFade" data-k="fade" min="0" max="3" step="0.1"></label>
+          <label class="ck" title="Each page shows one sport only"><input type="checkbox" id="sGroup" data-k="groupBySport"> One sport per page</label>
+        </div>
+        <div class="sgrid" data-pane="look" hidden>
+          <label class="f">Card template
+            <select id="sTpl" data-k="tpl"><option value="package">House package (brackets)</option><option value="clean">Clean (rounded)</option><option value="bar">Bar (accent edge)</option></select>
+          </label>
+          <label class="f">Font
+            <span class="pair"><select id="sFont" data-k="fontName"></select><label class="btn sm" for="fontFile" title="Upload a font file">Upload</label></span>
+            <input type="file" id="fontFile" accept=".woff2,.woff,.ttf,.otf" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+          </label>
+          <label class="f">Board / accent color
+            <span class="pair"><input type="color" id="sBgColor" data-k="bgColor" aria-label="Board color"><input type="color" id="sAccent" data-k="accent" aria-label="Accent color"></span>
+          </label>
+          <label class="f">Text / panel color
+            <span class="pair"><input type="color" id="sTxt" data-k="textColor" aria-label="Text color"><input type="color" id="sPanel" data-k="panelColor" aria-label="Panel color"><button class="btn sm" type="button" data-auto="panelColor" title="Panel follows the board color">Auto</button></span>
+          </label>
+          <label class="f">Leading score / ranking color
+            <span class="pair"><input type="color" id="sLead" data-k="leadColor" aria-label="Leading score color"><input type="color" id="sRank" data-k="rankColor" aria-label="Ranking color"><button class="btn sm" type="button" data-auto="leadColor,rankColor" title="Use the accent color">Accent</button></span>
+          </label>
+          <label class="f">Background
+            <select id="sBg" data-k="bg"><option value="board">Board color</option><option value="transparent">Transparent (key)</option><option value="green">Green screen</option></select>
+          </label>
           <label class="f">Team names
             <select id="sNames" data-k="names"><option value="auto">Auto (fit to card)</option><option value="school">School name</option><option value="abbr">Abbreviation</option></select>
           </label>
+          <label class="ck"><input type="checkbox" id="sUpper" data-k="upper"> All-caps names</label>
+          <div class="f wide copylook">Copy the look and options from another output
+            <span class="pair"><select id="lookFrom" aria-label="Output to copy the look from"></select><button class="btn sm" id="matchLook" type="button">Copy</button></span>
+          </div>
+        </div>
+        <div class="sgrid" data-pane="header" hidden>
           <label class="f" id="fHdMode" data-perm="sponsor">Header
             <select id="sHdMode" data-k="hdMode"><option value="off">Off</option><option value="logo">Sponsor logo</option><option value="text">Text</option></select>
           </label>
           <label class="f" id="fPby" data-perm="sponsor">Presented-by line
             <span class="pair"><input type="checkbox" id="sPbyOn" data-k="presentedOn" aria-label="Show presented-by line"><input type="text" id="sPby" data-k="presented" maxlength="30" aria-label="Presented-by text"></span>
           </label>
-          <label class="f" id="fHdAlign">Header position
+          <label class="f" id="fHdAlign" data-perm="sponsor">Header position
             <select id="sHdAlign" data-k="hdAlign"><option value="left">Left</option><option value="center">Center</option></select>
           </label>
           <label class="f" id="fHdSize" data-perm="sponsor">Header / logo size (% of board)<input type="number" id="sHdSize" data-k="hdSize" min="6" max="45"></label>
@@ -544,81 +620,110 @@ body.out.trans{background:transparent}
               <button class="btn sm" id="logoRemove" type="button" hidden>Remove</button>
             </div>
           </div>
-          <label class="f">Background
-            <select id="sBg" data-k="bg"><option value="board">Board color</option><option value="transparent">Transparent (key)</option><option value="green">Green screen</option></select>
-          </label>
-          <label class="f">Board / accent color
-            <span class="pair"><input type="color" id="sBgColor" data-k="bgColor" aria-label="Board color"><input type="color" id="sAccent" data-k="accent" aria-label="Accent color"></span>
-          </label>
-          <label class="f">Scoring play box
-            <select id="sPlays" data-k="plays"><option value="cfb">Football only</option><option value="all">All sports</option><option value="off">Off</option></select>
-          </label>
-          <label class="f">Scoring play seconds<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
-          <label class="f">Page dissolve (seconds, 0 = cut)<input type="number" id="sFade" data-k="fade" min="0" max="3" step="0.1"></label>
-          <label class="f">NFL / NBA player stats
-            <select id="sPlayers" data-k="players"><option value="auto">Large outputs only (960×540 and up)</option><option value="always">Always</option><option value="off">Off</option></select>
-          </label>
-          <label class="f">Upset alerts
-            <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
-          </label>
-          <label class="ck"><input type="checkbox" id="sGroup" data-k="groupBySport"> One sport per page</label>
-          <label class="ck"><input type="checkbox" id="sSportLabel" data-k="sportLabel"> Sport name in header</label>
+          <label class="ck" data-perm="sponsor"><input type="checkbox" id="sSportLabel" data-k="sportLabel"> Sport name in header</label>
+        </div>
+        <div class="sgrid" data-pane="show" hidden>
           <label class="ck"><input type="checkbox" id="sLogos" data-k="logos"> Logos</label>
           <label class="ck"><input type="checkbox" id="sRanks" data-k="ranks"> Rankings</label>
           <label class="ck"><input type="checkbox" id="sRecords" data-k="records"> Records</label>
           <label class="ck"><input type="checkbox" id="sTv" data-k="tv"> TV network (upcoming)</label>
+          <label class="f" title="A drop-down box under a game when someone scores">Scoring play box
+            <select id="sPlays" data-k="plays"><option value="cfb">Football only</option><option value="all">All sports</option><option value="off">Off</option></select>
+          </label>
+          <label class="f">Scoring play seconds<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
+          <label class="f">Upset alerts
+            <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
+          </label>
+          <label class="f">NFL / NBA player stats
+            <select id="sPlayers" data-k="players"><option value="auto">Large outputs only (960×540 and up)</option><option value="always">Always</option><option value="off">Off</option></select>
+          </label>
         </div>
-        <div style="padding:0 12px 14px"><p class="hint">Shortcuts: <kbd>Space</kbd> pause/play, <kbd>←</kbd> <kbd>→</kbd> change page. In the output window, double-click for full screen.</p></div>
+        <div style="padding:0 12px 14px"><p class="hint">Shortcuts: <kbd>Space</kbd> pause/play, <kbd>←</kbd> <kbd>→</kbd> change page on the output you’re editing. In an output window, double-click for full screen.</p></div>
+      </details>
+      <details class="settings" id="namesBox">
+        <summary>All outputs: team names, refresh &amp; warnings</summary>
+        <div class="names">
+          <label class="f">Get new scores from ESPN every (seconds)<input type="number" id="sRefresh" data-k="refresh" min="10" max="300"></label>
+          <label class="f">Warn when a live game hasn’t updated for (minutes)<input type="number" id="pStale" min="1" max="30"></label>
+          <h4 class="sub">Team names</h4>
+          <div class="row-ctl"><input type="text" id="nameFind" list="teamList" placeholder="Find a team from today’s games" aria-label="Find a team"><datalist id="teamList"></datalist><button class="btn sm" id="nameAdd" type="button">Add name</button></div>
+          <div id="nameRows"></div>
+          <p class="hint">Board names for any team, on every output and sport. Leave a box empty to use ESPN’s.</p>
+        </div>
+      </details>
+      <details class="settings" id="playersBox">
+        <summary>All outputs: NFL &amp; NBA players <b id="plCount"></b></summary>
+        <div class="names">
+          <div class="row-ctl"><input type="text" id="plQ" placeholder="Type a player’s name (e.g. Walker Kessler)" aria-label="Player name"><button class="btn sm primary" id="plFind" type="button">Search</button></div>
+          <div class="row-ctl"><input type="text" id="plCollege" value="Auburn" aria-label="School"><button class="btn sm" id="plCollegeFind" type="button">Find every NFL &amp; NBA player from this school</button></div>
+          <div id="plResults" class="plres"></div>
+          <div id="plList"></div>
+          <p class="hint">A tracked player’s stats show in a strip under his team’s game on large outputs (960×540 and up, e.g. Output 1), once that NFL or NBA game is in the rundown: season numbers until he has a line in the game, then his game line. Edit the name to change how it reads on the board. Change it per output in Board settings › What shows.</p>
+        </div>
       </details>
     </section>
   </main>
   <main class="admin" id="adminView" hidden>
+    <section class="card wide2 intro">
+      <h3>Who needs this page?</h3>
+      <ul class="whofor">
+        <li><b>Running the show:</b> nothing here. Everything for a show is on <b>Control</b>.</li>
+        <li><b>Stream Deck or Ross DashBoard buttons:</b> see <b>Control panels</b>.</li>
+        <li><b>XPression or Daktronics graphics that pull the scores:</b> see <b>Graphics system data</b>.</li>
+        <li><b>A backup computer, or moving to a new computer:</b> see <b>Backup computer</b>.</li>
+        <li><b>Locking the board so people must sign in:</b> see <b>Sign-in &amp; users</b> (admins).</li>
+      </ul>
+    </section>
+
+    <section class="card" data-need="users">
+      <h3>Control panels: Stream Deck &amp; Ross DashBoard</h3>
+      <ol class="steps">
+        <li>Make a control token (once). <button class="btn sm primary" id="tokMake" type="button">Make control token</button><span class="hint" id="tokState"></span></li>
+        <li><b>Stream Deck (Bitfocus Companion):</b> add the <b>Generic: HTTP Requests</b> connection. On each button, add a <b>GET</b> action and paste one of the button links.</li>
+        <li><b>Ross DashBoard:</b> <button class="btn sm" id="rossDl" type="button">Download the ready-made panel</button>, then File &gt; Open it in DashBoard.</li>
+      </ol>
+      <details class="more"><summary>Show button links</summary>
+        <label class="f inl">Buttons for <select id="sdOut" aria-label="Output for the buttons"><option value="1">Output 1</option><option value="2">Output 2</option><option value="3">Output 3</option><option value="4">Output 4</option><option value="all">All outputs</option></select></label>
+        <div class="urls" id="sdUrls"></div>
+        <p class="hint">The dashboard in control carries out each button press within a second. The Status link returns page, paused, hidden and screens online, for button feedback. Keep these links private: anyone with them can change pages.</p>
+      </details>
+    </section>
+
+    <section class="card">
+      <h3>Graphics system data: XPression &amp; Daktronics</h3>
+      <p class="hint">Each output has a live data link with what it’s showing right now: teams, ranks, scores, clock, down &amp; distance, network, possession, upset tag, logos, scoring plays, player lines and standings.</p>
+      <ol class="steps">
+        <li><b>XPression:</b> add a DataLinq XML source with the output’s XML link, refreshing every 1–2 seconds. Link text fields with paths like <code>/scoreboard/game[@slot='1']/away_score</code>.</li>
+        <li><b>Daktronics:</b> point an XML or JSON data feed in your show-control software at the link, or use the screen links as web content.</li>
+      </ol>
+      <details class="more"><summary>Show data links</summary><div class="urls" id="feedUrls"></div></details>
+      <details class="more"><summary>Show screen (web content) links</summary><div class="urls" id="dakUrls"></div></details>
+    </section>
+
+    <section class="card">
+      <h3>Backup computer</h3>
+      <p class="hint" id="foState"></p>
+      <p class="hint">On the backup computer, open this same page and sign in to board <b class="bcode"></b> (or paste the board code &amp; key below). It waits on standby, copies what’s on air, and takes over if this one stops. Venue screens keep running on their own even if every dashboard stops.</p>
+      <label class="f">This dashboard’s name (shown to the other dashboards)<input type="text" id="foName" maxlength="40"></label>
+      <label class="ck"><input type="checkbox" id="foAuto"> Take over automatically if the dashboard in control goes quiet for 15 seconds</label>
+      <div class="row-ctl" data-need="failover"><button class="btn sm primary" id="foTake" type="button">Take control now</button></div>
+      <h4>Screens online</h4>
+      <div id="screenList"></div>
+      <h4>Move this board to another computer</h4>
+      <p class="hint warnline">The board code &amp; key work like a password for your venue screens. Only paste them on your own computers; don’t text or email them.</p>
+      <div class="row-ctl"><button class="btn sm" id="onlineMove" type="button">Show board code &amp; key</button></div>
+      <div class="copybox" id="moveBox" hidden><input type="text" id="moveTxt" aria-label="Board code and key"><button class="btn sm" id="moveUse" type="button">Use this board</button><button class="btn sm" id="moveClose" type="button">Done</button></div>
+    </section>
+
     <section class="card">
       <h3>Sign-in &amp; users · board <span class="bcode" id="admBoard"></span></h3>
       <p class="hint" id="authState"></p>
       <div class="row-ctl"><button class="btn sm" id="signInAdm" type="button" hidden>Sign in</button><button class="btn sm" id="signOutAdm" type="button" hidden>Sign out</button></div>
       <div data-need="users" class="stack">
-        <label class="ck"><input type="checkbox" id="reqAuth"> Require sign-in for this board (dashboards must sign in to send to the DAK / online outputs)</label>
+        <label class="ck"><input type="checkbox" id="reqAuth"> Require sign-in for this board (dashboards must sign in to send to the venue screens)</label>
         <div id="userList"></div>
-        <p class="hint">Operators get only the boxes you tick. Admins can do everything, including this tab. The online board checks sign-in, taking control and user changes itself; the other boxes lock those parts of the dashboard.</p>
+        <p class="hint">Operators get only the boxes you tick. Admins can do everything, including this tab.</p>
       </div>
-    </section>
-
-    <section class="card">
-      <h3>Failover</h3>
-      <p class="hint" id="foState"></p>
-      <label class="f">This dashboard’s name (shown to the other dashboards)<input type="text" id="foName" maxlength="40"></label>
-      <label class="ck"><input type="checkbox" id="foAuto"> Take over automatically if the dashboard in control goes quiet for 15 seconds</label>
-      <div class="row-ctl" data-need="failover"><button class="btn sm primary" id="foTake" type="button">Take control now</button></div>
-      <p class="hint"><b>Backup computer:</b> open this same page there and sign in to board <b class="bcode"></b> (or use Board code to paste the code and key). It stays on standby, mirrors what’s on air, and takes over if this one stops. Closing the dashboard in control hands over at once.</p>
-      <p class="hint"><b>Outputs:</b> if every dashboard stops, DAK outputs keep pulling scores from ESPN and turning pages on their own, and they remember the last rundown, so a restart without internet still shows the last board. ESPN has a second address the board switches to if the first one fails.</p>
-      <h4>Screens online</h4>
-      <div id="screenList"></div>
-    </section>
-
-    <section class="card" data-need="users">
-      <h3>Stream Deck · Bitfocus Companion</h3>
-      <p class="hint" id="tokState"></p>
-      <div class="row-ctl"><button class="btn sm primary" id="tokMake" type="button">Make control token</button>
-        <label class="f inl">Buttons for <select id="sdOut" aria-label="Output for the buttons"><option value="1">Output 1</option><option value="2">Output 2</option><option value="3">Output 3</option><option value="4">Output 4</option><option value="all">All outputs</option></select></label></div>
-      <div class="urls" id="sdUrls"></div>
-      <p class="hint">In Companion: add the <b>Generic: HTTP Requests</b> connection, then on each button add a <b>GET</b> action with one of these URLs. The dashboard in control carries the command out within a second. The Status URL returns JSON (page, paused, hidden, screens online) for button feedback. Keep the token private: anyone with these URLs can change pages.</p>
-    </section>
-
-    <section class="card" data-need="users">
-      <h3>Ross DashBoard</h3>
-      <p class="hint">A ready-made custom panel with Prev / Next / Pause / First page / Hide buttons for each output, plus Freeze. It uses the control token above.</p>
-      <div class="row-ctl"><button class="btn sm primary" id="rossDl" type="button">Download DashBoard panel (.grid)</button></div>
-      <p class="hint">In DashBoard: File &gt; Open and pick the .grid file (or add it to a CustomPanel). The buttons send the same commands as the Stream Deck URLs, so you can also paste any URL into your own panel’s button task.</p>
-    </section>
-
-    <section class="card wide2">
-      <h3>Ross XPression &amp; Daktronics data feed</h3>
-      <p class="hint">Live data for what each output is showing right now: page, title, and every game’s teams, ranks, scores, status, down &amp; distance, network, possession, upset tag, logo URLs and the scoring-play text (standings pages list the teams in order). It updates whenever the dashboard in control changes page or a score changes.</p>
-      <p class="hint"><b>XPression:</b> add a DataLinq source (XML) with the XML URL and a 1–2 second refresh, then link text fields with paths like <code>/scoreboard/game[@slot='1']/away_score</code>. The <b>flat JSON</b> URL has simple keys (<code>g1_away_score</code>, <code>s3_name</code>) for JSON sources. <b>Daktronics:</b> point a data feed (XML or JSON over HTTP) in your show-control software at the same URLs, or keep using the output links below as web content.</p>
-      <div class="urls" id="feedUrls"></div>
-      <h4>DAK / web content links</h4>
-      <div class="urls" id="dakUrls"></div>
     </section>
   </main>
 </div>
@@ -1532,7 +1637,7 @@ function step(i, n){
 function bootOutput(){
   document.body.classList.add('out');
   document.getElementById('outRoot').hidden = false;
-  document.title = 'Output ' + (OUT_IDX + 1) + ' · College Scoreboard';
+  document.title = 'Output ' + (OUT_IDX + 1) + ' · Out of Town Scores';
   const stage = document.querySelector('#outRoot .stage'), holder = document.getElementById('outHolder');
   const B = () => cfg.outputs[OUT_IDX], rt = rts[OUT_IDX];
   let lastMsg = 0, idleT = 0, lastSig = '', knownLogos = cfg.outputs.map(assetOf);
@@ -1863,6 +1968,7 @@ async function publishOnline(){
 // closing the dashboard in control hands the board over right away instead of after 15 s
 if (!IS_OUT) window.addEventListener('pagehide', () => {
   if (FAIL.role !== 'control' || !online || !online.on || pub.v !== 2) return;
+  pub.busy = true; pub.again = false;   // leaving: nothing more goes out after the hand-off
   try { fetch(SB_URL + '/rest/v1/rpc/scoreboard_publish2', {method: 'POST', keepalive: true, headers: Object.assign({'Content-Type': 'application/json'}, SB_H),
     body: JSON.stringify({p_id: online.id, p_key: online.key || null, p_session: AUTH.token || null, p_ctl: {release: INST}, p_force: false, p_live: null, p_state: null, p_logos: null, p_feed: null})}); } catch(e) {}
 });
@@ -1875,11 +1981,18 @@ function bootControl(){
   const pickerKey = () => feedKey({sport: pk.sport, date: ymd(pk.date), group: pk.group});
   let editing = null, loadingPicker = false;
 
-  const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600); };
+  const toast = (msg, act) => {
+    const t = $('toast'); t.textContent = msg;
+    if (act) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm'; b.textContent = act.label; b.onclick = () => { t.classList.remove('show'); act.fn(); }; t.appendChild(b); }
+    t.classList.toggle('act', !!act); t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), act ? 9000 : 2600);
+  };
 
   // sport tabs
   $('sportSeg').innerHTML = Object.entries(SPORTS).map(([k, s]) => '<button data-s="' + k + '" title="' + esc(s.label) + '">' + esc(s.short) + '</button>').join('');
-  $('sportSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; pk.sport = b.dataset.s; pk.group = SPORTS[pk.sport].groups[0][0]; syncPicker(); loadPicker(); });
+  $('sportSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; pk.sport = b.dataset.s; pk.group = SPORTS[pk.sport].groups[0][0]; syncPicker(); loadPicker();
+    if (window.__qbFollow) window.__qbFollow(pk.sport);
+  });
   $('groupSel').addEventListener('change', e => { pk.group = e.target.value; loadPicker(); });
   $('chips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; pk.filter = b.dataset.f; syncPicker(); renderList(); });
   $('q').addEventListener('input', e => { pk.q = e.target.value.trim().toLowerCase(); renderList(); });
@@ -1958,7 +2071,7 @@ function bootControl(){
     up:'<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
     dn:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
     ed:'<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>',
-    go:'<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>',
+    go:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M10.5 7.5l4 2.5-4 2.5z"/></svg>',
     x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     hl:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>'
   };
@@ -1970,7 +2083,7 @@ function bootControl(){
     $('staleNote').hidden = !nStale; $('staleNote').textContent = nStale + (nStale === 1 ? ' game hasn’t' : ' games haven’t') + ' updated in a while';
     $('rdHint').hidden = cfg.rundown.length > 0;
     const psSel = pages(SEL);
-    const btns = r => '<span class="ib"><button data-a="go" title="Show this now on every output" aria-label="Show this now on every output">' + IC.go + '</button>' +
+    const btns = r => '<span class="ib"><button data-a="go" title="Show now: jump every output to this page" aria-label="Show now on every output">' + IC.go + '</button>' +
         (r.manual ? '<button data-a="ed" title="Edit" aria-label="Edit manual game">' + IC.ed + '</button>' : '') +
         (r.standings ? '<button data-a="ed" title="Highlight teams" aria-label="Highlight teams">' + IC.hl + '</button>' : '') +
         '<button data-a="up" title="Move up" aria-label="Move up">' + IC.up + '</button><button data-a="dn" title="Move down" aria-label="Move down">' + IC.dn + '</button>' +
@@ -2078,11 +2191,13 @@ function bootControl(){
   const qb = {sports: new Set([pk.sport])};
   const syncQb = () => {
     [...$('qbSports').children].forEach(b => b.setAttribute('aria-pressed', qb.sports.has(b.dataset.s)));
-    $('qbDate').textContent = 'For ' + pk.date.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+    $('qbDate').textContent = '· for ' + pk.date.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
   };
+  window.__qbFollow = sp => { qb.sports = new Set([sp]); if (isPro(sp)) $('qbRecipe').value = 'all'; syncQb(); };
   $('qbSports').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const sp = b.dataset.s; qb.sports.has(sp) ? qb.sports.delete(sp) : qb.sports.add(sp); syncQb(); });
   // pulls each chosen sport for the date shown in the game picker, keeps the matching games, Top 25 first by ranking
-  async function buildRundown(recipe, sports, replace){
+  const undoable = (msg, before) => toast(msg, {label: 'Undo', fn: () => { cfg.rundown = before; changed(); toast('Rundown restored'); }});
+  async function buildRundown(recipe, sports, replace, label){
     if (!sports.length) { toast('Pick at least one sport.'); return; }
     const test = RECIPES[recipe] || RECIPES.all, date = ymd(pk.date), found = [], failed = [];
     toast('Building rundown…');
@@ -2091,44 +2206,17 @@ function bootControl(){
       try { await loadFeed(k); } catch(e) { failed.push(SPORTS[sp].short); }
       (feeds[k] || []).filter(test).forEach(g => found.push({key: g.key, sport: sp, id: g.id, date, group}));
     }
+    const before = JSON.parse(JSON.stringify(cfg.rundown));
     if (replace) cfg.rundown = cfg.rundown.filter(r => r.manual || r.standings);
     let n = 0;
     found.sort((a, b) => rankKey(games[a.key]) - rankKey(games[b.key]) || (Date.parse(games[a.key].date) - Date.parse(games[b.key].date)))
       .forEach(e => { if (!inRd(e.key)) { addToRundown(e); n++; } });
     changed();
-    toast((replace ? 'Rundown built: ' : 'Added ') + n + (n === 1 ? ' game' : ' games') + (failed.length ? '. Couldn’t load ' + failed.join(', ') + '.' : ''));
+    if (n) $('buildBox').open = false;   // games are in: give the rundown its room back
+    undoable((label ? label + ': ' : '') + (replace ? 'Rundown replaced with ' : 'Added ') + n + (n === 1 ? ' game' : ' games') + (failed.length ? '. Couldn’t load ' + failed.join(', ') + '.' : ''), before);
   }
   $('qbReplace').onclick = () => buildRundown($('qbRecipe').value, [...qb.sports], true);
   $('qbAdd').onclick = () => buildRundown($('qbRecipe').value, [...qb.sports], false);
-
-  // ---------- saved setups: games recipe + sports + every output's settings (logos included) ----------
-  const SETUP_STORE = STORE + '.setups';
-  const loadSetups = () => { try { return JSON.parse(localStorage.getItem(SETUP_STORE) || '[]'); } catch(e) { return []; } };
-  const syncSetups = () => { const list = loadSetups(); $('setupSel').innerHTML = '<option value="">Saved setups…</option>' + list.map((x, i) => '<option value="' + i + '">' + esc(x.name) + '</option>').join(''); };
-  $('setupSave').onclick = () => {
-    const name = $('setupName').value.trim(); if (!name) { $('setupName').focus(); toast('Name the setup first.'); return; }
-    const list = loadSetups().filter(x => x.name.toLowerCase() !== name.toLowerCase());
-    list.push({name, recipe: $('qbRecipe').value, sports: [...qb.sports], outputs: cfg.outputs});
-    try { localStorage.setItem(SETUP_STORE, JSON.stringify(list)); }
-    catch(e) {
-      list[list.length - 1].outputs = cfg.outputs.map(b => Object.assign({}, b, {logo: ''}));
-      try { localStorage.setItem(SETUP_STORE, JSON.stringify(list)); toast('Saved “' + name + '” without sponsor logos (not enough room to keep them).'); syncSetups(); return; } catch(e2) { toast('Couldn’t save the setup.'); return; }
-    }
-    $('setupName').value = ''; syncSetups(); toast('Saved “' + name + '”');
-  };
-  $('setupLoad').onclick = async () => {
-    const x = loadSetups()[+$('setupSel').value]; if (!x) { toast('Pick a saved setup.'); return; }
-    cfg.outputs = cfg.outputs.map((b, i) => fixBoard(Object.assign({}, x.outputs[i] || b, x.outputs[i] && !x.outputs[i].logo && b.logo ? {logo: b.logo} : {}), i));
-    $('qbRecipe').value = x.recipe; qb.sports = new Set(x.sports); syncQb(); syncSettings();
-    await buildRundown(x.recipe, x.sports, true);
-    toast('Loaded “' + x.name + '”');
-  };
-  let delArm = 0;
-  $('setupDel').onclick = () => {
-    const i = +$('setupSel').value, list = loadSetups(); if (!list[i]) return;
-    if (Date.now() > delArm) { delArm = Date.now() + 3000; toast('Click Delete again to remove “' + list[i].name + '”'); return; }
-    list.splice(i, 1); try { localStorage.setItem(SETUP_STORE, JSON.stringify(list)); } catch(e) {} delArm = 0; syncSetups(); toast('Setup deleted');
-  };
 
   // ---------- team names ----------
   let teamIdx = {};
@@ -2162,35 +2250,57 @@ function bootControl(){
   });
   $('pStale').addEventListener('change', e => { cfg.prefs = fixPrefs(Object.assign({}, cfg.prefs, {staleMin: +e.target.value})); NAME_OVR = cfg.prefs.names; renderNames(); save(); renderRundown(); });
   $('namesBox').addEventListener('toggle', syncTeamList);
-  syncQb(); syncSetups(); renderNames(); window.__syncQb = syncQb;
+  syncQb(); renderNames(); window.__syncQb = syncQb;
 
-  let clearArm = 0;
   $('clearRd').onclick = () => {
     if (!cfg.rundown.length) return;
-    if (Date.now() < clearArm) { cfg.rundown = []; clearArm = 0; $('clearRd').textContent = 'Clear'; $('clearRd').classList.remove('danger-armed'); changed(); toast('Rundown cleared'); return; }
-    clearArm = Date.now() + 3000; $('clearRd').textContent = 'Click again to clear'; $('clearRd').classList.add('danger-armed');
-    setTimeout(() => { if (Date.now() >= clearArm) { $('clearRd').textContent = 'Clear'; $('clearRd').classList.remove('danger-armed'); } }, 3100);
+    const before = JSON.parse(JSON.stringify(cfg.rundown)); cfg.rundown = []; changed(); undoable('Rundown cleared', before);
   };
 
   function changed(){ save(); renderList(); renderRundown(); renderAll(); push(); }
 
+  // ---------- first-run guide: three steps that tick themselves off ----------
+  const GUIDE = STORE + '.guide', guideSteps = {games: false, preview: false, send: false};
+  let guideOff = false; try { guideOff = localStorage.getItem(GUIDE) === 'done'; } catch(e) {}
+  if (!guideOff && cfg.rundown.length && online.on) { guideOff = true; try { localStorage.setItem(GUIDE, 'done'); } catch(e) {} }   // already up and running
+  function syncGuide(){
+    const g = $('guide');
+    if (guideOff) { if (!g.hidden && !g.classList.contains('fin')) g.hidden = true; return; }
+    guideSteps.games = cfg.rundown.length > 0;
+    guideSteps.send = guideSteps.send || online.on || outWins.some(w => w && !w.closed);
+    g.hidden = false;
+    g.querySelectorAll('li').forEach(li => li.classList.toggle('done', !!guideSteps[li.dataset.step]));
+    if (guideSteps.games && guideSteps.preview && guideSteps.send) {
+      guideOff = true; g.classList.add('fin'); try { localStorage.setItem(GUIDE, 'done'); } catch(e) {}
+      setTimeout(() => { g.hidden = true; g.classList.remove('fin'); }, 3000);
+    }
+  }
+  $('guideHide').onclick = () => { guideOff = true; $('guide').hidden = true; try { localStorage.setItem(GUIDE, 'done'); } catch(e) {} };
+  $('buildBox').open = !cfg.rundown.length;
+
   // previews + transport, one block per output
   $('outs').innerHTML = cfg.outputs.map((_, i) => '<div class="ob" data-o="' + i + '">' +
-    '<div class="pane-hd"><h2><b>Output ' + (i+1) + '</b> · <span class="onm"></span> <span class="osz"></span></h2>' +
-    '<button class="btn sm primary" data-x="open">Open window</button><button class="btn sm" data-x="link">Copy link</button></div>' +
-    '<div class="stage"><div class="holder"></div></div>' +
-    '<div class="transport"><button class="btn sm" data-x="prev">‹ Prev</button><button class="btn sm" data-x="play">Pause</button><button class="btn sm" data-x="next">Next ›</button><button class="btn sm" data-x="hide" title="Blank this output (background only)">Hide</button><span class="info"></span></div></div>').join('');
-  const OB = cfg.outputs.map((_, i) => { const el = document.querySelector('.ob[data-o="' + i + '"]'); return {el, stage: el.querySelector('.stage'), holder: el.querySelector('.holder'), info: el.querySelector('.info'), play: el.querySelector('[data-x="play"]'), hide: el.querySelector('[data-x="hide"]')}; });
+    '<div class="obh"><h2><b>Output ' + (i+1) + '</b> · <span class="onm"></span> <span class="osz"></span></h2><span class="air"></span>' +
+    '<span class="obb"><button class="btn sm" data-x="open" title="Open this output in a window on this computer. Drag it to the videoboard screen and double-click for full screen.">Open here</button>' +
+    '<button class="btn sm" data-x="link" title="Copy the link for a venue computer (DAK player, videoboard PC)">Screen link</button></span></div>' +
+    '<div class="stage"><div class="holder"></div><div class="hidmask">Hidden · screens show the background only</div></div>' +
+    '<div class="transport"><button class="btn sm" data-x="prev">‹ Prev</button><button class="btn sm" data-x="play">Pause</button><button class="btn sm" data-x="next">Next ›</button>' +
+    '<button class="btn sm hidebtn" data-x="hide" title="Blank this output on every screen (background only). Click again to show it.">Hide</button><span class="info"></span></div>' +
+    '<button type="button" class="pnote" data-x="pnote" hidden>Player stats are hidden on this output (smaller than 960×540). Change it in Board settings › What shows</button></div>').join('');
+  const OB = cfg.outputs.map((_, i) => { const el = document.querySelector('.ob[data-o="' + i + '"]');
+    return {el, stage: el.querySelector('.stage'), holder: el.querySelector('.holder'), info: el.querySelector('.info'), play: el.querySelector('[data-x="play"]'),
+      hide: el.querySelector('[data-x="hide"]'), air: el.querySelector('.air'), pnote: el.querySelector('.pnote')}; });
   window.renderAll = () => {
     OB.forEach((o, i) => {
       const b = cfg.outputs[i];
       o.stage.style.aspectRatio = b.w + ' / ' + b.h;
       const wide = b.w / b.h >= 3; o.el.classList.toggle('wide', wide);
-      o.stage.style.maxHeight = wide ? '16vh' : '34vh';
       o.holder.style.width = b.w + 'px'; o.holder.style.height = b.h + 'px';
-      o.el.querySelector('.onm').textContent = b.name || '';
+      o.el.querySelector('.onm').textContent = b.name || ''; if (i === SEL) $('editingTxt').textContent = 'Editing Output ' + (i+1) + ' · ' + (b.name || '');
       o.el.querySelector('.osz').textContent = b.w + '×' + b.h;
       renderBoard(o.holder, i); fit(o.stage, o.holder, b);
+      // tracked players are in this output's games but the size rule keeps them off: say so
+      o.pnote.hidden = !(b.players === 'auto' && !showPlayers(b) && TRACKED.length && pages(i).some(p => !p.standings && p.games.some(g => playersFor(g).length)));
     });
     updInfo();
   };
@@ -2198,10 +2308,18 @@ function bootControl(){
     OB.forEach((o, i) => {
       const n = pages(i).length, rt = rts[i];
       const left = Math.max(0, Math.ceil((rt.nextAt - Date.now())/1000));
-      o.info.textContent = (rt.hidden ? 'Hidden · ' : '') + (n ? 'Page ' + (rt.page+1) + ' of ' + n + (n > 1 ? (rt.paused ? ' · paused' : FAIL.role === 'standby' ? '' : ' · next in ' + left + 's') : '') : 'No pages');
+      o.info.textContent = n ? 'Page ' + (rt.page+1) + ' of ' + n + (n > 1 ? (rt.paused ? ' · paused' : FAIL.role === 'standby' ? '' : ' · next in ' + left + 's') : '') : 'No pages';
       o.play.textContent = rt.paused ? 'Play' : 'Pause';
-      o.hide.textContent = rt.hidden ? 'Show' : 'Hide'; o.hide.classList.toggle('danger-armed', !!rt.hidden);
+      o.hide.textContent = rt.hidden ? 'Show' : 'Hide'; o.hide.classList.toggle('on', !!rt.hidden);
+      // on-air tally: venue screens showing this output (from their check-ins) and windows open on this computer
+      const scr = (window.__screens || []).filter(x => +x.out === i + 1).length, local = !!(outWins[i] && !outWins[i].closed);
+      const air = rt.hidden ? 'Hidden' : (scr || local) ? 'On air · ' + [scr ? scr + (scr === 1 ? ' screen' : ' screens') : '', local ? 'window here' : ''].filter(Boolean).join(' + ') : '';
+      o.air.textContent = air; o.air.className = 'air' + (rt.hidden ? ' hid' : air ? ' on' : '');
+      o.el.classList.toggle('is-hidden', !!rt.hidden);
     });
+    const ago = pub.beat ? Math.round((Date.now() - pub.beat) / 1000) : -1;
+    $('liveNote').textContent = 'Changes go live immediately' + (online.on && onlineStatus.ok && FAIL.role !== 'standby' && ago >= 0 && ago < 60 ? ' · screens updated ' + (ago < 2 ? 'just now' : ago + 's ago') : '');
+    syncGuide();
   }
   const ro = new ResizeObserver(() => OB.forEach((o, i) => fit(o.stage, o.holder, cfg.outputs[i])));
   OB.forEach(o => ro.observe(o.stage));
@@ -2209,11 +2327,13 @@ function bootControl(){
   $('outs').addEventListener('click', e => {
     const ob = e.target.closest('.ob'); if (!ob) return;
     const i = +ob.dataset.o, x = e.target.closest('[data-x]');
+    guideSteps.preview = true;
     if (!x) { selectOutput(i); return; }
     const a = x.dataset.x;
+    if (a === 'pnote') { selectOutput(i); setTab('show'); $('boardSettings').open = true; $('boardSettings').scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
     if (a === 'prev') step(i, -1); else if (a === 'next') step(i, 1); else if (a === 'play') togglePlay(i);
     else if (a === 'open') openOutput(i); else if (a === 'link') copyLink(i);
-    else if (a === 'hide') { rts[i].hidden = !rts[i].hidden; renderAll(); push(); }
+    else if (a === 'hide') { rts[i].hidden = !rts[i].hidden; renderAll(); push(); toast(rts[i].hidden ? 'Output ' + (i+1) + ' is hidden on every screen' : 'Output ' + (i+1) + ' is showing again'); }
   });
   $('freeze').onchange = e => { frozen = e.target.checked; setFeed(feedErr); };
   document.addEventListener('keydown', e => {
@@ -2243,8 +2363,18 @@ function bootControl(){
     $('logoThumb').setAttribute('src', cfg.board.logo || ''); $('logoRemove').hidden = !cfg.board.logo;
     $('logoTxt').textContent = cfg.board.logo ? (hm === 'logo' ? 'Showing in the header.' : 'Saved. Set Header to "Sponsor logo" to show it.') : 'Drop a PNG, JPG, SVG or WebP here. A transparent PNG or SVG works best.';
   }
+  const setTab = t => {
+    if (!document.querySelector('#boardSettings .sgrid[data-pane="' + t + '"]')) t = 'size';
+    document.querySelectorAll('#boardSettings .sgrid[data-pane]').forEach(p => p.hidden = p.dataset.pane !== t);
+    [...$('setTabs').children].forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
+    try { localStorage.setItem(STORE + '.stab', t); } catch(e) {}
+  };
+  $('setTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setTab(b.dataset.t); });
+  { let t = 'size'; try { t = localStorage.getItem(STORE + '.stab') || 'size'; } catch(e) {} setTab(t); }
+  $('boardSettings').addEventListener('click', () => guideSteps.preview = true);
   function selectOutput(i){
     SEL = i;
+    $('editingTxt').textContent = 'Editing Output ' + (i+1) + ' · ' + (cfg.outputs[i].name || '');
     [...$('outTabs').children].forEach(b => b.setAttribute('aria-pressed', +b.dataset.o === i));
     OB.forEach((o, j) => o.el.classList.toggle('sel', j === i));
     $('lookFrom').innerHTML = cfg.outputs.map((b, j) => j === i ? '' : '<option value="' + j + '">From Output ' + (j+1) + ' · ' + esc(b.name) + '</option>').join('');
@@ -2317,21 +2447,29 @@ function bootControl(){
   if (chan) chan.addEventListener('message', e => { if (e.data && e.data.type === 'college-scoreboard-hello') push(true); });
   const SITE = location.protocol.startsWith('http') ? (location.origin + location.pathname.replace(/\/[^/]*$/, '')) : SITE_DEFAULT;
   // Short link for DAK computers: SITE/<board code>/<output number>. It follows this dashboard live.
-  function copyLink(i){
-    if (!online.on) { online.on = true; $('onlineOn').checked = true; saveOnline(); publishOnline(); }
-    const url = SITE + '/?' + online.id + '/' + (i+1);
-    $('copyBox').hidden = false; $('copyTxt').value = url; $('copyTxt').select();
-    const done = () => toast('Output ' + (i+1) + ' link copied: ' + url.replace(/^https?:\/\//, ''));
-    try { navigator.clipboard.writeText(url).then(done, () => {}); } catch(e) {}
+  const screenURL = i => SITE + '/?' + online.id + '/' + (i+1);
+  function renderLinks(){
+    $('linksList').innerHTML = cfg.outputs.map((b, i) => '<div class="url"><span>Output ' + (i+1) + ' · ' + esc(b.name) + '</span><input type="text" readonly value="' + esc(screenURL(i)) + '" data-out="' + i + '" aria-label="Screen link for output ' + (i+1) + '"><button class="btn sm" type="button" data-copy>Copy</button></div>').join('');
   }
+  const startSending = () => { if (!online.on) { online.on = true; $('onlineOn').checked = true; saveOnline(); resetPub(); publishOnline(); window.__onlineChanged(); toast('Sending to venue screens is now on'); } };
+  const copyText = (txt, what) => { try { navigator.clipboard.writeText(txt).then(() => toast(what + ' copied'), () => toast('Press Ctrl+C to copy')); } catch(e) { toast('Press Ctrl+C to copy'); } };
+  // Short link for a venue computer: SITE/?<board code>/<output number>. It follows this dashboard live.
+  function copyLink(i){
+    startSending(); renderLinks(); $('linksBox').hidden = false; guideSteps.send = true;
+    const inp = $('linksList').querySelector('[data-out="' + i + '"]'); inp.select();
+    copyText(inp.value, 'Output ' + (i+1) + ' screen link');
+  }
+  $('linksBtn').onclick = () => { if (!$('linksBox').hidden) { $('linksBox').hidden = true; return; } startSending(); renderLinks(); $('linksBox').hidden = false; guideSteps.send = true; };
+  $('linksClose').onclick = () => $('linksBox').hidden = true;
+  $('linksBox').addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if (!b) return; const inp = b.parentNode.querySelector('input'); inp.select(); copyText(inp.value, 'Link'); });
   const saveOnline = () => { try { localStorage.setItem(ONLINE_STORE, JSON.stringify(online)); } catch(e) {} };
   window.__onlineChanged = () => {
     const bar = $('onlineBar');
     bar.classList.toggle('ok', online.on && onlineStatus.ok === true); bar.classList.toggle('err', online.on && onlineStatus.ok === false);
-    $('onlineTxt').textContent = !online.on ? 'Off · board ' + online.id + '. Click Copy link on an output to start sending.' :
+    $('onlineTxt').textContent = !online.on ? 'Off · turn on to send these boards to the venue computers' :
       onlineStatus.ok === false ? onlineStatus.msg : !onlineStatus.ok ? 'Connecting…' :
       FAIL.role === 'standby' ? 'Standby · board ' + online.id + ' · ' + ((FAIL.ctl && FAIL.ctl.name) || 'another dashboard') + ' in control' :
-      'Live · board ' + online.id + ' · ' + SITE.replace(/^https?:\/\//, '') + '/?' + online.id + '/1';
+      'Live · board ' + online.id;
     if (window.__syncFailover) window.__syncFailover();
   };
   $('onlineOn').checked = !!online.on;
@@ -2342,12 +2480,14 @@ function bootControl(){
   $('moveUse').onclick = () => {
     const m = $('moveTxt').value.trim().match(/^([a-z0-9]{4,12}):([A-Za-z0-9]{16,})$/);
     if (!m) { toast('Paste a board code and key in the form code:key.'); return; }
+    if (online.key && m[1] !== online.id && !confirm('Switch this dashboard to board ' + m[1] + '? Your venue screens on board ' + online.id + ' will stop following this dashboard.')) return;
     if (m[1] === online.id && m[2] === online.key) { $('moveBox').hidden = true; return; }
     window.__switchBoard(m[1], m[2]);
     $('moveBox').hidden = true; toast('This dashboard now uses board ' + m[1] + '. If another dashboard is in control, this one waits on standby.'); publishOnline(); window.__onlineChanged();
   };
   window.__onlineChanged();
-  $('copyClose').onclick = () => $('copyBox').hidden = true;
+  // leaving while in control: the screens carry on, but warn so it isn't by accident
+  window.addEventListener('beforeunload', e => { if (FAIL.role === 'control' && online.on && pub.v === 2) { e.preventDefault(); e.returnValue = ''; } });
 
   // feed status
   function setFeed(err){
@@ -2498,47 +2638,91 @@ function bootControl(){
     renderRundown(); renderAll(); push();
   };
 
-  // ================= themes: template, colors and fonts, saved per signed-in user =================
-  const THEME_KEYS = ['tpl', 'fontName', 'fontData', 'textColor', 'panelColor', 'leadColor', 'rankColor', 'upper', 'bg', 'bgColor', 'accent', 'fade', 'hdAlign'];
-  const HOUSE = {name: 'House package (default)', builtin: true, look: {tpl: 'package', fontName: 'Scoreboard Display', fontData: '', textColor: '#FFFFFF', panelColor: '', leadColor: '', rankColor: '', upper: true, bg: 'board', bgColor: '#102A5E', accent: '#E87722', fade: 0.6, hdAlign: 'left'}};
-  let THEMES = [];
-  const themeStore = () => STORE + '.themes' + (AUTH.user ? '.' + AUTH.user.id : '');
-  const syncThemes = () => {
-    $('themeSel').innerHTML = '<option value="">Saved themes' + (AUTH.user ? ' (' + esc(AUTH.user.name || AUTH.user.email) + ')' : '') + '…</option>' +
-      [HOUSE].concat(THEMES).map((t, i) => '<option value="' + i + '">' + esc(t.name) + '</option>').join('');
+  // ================= presets: one place for saved setups and looks (games / look / sponsor / layout), per signed-in user =================
+  const PS_GROUPS = {
+    look: ['tpl', 'fontName', 'fontData', 'textColor', 'panelColor', 'leadColor', 'rankColor', 'upper', 'bg', 'bgColor', 'accent', 'names'],
+    sponsor: ['hdMode', 'hdAlign', 'hdSize', 'title', 'logo', 'presentedOn', 'presented', 'sportLabel'],
+    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players']
   };
-  async function loadThemes(){
-    try { THEMES = JSON.parse(localStorage.getItem(themeStore()) || '[]'); } catch(e) { THEMES = []; }
-    syncThemes();
+  const PS_NAMES = {games: 'games', look: 'look', sponsor: 'sponsor', layout: 'layout'};
+  const HOUSE = {name: 'House package look', builtin: true, look1: {tpl: 'package', fontName: 'Scoreboard Display', fontData: '', textColor: '#FFFFFF', panelColor: '', leadColor: '', rankColor: '', upper: true, bg: 'board', bgColor: '#102A5E', accent: '#E87722'}};
+  let PRESETS = [];
+  const psStore = () => STORE + '.presets' + (AUTH.user ? '.' + AUTH.user.id : '');
+  const fromThemes = t => (Array.isArray(t) ? t : []).filter(x => x && x.look).map(x => ({name: x.name, look1: x.look}));
+  // saved setups and themes from before presets carry over
+  function carryOver(){
+    const out = [];
+    try { JSON.parse(localStorage.getItem(STORE + '.setups') || '[]').forEach(x => out.push({name: x.name, parts: ['games', 'look', 'sponsor', 'layout'], games: {recipe: x.recipe, sports: x.sports}, outputs: x.outputs})); } catch(e) {}
+    try { fromThemes(JSON.parse(localStorage.getItem(STORE + '.themes' + (AUTH.user ? '.' + AUTH.user.id : '')) || '[]')).forEach(x => out.push(x)); } catch(e) {}
+    return out;
+  }
+  const psLabel = p => p.name + (p.look1 ? ' · look, this output' : p.parts ? ' · ' + p.parts.map(x => PS_NAMES[x]).join(', ') : '');
+  const syncPresets = () => {
+    $('psSel').innerHTML = '<option value="">Pick a preset…</option>' + [HOUSE].concat(PRESETS).map((p, i) => '<option value="' + i + '">' + esc(psLabel(p)) + '</option>').join('');
+    $('psWhere').textContent = AUTH.user ? '· saved to ' + (AUTH.user.name || AUTH.user.email) : '· saved on this computer';
+  };
+  async function loadPresets(){
+    let list = null; try { list = JSON.parse(localStorage.getItem(psStore()) || 'null'); } catch(e) {}
+    PRESETS = Array.isArray(list) ? list : carryOver(); syncPresets();
     if (AUTH.user && AUTH.v2) {
-      try { const r = await rpc('scoreboard_my_prefs', {p_id: online.id, p_session: AUTH.token, p_prefs: null}); if (r && r.ok && r.prefs && Array.isArray(r.prefs.themes)) { THEMES = r.prefs.themes; try { localStorage.setItem(themeStore(), JSON.stringify(THEMES)); } catch(e) {} syncThemes(); } } catch(e) {}
+      try {
+        const r = await rpc('scoreboard_my_prefs', {p_id: online.id, p_session: AUTH.token, p_prefs: null});
+        if (r && r.ok && r.prefs) {
+          const srv = Array.isArray(r.prefs.presets) ? r.prefs.presets : fromThemes(r.prefs.themes);
+          if (srv.length || Array.isArray(r.prefs.presets)) PRESETS = srv;
+          try { localStorage.setItem(psStore(), JSON.stringify(PRESETS)); } catch(e) {}
+          syncPresets();
+        }
+      } catch(e) {}
     }
   }
-  async function saveThemes(){
-    let local = true; try { localStorage.setItem(themeStore(), JSON.stringify(THEMES)); } catch(e) { local = false; }
-    if (AUTH.user && AUTH.v2) { try { const r = await rpc('scoreboard_my_prefs', {p_id: online.id, p_session: AUTH.token, p_prefs: {themes: THEMES}}); if (r && r.ok) return 'account'; } catch(e) {} }
+  const loadThemes = loadPresets;   // sign-in / sign-out reloads the list
+  async function savePresets(){
+    let local = true; try { localStorage.setItem(psStore(), JSON.stringify(PRESETS)); } catch(e) { local = false; }
+    if (AUTH.user && AUTH.v2) { try { const r = await rpc('scoreboard_my_prefs', {p_id: online.id, p_session: AUTH.token, p_prefs: {presets: PRESETS}}); if (r && r.ok) return 'account'; } catch(e) {} }
     return local ? 'computer' : '';
   }
-  $('themeSave').onclick = async () => {
-    const name = $('themeName').value.trim(); if (!name) { $('themeName').focus(); toast('Name the theme first.'); return; }
-    const look = {}; THEME_KEYS.forEach(k => look[k] = cfg.board[k]);
-    THEMES = THEMES.filter(t => t.name.toLowerCase() !== name.toLowerCase()); THEMES.push({name, look});
-    const where = await saveThemes(); $('themeName').value = ''; syncThemes();
-    toast(where === 'account' ? 'Theme “' + name + '” saved to your sign-in, so it’s on any dashboard you use' : where ? 'Theme “' + name + '” saved on this computer' : 'Couldn’t save the theme (the uploaded font may be too large).');
+  $('psNew').onclick = () => { $('psForm').hidden = !$('psForm').hidden; if (!$('psForm').hidden) $('psName').focus(); };
+  $('psCancel').onclick = () => $('psForm').hidden = true;
+  $('psSave').onclick = async () => {
+    const name = $('psName').value.trim(); if (!name) { $('psName').focus(); toast('Name the preset first.'); return; }
+    const parts = ['games', 'look', 'sponsor', 'layout'].filter(k => $('ps' + k[0].toUpperCase() + k.slice(1)).checked);
+    if (!parts.length) { toast('Tick at least one thing to save.'); return; }
+    const p = {name, parts};
+    if (parts.includes('games')) p.games = {recipe: $('qbRecipe').value, sports: [...qb.sports]};
+    const keys = [].concat(...parts.filter(k => PS_GROUPS[k]).map(k => PS_GROUPS[k]));
+    if (keys.length) p.outputs = cfg.outputs.map(b => { const o = {}; keys.forEach(k => o[k] = b[k]); return o; });
+    PRESETS = PRESETS.filter(x => x.name.toLowerCase() !== name.toLowerCase()); PRESETS.push(p);
+    let where = await savePresets(), note = '';
+    if (!where && p.outputs) { p.outputs.forEach(o => { if ('logo' in o) o.logo = ''; if ('fontData' in o) o.fontData = ''; }); where = await savePresets(); note = ' (without the logo and uploaded font: not enough room)'; }
+    $('psName').value = ''; $('psForm').hidden = true; syncPresets(); $('psSel').value = String(PRESETS.indexOf(p) + 1);
+    toast(!where ? 'Couldn’t save the preset.' : 'Preset “' + name + '” saved ' + (where === 'account' ? 'to your sign-in, so it’s on any dashboard you use' : 'on this computer') + note);
   };
-  $('themeApply').onclick = () => {
-    const i = $('themeSel').value; if (i === '') { toast('Pick a theme.'); return; }
-    const t = [HOUSE].concat(THEMES)[+i]; if (!t) return;
-    THEME_KEYS.forEach(k => { if (k in t.look) cfg.board[k] = t.look[k]; });
-    cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
-    toast('Output ' + (SEL + 1) + ' now uses “' + t.name + '”');
+  $('psLoad').onclick = async () => {
+    const i = $('psSel').value; if (i === '') { toast('Pick a preset.'); return; }
+    const p = [HOUSE].concat(PRESETS)[+i]; if (!p) return;
+    if (p.look1) {   // a look for the output you're editing
+      Object.keys(p.look1).forEach(k => cfg.board[k] = p.look1[k]);
+      cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
+      toast('Output ' + (SEL + 1) + ' now uses “' + p.name + '”'); return;
+    }
+    if (p.outputs) cfg.outputs = cfg.outputs.map((b, j) => {
+      const src = p.outputs[j]; if (!src) return b;
+      const o = Object.assign({}, b); Object.keys(src).forEach(k => { if ((k === 'logo' || k === 'fontData') && !src[k]) return; o[k] = src[k]; });
+      return fixBoard(o, j);
+    });
+    syncSettings(); save(); renderAll(); push();
+    if (p.games) { $('qbRecipe').value = p.games.recipe; qb.sports = new Set(p.games.sports); syncQb(); await buildRundown(p.games.recipe, p.games.sports, true, 'Loaded “' + p.name + '”'); }
+    else toast('Loaded “' + p.name + '”');
   };
-  let themeDelArm = 0;
-  $('themeDel').onclick = async () => {
-    const i = +$('themeSel').value - 1, t = THEMES[i]; if ($('themeSel').value === '' || !t) { toast('Pick one of your saved themes.'); return; }
-    if (Date.now() > themeDelArm) { themeDelArm = Date.now() + 3000; toast('Click Delete again to remove “' + t.name + '”'); return; }
-    THEMES.splice(i, 1); themeDelArm = 0; await saveThemes(); syncThemes(); toast('Theme deleted');
+  let psDelArm = 0;
+  $('psDel').onclick = async () => {
+    const i = +$('psSel').value - 1, p = PRESETS[i];
+    if ($('psSel').value === '' || !p) { toast($('psSel').value === '0' ? 'The house look can’t be deleted.' : 'Pick one of your presets.'); return; }
+    if (Date.now() > psDelArm) { psDelArm = Date.now() + 3000; toast('Click Delete again to remove “' + p.name + '”'); return; }
+    PRESETS.splice(i, 1); psDelArm = 0; await savePresets(); syncPresets(); toast('Preset deleted');
   };
+  syncPresets();
   // fonts: built-in, Google fonts, or the station's own font file
   $('fontFile').addEventListener('change', e => {
     const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -2619,7 +2803,7 @@ function bootControl(){
     try {
       const since = new Date(Date.now() - 40000).toISOString();
       const r = await fetch(SB_URL + '/rest/v1/scoreboard_outputs?board_id=eq.' + online.id + '&seen_at=gt.' + encodeURIComponent(since) + '&select=out,client,info,seen_at&order=out', {headers: SB_H, cache: 'no-store'});
-      SCREENS = r.ok ? await r.json() : [];
+      SCREENS = r.ok ? await r.json() : []; window.__screens = SCREENS;
     } catch(e) {}
     renderScreens();
   }
@@ -2641,9 +2825,9 @@ function bootControl(){
   function applyPerms(){
     const lock = (el, ok) => { if (!el) return; el.inert = !ok; el.classList.toggle('locked', !ok); };
     document.querySelectorAll('.pane.picker, .pane.rundown').forEach(el => lock(el, can('rundown')));
-    document.querySelectorAll('#boardSettings .sgrid > *, #boardSettings .themes, #lookFrom, #matchLook, #namesBox .names').forEach(el => lock(el, can(el.dataset.perm || 'settings')));
+    document.querySelectorAll('#boardSettings .sgrid > *, #lookFrom, #matchLook, #namesBox .names, .build .qb').forEach(el => lock(el, can(el.dataset.perm || 'settings')));
     document.querySelectorAll('.ob .transport, #freezeLbl').forEach(el => lock(el, can('control')));
-    document.querySelectorAll('.ob [data-x="open"], .ob [data-x="link"], #onlineOnLbl, #onlineMove').forEach(el => lock(el, can('outputs')));
+    document.querySelectorAll('.ob [data-x="open"], .ob [data-x="link"], #onlineOnLbl, #onlineMove, #linksBtn').forEach(el => lock(el, can('outputs')));
     document.querySelectorAll('[data-need="users"]').forEach(el => lock(el, AUTH.v2 !== false && (can('users') || (!AUTH.hasUsers && !AUTH.user && !AUTH.require))));
     document.querySelectorAll('[data-need="failover"]').forEach(el => lock(el, can('failover')));
   }
