@@ -407,6 +407,23 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .board .scf{font:800 1.65em/1 var(--f-score);text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
 .board .sov{font:800 1.25em/1 var(--f-score);text-align:center;opacity:.65;font-variant-numeric:tabular-nums;white-space:nowrap}
 .board .stand.wide{flex-direction:row;align-items:center;gap:1em}
+/* fantasy leaders page */
+.board .fgrid{flex:1;display:grid;min-height:0}
+.board .fbox{display:flex;flex-direction:column;min-width:0;min-height:0}
+.board .fbh{font:800 1.15em/1 var(--f-score);color:var(--rank);letter-spacing:.1em;text-transform:uppercase;padding:0 0 .45em .2em;border-bottom:.08em solid var(--shade);margin-bottom:.3em}
+.board .frow{height:var(--frow);display:grid;grid-template-columns:1.4em 2.6em minmax(0,1fr) auto;align-items:center;column-gap:.6em;padding:0 .8em 0 .5em;background:var(--panel);border-bottom:.06em solid var(--shade)}
+.board .frow:nth-child(even){background-image:linear-gradient(rgba(255,255,255,.035),rgba(255,255,255,.035))}
+.board .frow.none{display:flex;background:none}
+.board .frow .sp{font-size:1.2em}
+.board .flg{width:2.5em;height:2.5em;border-radius:50%;object-fit:cover;object-position:50% 12%;background:rgba(0,0,0,.2)}
+.board .flg.dst{border-radius:0;object-fit:contain;background:none}
+.board .fnm{display:flex;flex-direction:column;justify-content:center;gap:.2em;min-width:0}
+.board .fnm .sn{font-size:1.5em}
+.board .fln{font:800 .85em/1 var(--f-score);text-transform:uppercase;letter-spacing:.04em;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board .fp{font:800 1.9em/1 var(--f-score);color:var(--lead);font-variant-numeric:tabular-nums}
+.board .stand .ffoot{margin-left:auto;opacity:.75}
+.board .stand.wide.fant .scf.fp{color:var(--lead);opacity:1}
+.board .stand.wide.fant .flg{width:3.4em;height:3.4em}
 .board .srow.hl{background:var(--accent);background-image:none;border-bottom-color:transparent;box-shadow:.35em .35em 0 var(--shade);position:relative;z-index:1}
 .board .srow.hl .sp,.board .srow.hl .sn,.board .srow.hl .scf{color:#fff}
 .board .srow.hl .sov{opacity:.9;color:#fff}
@@ -502,6 +519,11 @@ body.out.trans{background:transparent}
             <select id="stConf" aria-label="Conference"><option value="sec">SEC</option><option value="acc">ACC</option><option value="b10">Big Ten</option><option value="b12">Big 12</option></select>
             <select id="stSport" aria-label="Standings sport"><option value="cfb">Football</option><option value="mbb">Men’s basketball</option><option value="wbb">Women’s basketball</option></select>
             <button class="btn sm" id="stAdd" type="button" title="Adds a standings page; it updates as conference games go final">Add standings</button>
+          </div>
+          <div class="qh">Fantasy football page <span class="qd">· NFL, PPR</span></div>
+          <div class="qrow">
+            <select id="ffPos" aria-label="Fantasy positions"><option value="all">All positions</option><option value="QB">Quarterbacks</option><option value="RB">Running backs</option><option value="WR">Wide receivers</option><option value="TE">Tight ends</option><option value="DST">Defense / special teams</option><option value="K">Kickers</option></select>
+            <button class="btn sm" id="ffAdd" type="button" title="Top fantasy scorers (PPR) across the NFL games on the date in the game picker. Updates live.">Add fantasy leaders</button>
           </div>
           <div class="qh">Presets <span class="qd" id="psWhere"></span></div>
           <div class="qrow">
@@ -630,10 +652,11 @@ body.out.trans{background:transparent}
           <label class="f" title="A drop-down box under a game when someone scores">Scoring play box
             <select id="sPlays" data-k="plays"><option value="cfb">Football only</option><option value="all">All sports</option><option value="off">Off</option></select>
           </label>
-          <label class="f">Scoring play seconds<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
+          <label class="f" title="How long a new scoring play holds the page. Football plays then stay under their game for at least a minute.">Scoring play: hold page (seconds)<input type="number" id="sPlaySecs" data-k="playSecs" min="4" max="30"></label>
           <label class="f">Upset alerts
             <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
           </label>
+          <label class="ck" title="Under each basketball game once someone has 20 points. Our tracked players take the spot first. Same size rule as player stats."><input type="checkbox" id="sLeaders" data-k="leaders"> Basketball top scorer (20+ pts)</label>
           <label class="f">NFL / NBA player stats
             <select id="sPlayers" data-k="players"><option value="auto">Large outputs only (960×540 and up)</option><option value="always">Always</option><option value="off">Off</option></select>
           </label>
@@ -764,7 +787,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',leaders:true,presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -816,7 +839,7 @@ function norm(ev, sport){
     key: sport + ':' + ev.id, id: String(ev.id), sport, date: ev.date || c.date,
     state: ty.state || 'pre', statusName: ty.name || '', detail: ty.shortDetail || ty.detail || '', period: +st.period || 0,
     timeValid: c.timeValid !== false, tv,
-    away: side('away'), home: side('home'),
+    away: side('away'), home: side('home'), top: topScorer(c, sport),
     sit: {
       poss: s.possession ? pfxTeam(sport, s.possession) : '', red: !!s.isRedZone,
       down: down, spot: spot,
@@ -977,9 +1000,10 @@ function plStripHTML(list){
     let v;
     if (s.kind === 'dnp') v = '<b>DNP</b>' + (s.note ? '<i>' + esc(s.note) + '</i>' : '');
     else if (s.kind === 'out') v = '<i class="ss">' + (s.final ? 'No stats' : 'No stats yet') + '</i>';
+    else if (s.kind === 'leader') v = '<i class="ss">' + esc(s.team ? s.team + ' · ' : '') + 'Top scorer</i>' + (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
     else v = (s.kind === 'season' ? '<i class="ss">' + (s.note ? esc(s.note) + ' · ' : '') + (p.sport === 'nba' ? 'Season avg' : 'Season') + '</i>' : '') +
       (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
-    return '<span class="ps"><span class="pt"><img class="phs" alt="" src="' + headshot(p) + '" onerror="this.style.display=\'none\'"><span>' + esc(p.label || p.name) + '</span></span><span class="pv">' + v + '</span></span>';
+    return '<span class="ps"><span class="pt"><img class="phs" alt="" src="' + (p.img || headshot(p)) + '" onerror="this.style.display=\'none\'"><span>' + esc(p.label || p.name) + '</span></span><span class="pv">' + v + '</span></span>';
   }).join('') + '</div>';
 }
 const isFB = s => s === 'cfb' || s === 'nfl';
@@ -987,6 +1011,75 @@ const isFB = s => s === 'cfb' || s === 'nfl';
 const PL_MIN_W = 960, PL_MIN_H = 540;
 const showPlayers = b => b.players === 'always' || (b.players === 'auto' && b.w >= PL_MIN_W && b.h >= PL_MIN_H && b.w / b.h < 4);
 const pfxTeam = (sport, id) => isPro(sport) ? sport + '-' + id : String(id);
+
+// ---------- basketball top scorer (from ESPN's scoreboard leaders) ----------
+const isHoops = s => s === 'mbb' || s === 'wbb' || s === 'nba';
+function topScorer(c, sport){
+  if (!isHoops(sport)) return null;
+  let top = null;
+  (c.competitors || []).forEach(x => {
+    const L = (x.leaders || []).find(l => l.name === 'points'), a = L && (L.leaders || [])[0];
+    if (!a || !a.athlete || !(+a.value >= 0) || (top && +a.value <= top.pts)) return;
+    const R = (x.leaders || []).find(l => l.name === 'rating'), r = R && (R.leaders || [])[0];
+    const img = a.athlete.headshot ? (typeof a.athlete.headshot === 'string' ? a.athlete.headshot : a.athlete.headshot.href || '') : '';
+    top = {id: String(a.athlete.id || ''), name: a.athlete.displayName || a.athlete.shortName || '', pts: +a.value, img, team: (x.team || {}).abbreviation || '',
+      line: r && r.athlete && String(r.athlete.id) === String(a.athlete.id) && /PTS/.test(r.displayValue || '') ? r.displayValue : (a.displayValue || a.value) + ' PTS'};
+  });
+  return top;
+}
+const TOP_MIN = 20;
+// what hangs under a game: our tracked players first; otherwise, in basketball, the game's top scorer once he has 20
+function stripFor(g, b){
+  if (!showPlayers(b)) return [];
+  const t = playersFor(g); if (t.length) return t;
+  const top = b.leaders !== false && isHoops(g.sport) && g.state !== 'pre' && g.top && g.top.pts >= TOP_MIN ? g.top : null;
+  if (!top) return [];
+  const items = String(top.line).split(/,\s*/).map(x => { const m = x.match(/^([\d.\-\/]+)\s*(.*)$/); return m ? {v: m[1], l: m[2]} : {v: x, l: ''}; });
+  return [{p: {id: top.id, name: top.name, label: top.name, img: top.img, sport: g.sport}, s: {kind: 'leader', team: top.team, items}}];
+}
+
+// ---------- fantasy football leaders (PPR, ESPN-style standard scoring) ----------
+var FANTASY = {};    // NFL date (yyyymmdd) -> {at, started, players: [{id, name, short, team, pos, pts, line, img}]}
+const FF_POS = [['QB', 'Quarterbacks'], ['RB', 'Running backs'], ['WR', 'Wide receivers'], ['TE', 'Tight ends'], ['DST', 'Defense / ST'], ['K', 'Kickers']];
+const FF_LABEL = {all: 'All positions', QB: 'Quarterbacks', RB: 'Running backs', WR: 'Wide receivers', TE: 'Tight ends', DST: 'Defense / special teams', K: 'Kickers'};
+const shortName = n => { const p = String(n || '').trim().split(/\s+/); if (p.length < 2) return n; const last = p.slice(1).join(' ').replace(/\s+(Jr\.?|Sr\.?|II|III|IV)$/i, ''); return p[0][0] + '. ' + last; };
+const fmtPts = v => (Math.round(v * 10) / 10).toFixed(1);
+function fantasyHTML(item, b, geo){
+  const d = FANTASY[item.date], all = (d && d.players) || [];
+  const left = geo.hw + geo.padX, top = geo.hh + geo.padY, W = geo.gw, H = geo.gh;
+  const title = 'Fantasy leaders', sub = 'NFL · PPR' + (item.pos !== 'all' ? ' · ' + FF_LABEL[item.pos] : '');
+  if (!d || !d.started) return '<div class="stand fant" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px"><div class="empty" style="position:absolute;inset:0;font-size:' + (H * 0.07).toFixed(1) + 'px">' + (d ? 'Fantasy leaders appear once the games kick off' : 'Loading fantasy leaders…') + '</div></div>';
+  const by = pos => all.filter(p => p.pos === pos).sort((a, c) => c.pts - a.pts);
+  const img = p => '<img class="flg' + (p.pos === 'DST' ? ' dst' : '') + '" alt="" src="' + esc(p.img) + '" onerror="this.style.visibility=\'hidden\'">';
+  const nm = p => esc(p.pos === 'DST' ? p.name : p.short || p.name);
+  if (geo.wide) {   // fascia / ribbon: title block, then the leaders in one row
+    const list = item.pos === 'all' ? FF_POS.map(([k]) => by(k)[0]).filter(Boolean) : by(item.pos).slice(0, 8);
+    const u = H / 10, chip = u * 24, n = Math.max(1, Math.min(list.length, Math.floor((W - u * 26) / chip)));
+    return '<div class="stand wide fant" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px;font-size:' + u.toFixed(2) + 'px">' +
+      '<div class="sth"><span class="stt">' + title + '</span><span class="sts">' + esc(sub) + '</span></div>' +
+      list.slice(0, n).map((p, k) => '<div class="srow"><span class="sp">' + (item.pos === 'all' ? (p.pos === 'DST' ? 'D/ST' : p.pos) : k + 1) + '</span>' + img(p) + '<span class="sn">' + nm(p) + '</span><span class="scf fp">' + fmtPts(p.pts) + '</span></div>').join('') + '</div>';
+  }
+  const box = (pos, label, rows, perBox) => {
+    const list = by(pos).slice(0, perBox);
+    return '<div class="fbox"><div class="fbh">' + esc(label) + '</div>' + (list.length ? list.map((p, k) =>
+      '<div class="frow"><span class="sp">' + (k + 1) + '</span>' + img(p) + '<span class="fnm"><span class="sn">' + nm(p) + '</span><span class="fln">' + esc((p.pos === 'DST' ? '' : p.team + ' · ') + p.line) + '</span></span><span class="fp">' + fmtPts(p.pts) + '</span></div>').join('') :
+      '<div class="frow none"><span class="fln">No ' + esc(label.toLowerCase()) + ' yet</span></div>') + '</div>';
+  };
+  const titleH = Math.round(H * 0.12);
+  let cols, rowsN, perBox, boxes;
+  if (item.pos === 'all') { cols = W / H >= 1.3 ? 3 : 2; rowsN = 6 / cols; perBox = W / H >= 1.3 ? 4 : 3; boxes = FF_POS.map(([k, l]) => box(k, l, rowsN, perBox)); }
+  else { cols = W / H >= 1.3 ? 2 : 1; rowsN = 1; perBox = 10 / cols; const list = by(item.pos);
+    boxes = [...Array(cols)].map((_, c) => '<div class="fbox"><div class="fbh">' + (c ? '&nbsp;' : esc(FF_LABEL[item.pos])) + '</div>' + list.slice(c * perBox, (c + 1) * perBox).map((p, k) =>
+      '<div class="frow"><span class="sp">' + (c * perBox + k + 1) + '</span>' + img(p) + '<span class="fnm"><span class="sn">' + nm(p) + '</span><span class="fln">' + esc((p.pos === 'DST' ? '' : p.team + ' · ') + p.line) + '</span></span><span class="fp">' + fmtPts(p.pts) + '</span></div>').join('') + '</div>'); }
+  const gap = Math.round(Math.min(W, H) * 0.025), boxH = (H - titleH - gap * rowsN) / rowsN;
+  const rowH = boxH / (perBox + 0.8), u = Math.max(4, Math.min(rowH / 2.7, ((W - gap * (cols - 1)) / cols) / 20));
+  return '<div class="stand fant" style="left:' + left + 'px;top:' + top + 'px;width:' + W + 'px;height:' + H + 'px">' +
+    '<div class="sth" style="height:' + titleH + 'px;font-size:' + (titleH * 0.62).toFixed(1) + 'px"><span class="stt">' + title + '</span><span class="sts">' + esc(sub) + '</span>' +
+    '<span class="sts ffoot">' + (d.live ? 'Live · ' : '') + d.games + (d.games === 1 ? ' game' : ' games') + '</span></div>' +
+    '<div class="fgrid" style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr));grid-template-rows:repeat(' + rowsN + ',' + boxH.toFixed(1) + 'px);gap:' + gap + 'px;padding-top:' + gap + 'px;font-size:' + u.toFixed(2) + 'px;--frow:' + rowH.toFixed(1) + 'px">' +
+    boxes.join('') + '</div></div>';
+}
+
 function perPage(b){ return b.layout === 'grid' ? Math.max(1, b.cols * b.rows) : Math.max(1, b.perPage); }
 
 function buildPages(items, board){
@@ -995,7 +1088,7 @@ function buildPages(items, board){
   const chunk = (arr, sport) => {
     let cur = [];
     const flush = () => { for (let i = 0; i < cur.length; i += per) pages.push({sport, games: cur.slice(i, i+per)}); cur = []; };
-    arr.forEach(g => { if (g.standings) { flush(); pages.push({sport: g.sport, standings: g, games: []}); } else cur.push(g); });
+    arr.forEach(g => { if (g.standings) { flush(); pages.push({sport: g.sport, standings: g, games: []}); } else if (g.fantasy) { flush(); pages.push({sport: g.sport, fantasy: g, games: []}); } else cur.push(g); });
     flush();
   };
   if (board.groupBySport) {
@@ -1131,10 +1224,14 @@ function playHead(sport, delta, type){
   return delta === 3 ? '3-Pointer' : delta === 1 ? 'Free Throw' : delta === 2 ? '2 Points' : 'Score';
 }
 // a scoring play shows on this output if the output's setting covers the sport and it's still fresh
-function activePlay(g, b, now){
+// football plays stay under their game for at least a minute; other sports for the "scoring play seconds" setting
+const playDur = (sport, b) => (isFB(sport) ? Math.max(60, b.playSecs) : b.playSecs) * 1000;
+function activePlay(g, b, now, pageStart){
   const p = PLAYS[g.key];
-  if (!p || b.plays === 'off' || (b.plays === 'cfb' && !isFB(g.sport))) return null;
-  return now < p.t + b.playSecs * 1000 ? p : null;
+  if (!p || p.ready === false || b.plays === 'off' || (b.plays === 'cfb' && !isFB(g.sport))) return null;
+  const end = p.t + playDur(g.sport, b);
+  // once its page is on air, the play stays put until the page changes (never drops off mid-page)
+  return now < end || (pageStart && p.t <= pageStart && end > pageStart) ? p : null;
 }
 // The board redraws often (score refreshes, play text arriving, heartbeats). A CSS animation restarts on every redraw,
 // so each animation remembers when it first appeared and later redraws continue it (negative delay) instead of restarting.
@@ -1176,8 +1273,8 @@ function cardHTML(g, ctx){
       (b.records && t.record ? '<span class="rec">' + esc(t.record) + '</span>' : '') + '</span>' +
       '<span class="sc" style="' + scW + bst + '">' + (showScore ? esc(t.score) : '') + '</span></div>';
   };
-  const play = activePlay(g, b, ctx.now), upset = upsetTag(g, b.upsets);
-  const pls = !play && showPlayers(b) ? playersFor(g) : [], plShow = pls.length && (!ctx.wide || ctx.flip);
+  const play = activePlay(g, b, ctx.now, ctx.pageStart), upset = upsetTag(g, b.upsets);
+  const pls = !play ? stripFor(g, b) : [], plShow = pls.length && (!ctx.wide || ctx.flip);
   return '<div class="g' + (ctx.mirror ? ' mir' : '') + (play ? ' has-play' : '') + (ctx.wide ? ' wide' : '') + '">' + (upset ? '<span class="upset">' + esc(upset) + '</span>' : '') + '<div class="br"><i></i><i class="o"></i><i></i></div>' +
     '<div class="pn"><div class="tm">' + row(g.away, 'a') + row(g.home, 'h') + '</div>' + brandStatus(g, b, ctx.tag) + '</div>' +
     (play ? playHTML(g, play) : '') + (plShow ? plStripHTML(pls) : '') + '</div>';
@@ -1219,7 +1316,9 @@ function darken(hex, amt){
 }
 function boardHTML(pages, idx, b, opt){
   const page = pages[idx] || {sport:null, games:[]};
-  const strip = showPlayers(b) && !page.standings && page.games.some(g => playersFor(g).length);
+  // room under the games for a strip: tracked players / top scorer, or a football scoring play that sits there for a minute
+  // (reserved whenever a football game on the page is live, so the cards don't resize when a play drops in)
+  const strip = !page.standings && !page.fantasy && page.games.some(g => stripFor(g, b).length || (b.plays !== 'off' && isFB(g.sport) && g.state === 'in'));
   const geo = geometry(b, page.games.length, strip);
   const bg = b.bg === 'transparent' ? 'transparent' : b.bg === 'green' ? '#00B140' : b.bgColor;
   const panel = b.panelColor || darken(b.bgColor, 0.16);
@@ -1239,6 +1338,8 @@ function boardHTML(pages, idx, b, opt){
   }
   if (opt.blank) {
     // output hidden from the Stream Deck / dashboard: background (and header) only
+  } else if (page.fantasy) {
+    h += fantasyHTML(page.fantasy, b, geo).replace('<div class="stand', '<div class="stand' + (opt.enter && b.fade > 0 ? ' enter' : ''));
   } else if (page.standings) {
     h += standingsHTML(page.standings, b, geo).replace('<div class="stand', '<div class="stand' + (opt.enter && b.fade > 0 ? ' enter' : ''));
   } else if (!page.games.length) {
@@ -1250,7 +1351,7 @@ function boardHTML(pages, idx, b, opt){
     const now = Date.now();
     h += '<div class="grid' + (opt.enter && b.fade > 0 ? ' enter' : '') + '" style="left:' + (geo.hw + geo.padX) + 'px;top:' + (geo.hh + geo.padY) + 'px;width:' + geo.gw + 'px;height:' + (geo.gh - geo.stripPx) + 'px;' +
       'grid-template-columns:repeat(' + geo.cols + ',' + geo.cw.toFixed(1) + 'px);grid-template-rows:repeat(' + geo.rows + ',' + geo.ch.toFixed(1) + 'px);column-gap:' + geo.cgap + 'px;row-gap:' + geo.rgap + 'px;font-size:' + geo.u.toFixed(2) + 'px">' +
-      page.games.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide, flip: Math.floor(now / 6000) % 2 === 1})).join('') + '</div>';
+      page.games.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, pageStart: opt.pageStart, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide, flip: Math.floor(now / 6000) % 2 === 1})).join('') + '</div>';
   }
   return h + '</div>';
 }
@@ -1290,7 +1391,8 @@ function fixBoard(b, i){
   o.header = o.hdMode !== 'off'; o.hdAlign = o.hdAlign === 'center' ? 'center' : 'left'; o.hdSize = clampN(o.hdSize,6,45,d.hdSize);
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
   o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
-  o.players = ['off', 'always'].includes(o.players) ? o.players : 'auto';   // older 'below' setting becomes the size rule
+  o.players = ['off', 'always'].includes(o.players) ? o.players : 'auto';
+  o.leaders = o.leaders !== false;   // older 'below' setting becomes the size rule
   o.presentedOn = !!o.presentedOn; o.presented = String(o.presented == null ? d.presented : o.presented).slice(0, 30);
   o.tpl = ['package','clean','bar'].includes(o.tpl) ? o.tpl : 'package';
   if (o.fontName !== 'custom' && !(o.fontName in FONTS)) o.fontName = d.fontName;
@@ -1378,9 +1480,12 @@ let controlledAt = 0;
 const ownsData = () => !IS_OUT || Date.now() - controlledAt > 6000;
 async function scoringPlay(g, side, delta){
   const last = g.sit.last;
-  const p = {t: Date.now(), side, head: playHead(g.sport, delta, last && last.type), text: (last && last.text) || ''};
+  // football waits (up to 8 s) for ESPN's full play text so the box doesn't change once it's up
+  const p = {t: Date.now(), side, head: playHead(g.sport, delta, last && last.type), text: (last && last.text) || '', ready: !isFB(g.sport)};
   PLAYS[g.key] = p;
   if (!isFB(g.sport)) return;
+  const show = () => { if (p.ready || PLAYS[g.key] !== p) return; p.ready = true; p.t = Date.now(); if (typeof renderAll === 'function') renderAll(); push(); };
+  setTimeout(show, 8000);
   // football: ESPN's game summary has the full scoring play ("Smith 34 Yd pass from Jones (Doe Kick)")
   try {
     const r = await fetch(API + SPORTS[g.sport].path + '/summary?event=' + g.id, {cache:'no-store'});
@@ -1390,10 +1495,9 @@ async function scoringPlay(g, side, delta){
       if (lp.text) p.text = lp.text;
       p.head = playHead(g.sport, delta, lp.type && lp.type.text);
       if (lp.team && lp.team.id) { const tid = pfxTeam(g.sport, lp.team.id); p.side = tid === g.home.id ? 'h' : tid === g.away.id ? 'a' : p.side; }
-      if (typeof renderAll === 'function') renderAll();
-      push();
     }
   } catch(e) {}
+  show();
 }
 // College Football Playoff rankings replace ESPN's poll for football once this season's CFP rankings exist
 let rankSource = '';
@@ -1426,7 +1530,7 @@ async function espnJSON(url){
 const BOX = {};      // game key -> {at, final, players}  (just the box score, kept small)
 const SEASON = {};   // player id -> {at, items}
 const slimBox = j => ((j.boxscore || {}).players || []).map(t => ({team: String((t.team || {}).id || ''), cats: (t.statistics || []).map(s => ({name: s.name || 'stats', labels: s.labels || s.names || [],
-  athletes: (s.athletes || []).map(a => ({id: String((a.athlete || {}).id || ''), stats: a.stats || [], dnp: !!a.didNotPlay, reason: a.reason || ''}))}))}));
+  athletes: (s.athletes || []).map(a => ({id: String((a.athlete || {}).id || ''), name: (a.athlete || {}).displayName || '', stats: a.stats || [], dnp: !!a.didNotPlay, reason: a.reason || ''}))}))}));
 function findInBox(box, pid){
   let found = null;
   box.forEach(t => t.cats.forEach(c => c.athletes.forEach(a => {
@@ -1514,8 +1618,103 @@ async function refreshPlayerStats(){
   return JSON.stringify(PSTATS) !== before;
 }
 
+
+// ---------- fantasy football: box scores of every NFL game on the slate -> PPR points ----------
+const FBOX = {};            // game key -> {at, final, players, teams, plays}
+const FF_POSMAP = {}, FF_TEAMAT = {};   // athlete id -> position (from team rosters), team id -> when its roster was read
+async function ffPositions(tid){
+  if (FF_TEAMAT[tid] && Date.now() - FF_TEAMAT[tid] < 12 * 3600e3) return;
+  const j = await espnJSON(API + 'football/nfl/teams/' + tid + '/roster');
+  FF_TEAMAT[tid] = j ? Date.now() : Date.now() - 12 * 3600e3 + 300000;
+  if (!j) return;
+  [].concat(...((j.athletes || []).map(gr => gr.items || []))).forEach(a => { const p = (a.position || {}).abbreviation || ''; FF_POSMAP[String(a.id)] = p === 'PK' ? 'K' : p === 'FB' ? 'RB' : p; });
+}
+const ffTeamStats = j => ((j.boxscore || {}).teams || []).map(t => { const st = {}; (t.statistics || []).forEach(x => { if (!(x.name in st)) st[x.name] = x.displayValue; }); return {id: String((t.team || {}).id || ''), abbr: (t.team || {}).abbreviation || '', logo: (t.team || {}).logo || '', st}; });
+const ffPlays = j => (j.scoringPlays || []).map(p => ({team: String((p.team || {}).id || ''), type: ((p.type || {}).text) || '', text: p.text || ''}));
+// ESPN standard PPR: pass 0.04/yd, 4/TD, -2/INT; rush & rec 0.1/yd, 6/TD; 1/catch; -2/fumble lost; 6/return TD.
+// K: FG 0-39 = 3, 40-49 = 4, 50+ = 5, missed FG -1, PAT +1 / missed -1.
+// D/ST: sack 1, INT 2, fumble recovery 2, TD 6, safety 2, plus points-allowed and yards-allowed tiers.
+const PA_TIER = pa => pa === 0 ? 5 : pa <= 6 ? 4 : pa <= 13 ? 3 : pa <= 17 ? 1 : pa <= 27 ? 0 : pa <= 34 ? -1 : pa <= 45 ? -3 : -5;
+const YA_TIER = ya => ya < 100 ? 5 : ya < 200 ? 3 : ya < 300 ? 2 : ya < 350 ? 0 : ya < 400 ? -1 : ya < 450 ? -3 : ya < 500 ? -5 : ya < 550 ? -6 : -7;
+function ffGame(g, bx){
+  const P = {}, n = v => parseFloat(String(v == null ? '' : v).replace(/[^\d.\-]/g, '')) || 0;
+  const pair = v => { const m = String(v || '').match(/(\d+)\s*\/\s*(\d+)/); return m ? [+m[1], +m[2]] : [0, 0]; };
+  const tAbbr = tid => { const t = bx.teams.find(x => x.id === tid); return t ? t.abbr : ''; };
+  bx.players.forEach(t => t.cats.forEach(c => c.athletes.forEach(a => {
+    if (!a.id || !a.stats.length) return;
+    const p = P[a.id] || (P[a.id] = {id: a.id, team: t.team, s: {}}), v = k => a.stats[c.labels.indexOf(k)];
+    if (c.name === 'passing') { p.s.pYd = n(v('YDS')); p.s.pTd = n(v('TD')); p.s.int = n(v('INT')); p.s.cmp = v('C/ATT'); }
+    else if (c.name === 'rushing') { p.s.rYd = n(v('YDS')); p.s.rTd = n(v('TD')); p.s.car = n(v('CAR')); }
+    else if (c.name === 'receiving') { p.s.rec = n(v('REC')); p.s.reYd = n(v('YDS')); p.s.reTd = n(v('TD')); }
+    else if (c.name === 'fumbles') p.s.fl = n(v('LOST'));
+    else if (c.name === 'kickReturns' || c.name === 'puntReturns') p.s.retTd = (p.s.retTd || 0) + n(v('TD'));
+    else if (c.name === 'kicking') { p.s.fg = pair(v('FG')); p.s.xp = pair(v('XP')); }
+  })));
+  const names = {}; bx.players.forEach(t => t.cats.forEach(c => c.athletes.forEach(a => { if (a.name) names[a.id] = a.name; })));
+  const out = [];
+  Object.values(P).forEach(p => {
+    const s = p.s, pos = FF_POSMAP[p.id] || (s.fg ? 'K' : s.pYd != null && (s.pYd > 40 || !s.rec) ? 'QB' : '');
+    if (!['QB', 'RB', 'WR', 'TE', 'K'].includes(pos)) return;
+    let pts = 0, line = '';
+    if (pos === 'K') {
+      const fgs = bx.plays.filter(x => x.team === p.team && /field goal/i.test(x.type) && !/miss|block/i.test(x.type)).map(x => (x.text.match(/^(.+?)\s+(\d+)\s*Yd\s+Field Goal/i) || [])).filter(m => m[1] && names[p.id] && m[1].trim() === names[p.id]).map(m => +m[2]);
+      const [fgm, fga] = s.fg || [0, 0], [xpm, xpa] = s.xp || [0, 0];
+      pts = fgs.reduce((t, d) => t + (d >= 50 ? 5 : d >= 40 ? 4 : 3), 0) + Math.max(0, fgm - fgs.length) * 3 - (fga - fgm) + xpm - (xpa - xpm);
+      line = fgm + '/' + fga + ' FG' + (fgs.length ? ' (' + fgs.join(', ') + ')' : '') + ' · ' + xpm + '/' + xpa + ' XP';
+    } else {
+      pts = (s.pYd || 0) * 0.04 + (s.pTd || 0) * 4 - (s.int || 0) * 2 + (s.rYd || 0) * 0.1 + (s.rTd || 0) * 6 + (s.rec || 0) + (s.reYd || 0) * 0.1 + (s.reTd || 0) * 6 - (s.fl || 0) * 2 + (s.retTd || 0) * 6;
+      const td = (s.rTd || 0) + (s.reTd || 0) + (s.retTd || 0);
+      if (pos === 'QB') line = (s.pYd || 0) + ' YDS ' + (s.pTd || 0) + ' TD' + (s.int ? ' ' + s.int + ' INT' : '') + ((s.rYd || 0) >= 10 || s.rTd ? ' · ' + (s.rYd || 0) + ' RUSH' + (s.rTd ? ' ' + s.rTd + ' TD' : '') : '');
+      else if (pos === 'RB') line = (s.rYd || 0) + ' RUSH' + (s.rec ? ' · ' + s.rec + ' REC ' + (s.reYd || 0) + ' YDS' : '') + (td ? ' · ' + td + ' TD' : '');
+      else line = (s.rec || 0) + ' REC ' + (s.reYd || 0) + ' YDS' + (td ? ' · ' + td + ' TD' : '');
+    }
+    out.push({id: p.id, name: names[p.id] || '', short: shortName(names[p.id] || ''), team: tAbbr(p.team), pos, pts, line, img: 'https://a.espncdn.com/i/headshots/nfl/players/full/' + p.id + '.png'});
+  });
+  // defense / special teams, one per team
+  bx.teams.forEach(t => {
+    const opp = bx.teams.find(x => x.id !== t.id) || {st: {}};
+    const mine = bx.players.find(x => x.team === t.id) || {cats: []}, tot = (name, k) => { const c = mine.cats.find(x => x.name === name); if (!c) return 0; return c.athletes.reduce((s, a) => s + n(a.stats[c.labels.indexOf(k)]), 0); };
+    const sacks = tot('defensive', 'SACKS'), ints = tot('interceptions', 'INT'), fr = n(opp.st.fumblesLost), tds = n(t.st.defensiveTouchdowns) + tot('kickReturns', 'TD') + tot('puntReturns', 'TD');
+    const saf = bx.plays.filter(x => x.team === t.id && /safety/i.test(x.type)).length;
+    const oppTeam = g.away.id === 'nfl-' + opp.id ? g.away : g.home, pa = n(oppTeam.score), ya = n(opp.st.totalYards);
+    const pts = sacks + ints * 2 + fr * 2 + tds * 6 + saf * 2 + PA_TIER(pa) + YA_TIER(ya);
+    const line = [sacks ? sacks + ' SACK' : '', ints ? ints + ' INT' : '', fr ? fr + ' FR' : '', tds ? tds + ' TD' : '', pa + ' PA'].filter(Boolean).join(' · ');
+    const team = g.away.id === 'nfl-' + t.id ? g.away : g.home;
+    out.push({id: 'dst-' + t.id, name: (team.name || t.abbr) + ' D/ST', short: t.abbr + ' D/ST', team: t.abbr, pos: 'DST', pts, line, img: team.logo || t.logo || ''});
+  });
+  return out;
+}
+let ffBusy = false;
+async function refreshFantasy(){
+  const dates = [...new Set(cfg.rundown.filter(r => r.fantasy).map(r => r.date))];
+  if (ffBusy || !dates.length) return false;
+  ffBusy = true;
+  const before = JSON.stringify(FANTASY);
+  try {
+    for (const date of dates) {
+      await loadFeed(feedKey({sport: 'nfl', date, group: ''})).catch(() => {});
+      const list = (feeds[feedKey({sport: 'nfl', date, group: ''})] || []).filter(g => g.state !== 'pre');
+      const now = Date.now(), players = [];
+      for (const g of list) {
+        let bx = FBOX[g.key];
+        if (!bx || (!bx.final && now - bx.at > 45000)) {
+          const j = await espnJSON(API + 'football/nfl/summary?event=' + g.id);
+          if (j) bx = FBOX[g.key] = {at: now, final: g.state === 'post', players: slimBox(j), teams: ffTeamStats(j), plays: ffPlays(j)};
+        }
+        if (!bx) continue;
+        for (const t of bx.teams) await ffPositions(t.id);
+        players.push(...ffGame(g, bx));
+      }
+      FANTASY[date] = {at: now, started: list.length > 0, games: list.length, live: list.some(g => g.state === 'in'), players: players.sort((a, b) => b.pts - a.pts).slice(0, 160)};
+    }
+  } catch(e) {}
+  ffBusy = false;
+  return JSON.stringify(FANTASY) !== before;
+}
+const fantasyFor = () => { const o = {}; cfg.rundown.filter(r => r.fantasy).forEach(r => { if (FANTASY[r.date]) o[r.date] = FANTASY[r.date]; }); return o; };
+
 const feedKey = r => r.sport + '|' + r.date + '|' + (r.group || '');
-const feedRows = () => cfg.rundown.filter(r => !r.manual && !r.standings);
+const feedRows = () => cfg.rundown.filter(r => !r.manual && !r.standings && !r.fantasy);
 async function loadStandings(sport, conf){
   const gid = (STANDINGS_GROUPS[sport] || {})[conf]; if (!gid) throw new Error('no standings');
   let j = null;
@@ -1548,7 +1747,7 @@ async function loadFeed(k){
 }
 
 function rundownGames(){
-  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf, hl: r.hl || [], dim: r.dim !== false} : games[r.key]).filter(Boolean);
+  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.fantasy ? {key: r.key, fantasy: true, sport: 'nfl', date: r.date, pos: r.pos || 'all'} : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf, hl: r.hl || [], dim: r.dim !== false} : games[r.key]).filter(Boolean);
 }
 function pages(i){ return buildPages(rundownGames(), cfg.outputs[i]); }
 
@@ -1563,6 +1762,7 @@ function renderBoard(holder, i){
   const ps = pages(i), rt = rts[i];
   if (rt.page >= ps.length) rt.page = 0;
   const enter = rt.page !== rt.lastPage; rt.lastPage = rt.page;
+  if (enter || !rt.pageAt) rt.pageAt = Date.now();
   if (!enter && Date.now() < (rt.fadeUntil || 0)) {
     clearTimeout(rt.fadeT); rt.fadeT = setTimeout(() => renderAll(), rt.fadeUntil - Date.now() + 20);
     return ps;
@@ -1572,7 +1772,7 @@ function renderBoard(holder, i){
   // dissolve: the outgoing page stays layered on the board and fades out while the new page fades in
   const prev = enter && b.fade > 0 ? holder.querySelector('.board > .grid:not(.leave), .board > .stand:not(.leave)') : null;
   if (enter && b.fade > 0) rt.fadeUntil = Date.now() + b.fade * 1000;
-  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, blank: !!rt.hidden, font: boardFont(b, i), bumped: k => (bumps[k] || 0) > now ? bumps[k] : 0});
+  holder.innerHTML = boardHTML(ps, rt.page, b, {enter, emptyText: window.__emptyText, blank: !!rt.hidden, font: boardFont(b, i), bumped: k => (bumps[k] || 0) > now ? bumps[k] : 0, pageStart: rt.pageAt});
   if (prev) {
     const nb = holder.querySelector('.board');
     prev.classList.remove('enter'); prev.classList.add('leave');
@@ -1581,11 +1781,11 @@ function renderBoard(holder, i){
   }
   fitNames(holder);
   // wide boards swap the bottom team for the player strip every 6 seconds
-  if (isWide(b) && showPlayers(b) && (ps[rt.page] || {games: []}).games.some(g => playersFor(g).length)) {
+  if (isWide(b) && (ps[rt.page] || {games: []}).games.some(g => stripFor(g, b).length)) {
     clearTimeout(window.__flipT); window.__flipT = setTimeout(() => renderAll(), 6000 - now % 6000 + 30);
   }
   clearTimeout(bumpT);
-  const pending = Object.values(bumps).concat(Object.values(PLAYS).map(p => p.t + b.playSecs * 1000)).filter(t => t > now);
+  const pending = Object.values(bumps).concat(Object.entries(PLAYS).map(([k, p]) => p.t + playDur(k.split(':')[0], b))).filter(t => t > now);
   if (pending.length) bumpT = setTimeout(renderAll, Math.max(...pending) - now + 50);
   return ps;
 }
@@ -1651,7 +1851,7 @@ function bootOutput(){
     if (live) { lastMsg = Date.now(); controlledAt = Date.now(); }
     if (d.logos) knownLogos = d.logos.map(normAsset);
     // heartbeats repeat the same data; only redraw when something actually changed
-    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at), d.pstats || 0,
+    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at), d.pstats || 0, Object.entries(d.fantasy || {}).map(([k, v]) => k + v.at),
       Object.entries(d.plays || {}).map(([k, p]) => k + p.head + p.text), knownLogos.map(a => a.logo.length + a.logo.slice(-24) + '/' + a.font.length)]);
     if (sig === lastSig) return;
     lastSig = sig;
@@ -1659,6 +1859,7 @@ function bootOutput(){
     (d.games || []).forEach(ingest);
     Object.assign(STANDINGS, d.standings || {});
     if (d.pstats) PSTATS = d.pstats;
+    Object.assign(FANTASY, d.fantasy || {});
     Object.keys(PLAYS).forEach(k => delete PLAYS[k]); Object.assign(PLAYS, d.plays || {});
     if (live) { rt.page = (d.pages || [])[OUT_IDX] || 0; rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
     renderAll();
@@ -1676,7 +1877,7 @@ function bootOutput(){
     const CACHE = STORE + '.cache.' + ONLINE_ID;
     const saveCache = () => { try { localStorage.setItem(CACHE, JSON.stringify({state, logos: knownLogos})); } catch(e) { try { localStorage.setItem(CACHE, JSON.stringify({state, logos: []})); } catch(e2) {} } };
     try { const c = JSON.parse(localStorage.getItem(CACHE) || 'null'); if (c && c.state && c.state.rundown) { state = c.state; knownLogos = (c.logos || []).map(normAsset);
-      onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: c.logos || [], games: state.games, standings: state.standings, pstats: state.pstats, plays: {}, pages: [], paused: []}, false); } } catch(e) {}
+      onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: c.logos || [], games: state.games, standings: state.standings, pstats: state.pstats, fantasy: state.fantasy, plays: {}, pages: [], paused: []}, false); } } catch(e) {}
     // check in every 10 s so the dashboard (and the Stream Deck status) can show which screens are up
     const CLIENT = (() => { let c = ''; try { c = localStorage.getItem(STORE + '.client') || ''; if (!c) { c = Math.random().toString(36).slice(2, 12); localStorage.setItem(STORE + '.client', c); } } catch(e) { c = Math.random().toString(36).slice(2, 12); } return c; })();
     let checkins = true;
@@ -1704,7 +1905,7 @@ function bootOutput(){
           if (state && state.rundown) {
             const now = Date.now(), plays = {};
             Object.entries(state.plays || {}).forEach(([k, p]) => plays[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
-            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays, standings: state.standings, pstats: state.pstats,
+            onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays, standings: state.standings, pstats: state.pstats, fantasy: state.fantasy,
               pages: (row.live && row.live.pages) || [], paused: (row.live && row.live.paused) || [], hidden: (row.live && row.live.hidden) || []}, now - beatAt < 12000);
           }
         }
@@ -1718,7 +1919,7 @@ function bootOutput(){
     if (standalone()) {
       const keys = new Set(feedRows().map(feedKey));
       await Promise.allSettled([...keys].map(loadFeed).concat([refreshStandings(false)]));
-      await refreshPlayerStats();
+      await refreshPlayerStats(); await refreshFantasy();
       renderAll();
     }
     setTimeout(selfRefresh, B().refresh * 1000);
@@ -1751,7 +1952,7 @@ function push(forceLogos){
   const sig = assetSig();
   const withLogos = forceLogos || sig !== lastLogoSig || (++pushN % 10 === 0); lastLogoSig = sig;
   const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs},
-    logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(), pstats: PSTATS,
+    logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(), pstats: PSTATS, fantasy: fantasyFor(),
     games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean),
     pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)};
   outWins.forEach(w => { try { if (w && !w.closed) w.postMessage(msg, '*'); } catch(e) {} });
@@ -1821,14 +2022,22 @@ function feedGame(g, slot, b){
     down: isFB(g.sport) && g.state === 'in' && !isHalf(g) ? (g.sit.down || '') : '', network: g.tv || '',
     start_time: g.date && !g.manual ? new Date(g.date).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', timeZone: TZ}) : '',
     upset: upsetTag(g, b.upsets), leader: g.state !== 'pre' && isFinite(as) && isFinite(hs) && as !== hs ? (as > hs ? 'away' : 'home') : '',
-    play_head: p ? p.head : '', play_text: p ? p.text : '', players: playersFor(g).map(x => (x.p.label || x.p.name) + ': ' + plText(x.s)).join(' | ')}, side(g.away, 'away'), side(g.home, 'home'));
+    play_head: p ? p.head : '', play_text: p ? p.text : '', players: playersFor(g).map(x => (x.p.label || x.p.name) + ': ' + plText(x.s)).join(' | '),
+    top_scorer: isHoops(g.sport) && g.top && g.top.pts >= TOP_MIN ? g.top.name + ' (' + g.top.team + '): ' + g.top.line : ''}, side(g.away, 'away'), side(g.home, 'home'));
 }
 function buildFeed(){
   return {updated: new Date().toISOString(), outputs: cfg.outputs.map((b, i) => {
     const ps = pages(i), rt = rts[i], pg = ps[rt.page] || null;
     const o = {out: i + 1, name: b.name, page: pg ? rt.page + 1 : 0, pages: ps.length, paused: !!rt.paused,
-      kind: rt.hidden ? 'hidden' : !pg ? 'empty' : pg.standings ? 'standings' : pg.games.length ? 'games' : 'empty', title: '', games: [], standings: null};
-    if (pg && pg.standings) {
+      kind: rt.hidden ? 'hidden' : !pg ? 'empty' : pg.standings ? 'standings' : pg.fantasy ? 'fantasy' : pg.games.length ? 'games' : 'empty', title: '', games: [], standings: null, fantasy: null};
+    if (pg && pg.fantasy) {
+      const it = pg.fantasy, d = FANTASY[it.date], all = (d && d.players) || [];
+      o.title = 'Fantasy leaders (PPR)' + (it.pos !== 'all' ? ' · ' + FF_LABEL[it.pos] : '');
+      const rows = [];
+      (it.pos === 'all' ? FF_POS.map(x => x[0]) : [it.pos]).forEach(pos => all.filter(p => p.pos === pos).sort((a, c) => c.pts - a.pts).slice(0, it.pos === 'all' ? 5 : 10)
+        .forEach((p, k) => rows.push({position: pos === 'DST' ? 'D/ST' : pos, rank: k + 1, name: p.name, team: p.team, points: fmtPts(p.pts), line: p.line, headshot: p.img})));
+      o.fantasy = {title: o.title, rows};
+    } else if (pg && pg.standings) {
       const it = pg.standings, st = STANDINGS[it.sport + ':' + it.conf];
       o.title = CONF_NAMES[it.conf] + ' Standings';
       o.standings = {title: o.title, sport: SPORTS[it.sport].label, rows: (st ? st.rows : []).map((r, k) => {
@@ -1860,7 +2069,7 @@ async function mirrorBoard(){
     if (st && st.rundown && st.outputs) {
       cfg = mkCfg(st.rundown, withAssets(st.outputs, assets), st.prefs);
       (st.games || []).forEach(ingest);
-      Object.assign(STANDINGS, st.standings || {}); PSTATS = st.pstats || {};
+      Object.assign(STANDINGS, st.standings || {}); PSTATS = st.pstats || {}; Object.assign(FANTASY, st.fantasy || {});
       const now = Date.now(); Object.keys(PLAYS).forEach(k => delete PLAYS[k]);
       Object.entries(st.plays || {}).forEach(([k, p]) => PLAYS[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
     }
@@ -1916,9 +2125,9 @@ async function publishOnline(){
     if (pub.again) { pub.again = false; publishOnline(); }
     return;
   }
-  const plays = {}; Object.entries(PLAYS).forEach(([k, p]) => { if (now - p.t < 60000) plays[k] = Object.assign({}, p, {age: now - p.t, t: undefined}); });
+  const plays = {}; Object.entries(PLAYS).forEach(([k, p]) => { if (now - p.t < 150000) plays[k] = Object.assign({}, p, {age: now - p.t, t: undefined}); });
   const state = {v: 2, rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs,
-    games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean), plays, standings: standingsFor(), pstats: PSTATS};
+    games: cfg.rundown.filter(r => !r.manual && !r.standings && !r.fantasy).map(r => games[r.key]).filter(Boolean), plays, standings: standingsFor(), pstats: PSTATS, fantasy: fantasyFor()};
   const stateSig = JSON.stringify(Object.assign({}, state, {plays: Object.keys(plays).map(k => k + plays[k].head + plays[k].text)}));
   const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)}, liveSig = JSON.stringify(live);
   const logoSig = assetSig();
@@ -2075,7 +2284,7 @@ function bootControl(){
     x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     hl:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>'
   };
-  const onPage = (p, key) => (p.standings && p.standings.key === key) || p.games.some(g => g.key === key);
+  const onPage = (p, key) => (p.standings && p.standings.key === key) || (p.fantasy && p.fantasy.key === key) || p.games.some(g => g.key === key);
   function pageOf(i, key){ return pages(i).findIndex(p => onPage(p, key)); }
   function renderRundown(){
     $('rdCount').textContent = cfg.rundown.length ? '· ' + cfg.rundown.length : '';
@@ -2089,6 +2298,15 @@ function bootControl(){
         '<button data-a="up" title="Move up" aria-label="Move up">' + IC.up + '</button><button data-a="dn" title="Move down" aria-label="Move down">' + IC.dn + '</button>' +
         '<button data-a="x" title="Remove" aria-label="Remove">' + IC.x + '</button></span>';
     $('rdList').innerHTML = cfg.rundown.map((r, i) => {
+      if (r.fantasy) {
+        const d = FANTASY[r.date], pg = psSel.findIndex(p => onPage(p, r.key));
+        const dl = new Date(+r.date.slice(0, 4), +r.date.slice(4, 6) - 1, +r.date.slice(6, 8)).toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
+        const lead = d && d.players && d.players.filter(p => r.pos === 'all' || p.pos === r.pos)[0];
+        return '<li data-key="' + esc(r.key) + '"><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu"><span>' + esc('Fantasy leaders · ' + FF_LABEL[r.pos || 'all']) + '</span>' +
+          '<span class="meta"><span class="tagx">NFL</span><span class="tagx">PPR</span><span>' + esc(dl) + '</span>' +
+          '<span>' + (!d ? 'Loading…' : !d.started ? 'Waiting for kickoff' : lead ? esc(lead.short + ' ' + fmtPts(lead.pts)) : '') + '</span>' +
+          (pg >= 0 ? '<span class="pg">Pg ' + (pg+1) + '</span>' : '') + '</span></span>' + btns(r) + '</div></li>';
+      }
       if (r.standings) {
         const st = STANDINGS[r.sport + ':' + r.conf], pg = psSel.findIndex(p => onPage(p, r.key));
         const hl = new Set(r.hl || []), rows = st ? st.rows : [], names = rows.filter(x => hl.has(x.id)).map(x => teamLabel(x, 'school'));
@@ -2207,7 +2425,7 @@ function bootControl(){
       (feeds[k] || []).filter(test).forEach(g => found.push({key: g.key, sport: sp, id: g.id, date, group}));
     }
     const before = JSON.parse(JSON.stringify(cfg.rundown));
-    if (replace) cfg.rundown = cfg.rundown.filter(r => r.manual || r.standings);
+    if (replace) cfg.rundown = cfg.rundown.filter(r => r.manual || r.standings || r.fantasy);
     let n = 0;
     found.sort((a, b) => rankKey(games[a.key]) - rankKey(games[b.key]) || (Date.parse(games[a.key].date) - Date.parse(games[b.key].date)))
       .forEach(e => { if (!inRd(e.key)) { addToRundown(e); n++; } });
@@ -2385,7 +2603,7 @@ function bootControl(){
   $('matchLook').onclick = () => {
     const from = +$('lookFrom').value, src = cfg.outputs[from];
     ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets',
-     'players','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
+     'players','leaders','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
     cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
     toast('Output ' + (SEL+1) + ' now matches Output ' + (from+1) + '’s look');
   };
@@ -2508,6 +2726,7 @@ function bootControl(){
       setFeed(bad ? (bad.reason && bad.reason.message || 'network error') : '');
       renderList(); renderRundown(); renderAll(); push();
       refreshPlayerStats().then(ch => { if (ch) { renderAll(); push(); } window.__renderPlayers && window.__renderPlayers(); });
+      refreshFantasy().then(ch => { if (ch) { renderRundown(); renderAll(); push(); } });
     }
     scheduleRefresh();
   }
@@ -2629,6 +2848,13 @@ function bootControl(){
 
   // ================= conference standings on the rundown =================
   $('stSport').value = ['cfb', 'mbb', 'wbb'].includes(pk.sport) ? pk.sport : 'cfb';
+  $('ffAdd').onclick = async () => {
+    const pos = $('ffPos').value, date = ymd(pk.date), key = 'ff:' + date + ':' + pos;
+    if (inRd(key)) { toast('That fantasy page is already in the rundown'); return; }
+    cfg.rundown.push({key, fantasy: true, sport: 'nfl', date, pos}); changed();
+    toast('Fantasy leaders (' + FF_LABEL[pos] + ') added for NFL games on ' + pk.date.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'}));
+    if (await refreshFantasy()) { renderRundown(); renderAll(); push(); }
+  };
   $('stAdd').onclick = async () => {
     const sport = $('stSport').value, conf = $('stConf').value, key = 'st:' + sport + ':' + conf;
     if (inRd(key)) { toast(CONF_NAMES[conf] + ' ' + SPORTS[sport].short + ' standings are already in the rundown'); return; }
@@ -2642,7 +2868,7 @@ function bootControl(){
   const PS_GROUPS = {
     look: ['tpl', 'fontName', 'fontData', 'textColor', 'panelColor', 'leadColor', 'rankColor', 'upper', 'bg', 'bgColor', 'accent', 'names'],
     sponsor: ['hdMode', 'hdAlign', 'hdSize', 'title', 'logo', 'presentedOn', 'presented', 'sportLabel'],
-    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players']
+    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players', 'leaders']
   };
   const PS_NAMES = {games: 'games', look: 'look', sponsor: 'sponsor', layout: 'layout'};
   const HOUSE = {name: 'House package look', builtin: true, look1: {tpl: 'package', fontName: 'Scoreboard Display', fontData: '', textColor: '#FFFFFF', panelColor: '', leadColor: '', rankColor: '', upper: true, bg: 'board', bgColor: '#102A5E', accent: '#E87722'}};
