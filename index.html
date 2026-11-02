@@ -2401,7 +2401,14 @@ function bootControl(){
     const b = e.target.closest('button[data-a]'); if (!b) return;
     const key = b.closest('li').dataset.key, i = cfg.rundown.findIndex(r => r.key === key); if (i < 0) return;
     const a = b.dataset.a;
-    if (a === 'up' && i > 0) cfg.rundown.splice(i-1, 0, cfg.rundown.splice(i, 1)[0]);
+    // moving past the edge of its sport moves the whole sport (sports always stay together)
+    const nb = a === 'up' ? cfg.rundown[i-1] : a === 'dn' ? cfg.rundown[i+1] : null;
+    if (nb && nb.sport !== cfg.rundown[i].sport) {
+      const o = sportOrder(), p = o.indexOf(cfg.rundown[i].sport), q = o.indexOf(nb.sport);
+      o[p] = nb.sport; o[q] = cfg.rundown[i].sport; groupRundown(o);
+      toast((SPORTS[cfg.rundown.find(r => r.key === key).sport] || {}).label + ' moved ' + (a === 'up' ? 'up' : 'down'));
+    }
+    else if (a === 'up' && i > 0) cfg.rundown.splice(i-1, 0, cfg.rundown.splice(i, 1)[0]);
     else if (a === 'dn' && i < cfg.rundown.length-1) cfg.rundown.splice(i+1, 0, cfg.rundown.splice(i, 1)[0]);
     else if (a === 'x') cfg.rundown.splice(i, 1);
     else if (a === 'ed') { editing = editing === key ? null : key; renderRundown(); return; }
@@ -2413,6 +2420,7 @@ function bootControl(){
     const key = e.target.closest('li').dataset.key, r = cfg.rundown.find(x => x.key === key); if (!r) return;
     const v = e.target.value;
     if (f.includes('.')) { const [sd, k] = f.split('.'); r[sd] = r[sd] || {}; r[sd][k] = v; } else r[f] = v;
+    if (f === 'sport') { groupRundown(); save(); renderRundown(); renderAll(); push(); return; }
     save(); renderAll(); push(); renderList();
     if (e.target.tagName === 'SELECT') renderRundown();
   });
@@ -2437,7 +2445,8 @@ function bootControl(){
     cfg.rundown.push({key, manual:true, sport:pk.sport, state:'pre', status:'7:00 PM', away:{name:'Away Team', score:'', color:'#4A5568'}, home:{name:'Home Team', score:'', color:'#2B4C7E'}});
     editing = key; changed();
   };
-  const sortRundown = cmp => { cfg.rundown = cfg.rundown.map((r, i) => [r, gameOf(r), i]).sort((x, y) => cmp(x[1], y[1]) || (x[2] - y[2])).map(x => x[0]); changed(); };
+  // sorting works inside each sport; the sports keep their order
+  const sortRundown = cmp => { const o = sportOrder(); cfg.rundown = cfg.rundown.map((r, i) => [r, gameOf(r), i]).sort((x, y) => (!!(x[0].standings || x[0].fantasy) - !!(y[0].standings || y[0].fantasy)) || cmp(x[1], y[1]) || (x[2] - y[2])).map(x => x[0]); groupRundown(o); changed(); };
   const byRank = (a, b) => rankKey(a) - rankKey(b);
   const timeKey = g => { const t = g && !g.manual && g.date ? Date.parse(g.date) : NaN; return isFinite(t) ? t : Infinity; };
   $('sortRank').onclick = () => { if (!cfg.rundown.length) return; sortRundown(byRank); toast('Rundown sorted: Top 25 first, by ranking'); };
@@ -2541,7 +2550,15 @@ function bootControl(){
     const before = JSON.parse(JSON.stringify(cfg.rundown)); cfg.rundown = []; changed(); undoable('Rundown cleared', before);
   };
 
-  function changed(){ save(); renderList(); renderRundown(); renderAll(); push(); }
+  // Each sport stays together in the rundown, sports in the order they were first added; standings and
+  // fantasy pages ride with their sport. Moving a sport's first item above another sport moves the whole block.
+  function groupRundown(order){
+    const seen = (order || []).slice();
+    cfg.rundown.forEach(r => { if (!seen.includes(r.sport)) seen.push(r.sport); });
+    cfg.rundown = cfg.rundown.map((r, i) => [r, i]).sort((a, b) => (seen.indexOf(a[0].sport) - seen.indexOf(b[0].sport)) || (a[1] - b[1])).map(x => x[0]);
+  }
+  const sportOrder = () => { const o = []; cfg.rundown.forEach(r => { if (!o.includes(r.sport)) o.push(r.sport); }); return o; };
+  function changed(){ groupRundown(); save(); renderList(); renderRundown(); renderAll(); push(); }
 
   // ---------- first-run guide: three steps that tick themselves off ----------
   const GUIDE = STORE + '.guide', guideSteps = {games: false, preview: false, send: false};
