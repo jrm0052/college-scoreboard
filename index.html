@@ -663,6 +663,7 @@ body.out.trans{background:transparent}
           <label class="f">Upset alerts
             <select id="sUpsets" data-k="upsets"><option value="half">From the 2nd half</option><option value="late">4th quarter / late only</option><option value="off">Off</option></select>
           </label>
+          <label class="ck" title="Once a page is on air, new scores, logos and stats wait for the next page (or the next turn of a one-page board), so nothing flashes or jumps on screen"><input type="checkbox" id="sHold" data-k="holdOnAir"> Hold scores while a page is on air</label>
           <label class="ck" title="Under each basketball game once someone has 20 points. Our tracked players take the spot first. Same size rule as player stats."><input type="checkbox" id="sLeaders" data-k="leaders"> Basketball top scorer (20+ pts)</label>
           <label class="f">NFL / NBA player stats
             <select id="sPlayers" data-k="players"><option value="auto">Large outputs only (960×540 and up)</option><option value="always">Always</option><option value="off">Off</option></select>
@@ -797,7 +798,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',leaders:true,presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',leaders:true,holdOnAir:true,presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -1402,7 +1403,7 @@ function fixBoard(b, i){
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
   o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
   o.players = ['off', 'always'].includes(o.players) ? o.players : 'auto';
-  o.leaders = o.leaders !== false;   // older 'below' setting becomes the size rule
+  o.leaders = o.leaders !== false; o.holdOnAir = o.holdOnAir !== false;   // older 'below' setting becomes the size rule
   o.presentedOn = !!o.presentedOn; o.presented = String(o.presented == null ? d.presented : o.presented).slice(0, 30);
   o.tpl = ['package','clean','bar'].includes(o.tpl) ? o.tpl : 'package';
   if (o.fontName !== 'custom' && !(o.fontName in FONTS)) o.fontName = d.fontName;
@@ -1786,6 +1787,17 @@ function renderBoard(holder, i){
     clearTimeout(rt.fadeT); rt.fadeT = setTimeout(() => renderAll(), rt.fadeUntil - Date.now() + 20);
     return ps;
   }
+  // Hold while on air: once a page is up, new scores, logos and stats wait for the next page (or the next
+  // turn of a one-page board) instead of redrawing the page under the viewers. Operator changes still apply.
+  {
+    const bb = cfg.outputs[i], pg = ps[rt.page];
+    const what = !pg ? '' : pg.standings ? 'st' + pg.standings.key + (pg.standings.hl || []).join() + !!STANDINGS[pg.standings.sport + ':' + pg.standings.conf] :
+      pg.fantasy ? 'ff' + pg.fantasy.key + !!FANTASY[pg.fantasy.date] : pg.games.map(g => g.key).join();
+    const swap = isWide(bb) && pg && pg.games.some(g => stripFor(g, bb).length) ? Math.floor(Date.now() / 6000) % 2 : 0;
+    const sig = JSON.stringify([stripAssets(bb), (bb.logo || '').length, (bb.fontData || '').length, rt.page, ps.length, rt.cycle || 0, !!rt.hidden, window.__emptyText || '', what, swap, cfg.prefs.names, cfg.prefs.skipOn]);
+    if (bb.holdOnAir !== false && !enter && holder.__sig === sig && holder.firstElementChild) return ps;
+    holder.__sig = sig;
+  }
   const now = Date.now();
   const b = cfg.outputs[i];
   // dissolve: the outgoing page stays layered on the board and fades out while the new page fades in
@@ -1820,7 +1832,7 @@ function due(i){
   if (rt.paused || now < rt.nextAt) return false;
   const h = playHold(i);
   if (h > now) { rt.nextAt = h + 400; return false; }
-  if (pages(i).length > 1) return true;
+  if (pages(i).length > 1 || cfg.outputs[i].holdOnAir !== false) return true;   // a one-page board takes a fresh look each turn
   rt.nextAt = now + cfg.outputs[i].secs * 1000; return false;
 }
 // font for an output's theme: built-in, a Google font (loaded on first use) or an uploaded font file
@@ -1847,7 +1859,7 @@ function boardFont(b, i){
 
 function step(i, n){
   const len = pages(i).length || 1, rt = rts[i];
-  rt.page = ((rt.page + n) % len + len) % len;
+  rt.page = ((rt.page + n) % len + len) % len; rt.cycle = ((rt.cycle || 0) + 1) % 1e6;
   rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
   renderAll(); push();
 }
@@ -1870,7 +1882,7 @@ function bootOutput(){
     if (live) { lastMsg = Date.now(); controlledAt = Date.now(); }
     if (d.logos) knownLogos = d.logos.map(normAsset);
     // heartbeats repeat the same data; only redraw when something actually changed
-    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at), d.pstats || 0, Object.entries(d.fantasy || {}).map(([k, v]) => k + v.at),
+    const sig = JSON.stringify([d.cfg, d.games, live ? d.pages : 0, live ? d.cycles : 0, live ? d.paused : 0, live ? d.hidden : 0, Object.entries(d.standings || {}).map(([k, v]) => k + v.at), d.pstats || 0, Object.entries(d.fantasy || {}).map(([k, v]) => k + v.at),
       Object.entries(d.plays || {}).map(([k, p]) => k + p.head + p.text), knownLogos.map(a => a.logo.length + a.logo.slice(-24) + '/' + a.font.length)]);
     if (sig === lastSig) return;
     lastSig = sig;
@@ -1880,7 +1892,7 @@ function bootOutput(){
     if (d.pstats) PSTATS = d.pstats;
     Object.assign(FANTASY, d.fantasy || {});
     Object.keys(PLAYS).forEach(k => delete PLAYS[k]); Object.assign(PLAYS, d.plays || {});
-    if (live) { rt.page = (d.pages || [])[OUT_IDX] || 0; rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
+    if (live) { rt.cycle = (d.cycles || [])[OUT_IDX] || 0; rt.page = (d.pages || [])[OUT_IDX] || 0; rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
     renderAll();
   };
   window.addEventListener('message', e => onMsg(e.data));
@@ -1925,7 +1937,7 @@ function bootOutput(){
             const now = Date.now(), plays = {};
             Object.entries(state.plays || {}).forEach(([k, p]) => plays[k] = Object.assign({}, p, {t: now - (p.age || 0)}));
             onMsg({type:'college-scoreboard', cfg:{rundown: state.rundown, outputs: state.outputs, prefs: state.prefs}, logos: knownLogos, games: state.games, plays, standings: state.standings, pstats: state.pstats, fantasy: state.fantasy,
-              pages: (row.live && row.live.pages) || [], paused: (row.live && row.live.paused) || [], hidden: (row.live && row.live.hidden) || []}, now - beatAt < 12000);
+              pages: (row.live && row.live.pages) || [], cycles: (row.live && row.live.cycles) || [], paused: (row.live && row.live.paused) || [], hidden: (row.live && row.live.hidden) || []}, now - beatAt < 12000);
           }
         }
       } catch(e) {}
@@ -1973,7 +1985,7 @@ function push(forceLogos){
   const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs},
     logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(), pstats: PSTATS, fantasy: fantasyFor(),
     games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean),
-    pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)};
+    pages: rts.map(r => r.page), cycles: rts.map(r => r.cycle || 0), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)};
   outWins.forEach(w => { try { if (w && !w.closed) w.postMessage(msg, '*'); } catch(e) {} });
   try { chan && chan.postMessage(msg); } catch(e) {}
   publishOnline();
@@ -2098,7 +2110,7 @@ async function mirrorBoard(){
   rts.forEach((rt, i) => {
     const pg = (lv.pages || [])[i], pz = !!(lv.paused || [])[i], hd = !!(lv.hidden || [])[i];
     if ((pg != null && pg !== rt.page) || pz !== rt.paused || hd !== !!rt.hidden) changed = true;
-    if (pg != null) rt.page = pg; rt.paused = pz; rt.hidden = hd; rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
+    if (pg != null) rt.page = pg; rt.paused = pz; rt.hidden = hd; rt.cycle = (lv.cycles || [])[i] || 0; rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
   });
   if (changed) { save(); window.__mirrored && window.__mirrored(); }
   return true;
@@ -2148,7 +2160,7 @@ async function publishOnline(){
   const state = {v: 2, rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs,
     games: cfg.rundown.filter(r => !r.manual && !r.standings && !r.fantasy).map(r => games[r.key]).filter(Boolean), plays, standings: standingsFor(), pstats: PSTATS, fantasy: fantasyFor()};
   const stateSig = JSON.stringify(Object.assign({}, state, {plays: Object.keys(plays).map(k => k + plays[k].head + plays[k].text)}));
-  const live = {pages: rts.map(r => r.page), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)}, liveSig = JSON.stringify(live);
+  const live = {pages: rts.map(r => r.page), cycles: rts.map(r => r.cycle || 0), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)}, liveSig = JSON.stringify(live);
   const logoSig = assetSig();
   const feed = buildFeed(), feedSig = JSON.stringify(feed.outputs);
   // full games/settings go out whenever they change AND at least every 30 s (logos every 5 min), so a board can never sit empty
@@ -2641,7 +2653,7 @@ function bootControl(){
   $('matchLook').onclick = () => {
     const from = +$('lookFrom').value, src = cfg.outputs[from];
     ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets',
-     'players','leaders','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
+     'players','leaders','holdOnAir','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
     cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
     toast('Output ' + (SEL+1) + ' now matches Output ' + (from+1) + '’s look');
   };
@@ -2906,7 +2918,7 @@ function bootControl(){
   const PS_GROUPS = {
     look: ['tpl', 'fontName', 'fontData', 'textColor', 'panelColor', 'leadColor', 'rankColor', 'upper', 'bg', 'bgColor', 'accent', 'names'],
     sponsor: ['hdMode', 'hdAlign', 'hdSize', 'title', 'logo', 'presentedOn', 'presented', 'sportLabel'],
-    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players', 'leaders']
+    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players', 'leaders', 'holdOnAir']
   };
   const PS_NAMES = {games: 'games', look: 'look', sponsor: 'sponsor', layout: 'layout'};
   const HOUSE = {name: 'House package look', builtin: true, look1: {tpl: 'package', fontName: 'Scoreboard Display', fontData: '', textColor: '#FFFFFF', panelColor: '', leadColor: '', rankColor: '', upper: true, bg: 'board', bgColor: '#102A5E', accent: '#E87722'}};
