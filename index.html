@@ -1874,6 +1874,9 @@ function bootOutput(){
   const stage = document.querySelector('#outRoot .stage'), holder = document.getElementById('outHolder');
   const B = () => cfg.outputs[OUT_IDX], rt = rts[OUT_IDX];
   let lastMsg = 0, idleT = 0, lastSig = '', knownLogos = cfg.outputs.map(assetOf);
+  // Two dashboards open in the same browser (an extra tab or window) both talk to this window. Following both
+  // made the board bounce between their two pages, so the window sticks with one until it goes quiet for 6 s.
+  let ctlFrom = '', ctlSeen = 0, lastCy;
   window.renderAll = () => {
     document.body.classList.toggle('trans', B().bg === 'transparent');
     holder.style.width = B().w + 'px'; holder.style.height = B().h + 'px';
@@ -1881,6 +1884,11 @@ function bootOutput(){
   };
   const onMsg = (d, live = true) => {
     if (!d || d.type !== 'college-scoreboard' || !d.cfg || !d.cfg.outputs) return;
+    if (d.from) {
+      if (ctlFrom && d.from !== ctlFrom && Date.now() - ctlSeen < 6000) return;
+      if (d.from !== ctlFrom) lastCy = undefined;
+      ctlFrom = d.from; ctlSeen = Date.now();
+    }
     if (live) { lastMsg = Date.now(); controlledAt = Date.now(); }
     if (d.logos) knownLogos = d.logos.map(normAsset);
     // heartbeats repeat the same data; only redraw when something actually changed
@@ -1894,7 +1902,11 @@ function bootOutput(){
     if (d.pstats) PSTATS = d.pstats;
     Object.assign(FANTASY, d.fantasy || {});
     Object.keys(PLAYS).forEach(k => delete PLAYS[k]); Object.assign(PLAYS, d.plays || {});
-    if (live) { rt.cycle = (d.cycles || [])[OUT_IDX] || 0; rt.page = (d.pages || [])[OUT_IDX] || 0; rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
+    // take the dashboard's page only when it has changed it. A dashboard tab the browser has slowed down in the
+    // background repeats its old page; following that pulled the board back to a page it had already moved on from.
+    const cy = (d.cycles || [])[OUT_IDX];
+    if (live && (cy === undefined || cy !== lastCy)) { lastCy = cy; rt.cycle = cy || 0; rt.page = (d.pages || [])[OUT_IDX] || 0; rt.nextAt = Date.now() + B().secs * 1000; }
+    if (live) { rt.paused = !!(d.paused || [])[OUT_IDX]; rt.hidden = !!(d.hidden || [])[OUT_IDX]; }
     renderAll();
   };
   window.addEventListener('message', e => onMsg(e.data));
@@ -1981,10 +1993,12 @@ const outWins = Array(N_OUT).fill(null);
 let lastLogoSig = '', pushN = 0;
 function push(forceLogos){
   if (IS_OUT) return;
+  // each page change gets a new number, so outputs can tell a real page change from an old, repeated one
+  rts.forEach(r => { if (r.page !== r.__lp) { r.cycle = ((r.cycle || 0) + 1) % 1e6; r.__lp = r.page; } });
   // logos are large, so they ride along only when they change (and every 10th heartbeat as a safety net)
   const sig = assetSig();
   const withLogos = forceLogos || sig !== lastLogoSig || (++pushN % 10 === 0); lastLogoSig = sig;
-  const msg = {type:'college-scoreboard', cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs},
+  const msg = {type:'college-scoreboard', from: INST, cfg:{rundown: cfg.rundown, outputs: cfg.outputs.map(stripAssets), prefs: cfg.prefs},
     logos: withLogos ? cfg.outputs.map(assetOf) : null, plays: PLAYS, standings: standingsFor(), pstats: PSTATS, fantasy: fantasyFor(),
     games: cfg.rundown.filter(r => !r.manual && !r.standings).map(r => games[r.key]).filter(Boolean),
     pages: rts.map(r => r.page), cycles: rts.map(r => r.cycle || 0), paused: rts.map(r => r.paused), hidden: rts.map(r => !!r.hidden)};
@@ -2610,11 +2624,25 @@ function bootControl(){
     if (e.target.closest('input,select,textarea') || !can('control') || !$('adminView').hidden) return;
     if (e.key === ' ') { e.preventDefault(); togglePlay(SEL); } else if (e.key === 'ArrowRight') step(SEL, 1); else if (e.key === 'ArrowLeft') step(SEL, -1);
   });
-  setInterval(() => {
+  // The rotation clock runs in a small worker: Chrome slows timers in a background tab to about once a minute,
+  // which stalled page turns and heartbeats whenever the dashboard wasn't the front window.
+  let tickN = 0;
+  const tick = () => {
     rts.forEach((rt, i) => { if (FAIL.role !== 'standby' && due(i)) step(i, 1); });
     updInfo();
-  }, 250);
-  setInterval(push, 2000); // heartbeat keeps the output windows in sync
+    if (++tickN % 8 === 0) push();   // heartbeat every 2 s keeps the output windows in sync
+  };
+  let ticker = null;
+  try { ticker = new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(0)},250)'], {type: 'text/javascript'}))); ticker.onmessage = tick; } catch(e) { ticker = null; }
+  if (!ticker) setInterval(tick, 250);
+  // another dashboard open in this browser (extra tab/window): output windows follow only one, so say so
+  let otherWarned = 0;
+  if (chan) chan.addEventListener('message', e => {
+    const d = e.data;
+    if (!d || d.type !== 'college-scoreboard' || !d.from || d.from === INST || Date.now() - otherWarned < 60000) return;
+    otherWarned = Date.now();
+    toast('Another dashboard is open in this browser (another tab or window). Output windows follow just one of them, so close the extra one.');
+  });
 
   // settings
   const inputs = [...document.querySelectorAll('[data-k]')];
