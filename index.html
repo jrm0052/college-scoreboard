@@ -88,6 +88,12 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .rd{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;overflow:auto;max-height:calc(100vh - 130px)}
 .rd li{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:7px 8px 7px 10px}
 .rd li.is-stale{border-color:var(--warn)}
+.rd li.is-ours{opacity:.55;border-style:dashed}
+.rd .meta .ours{color:var(--muted);font-weight:600}
+#skipList{display:flex;flex-wrap:wrap;gap:4px}
+#skipList .chip-btn{font-size:11px;padding:3px 9px}
+.skipbar{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;font-size:13px}
+.linkbtn{background:none;border:0;padding:0;color:var(--sel);font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .rd .meta .stale{color:var(--warn);font-weight:600}
 .rd .meta .ups{color:var(--sel);font-weight:600}
 .stale-note{color:var(--warn);font-size:13px;font-weight:600}
@@ -498,6 +504,7 @@ body.out.trans{background:transparent}
         <button class="btn sm" id="addManual" title="A game ESPN doesn’t have: type the teams, score and status yourself">Add manual game</button>
         <button class="btn sm" id="clearRd" title="Remove everything from the rundown (you can undo)">Clear</button>
       </div>
+      <div class="skipbar"><label class="ck" title="Games with one of our teams stay in the rundown but never show on the boards"><input type="checkbox" id="skipOn"> Leave our games out of the rotation</label><button type="button" class="linkbtn" id="skipEdit" title="Choose which teams count as ours"></button></div>
       <details class="build" id="buildBox">
         <summary>Build &amp; presets</summary>
         <div class="qb">
@@ -668,6 +675,9 @@ body.out.trans{background:transparent}
         <div class="names">
           <label class="f">Get new scores from ESPN every (seconds)<input type="number" id="sRefresh" data-k="refresh" min="10" max="300"></label>
           <label class="f">Warn when a live game hasn’t updated for (minutes)<input type="number" id="pStale" min="1" max="30"></label>
+          <h4 class="sub" id="skipHead">Our teams (their games stay off the boards)</h4>
+          <div class="hlchips" id="skipList"></div>
+          <div class="row-ctl"><input type="text" id="skipFind" list="teamList" placeholder="Add a team from today’s games" aria-label="Add one of our teams"><button class="btn sm" id="skipAdd" type="button">Add team</button></div>
           <h4 class="sub">Team names</h4>
           <div class="row-ctl"><input type="text" id="nameFind" list="teamList" placeholder="Find a team from today’s games" aria-label="Find a team"><datalist id="teamList"></datalist><button class="btn sm" id="nameAdd" type="button">Add name</button></div>
           <div id="nameRows"></div>
@@ -1412,7 +1422,9 @@ function fixPrefs(p){
   const names = (p.names && typeof p.names === 'object') ? p.names : {'344': {orig: 'Mississippi St', name: 'Miss State', abbr: ''}};
   const players = (Array.isArray(p.players) ? p.players : []).filter(x => x && /^\d+$/.test(String(x.id)) && isPro(x.sport)).slice(0, 60)
     .map(x => ({id: String(x.id), name: String(x.name || ''), label: String(x.label == null ? x.name || '' : x.label).slice(0, 30), sport: x.sport, team: String(x.team || ''), teamAbbr: String(x.teamAbbr || ''), pos: String(x.pos || ''), jersey: String(x.jersey || '')}));
-  return {staleMin: clampN(p.staleMin, 1, 30, 4), names, players};
+  // our own teams' games come out of the rotation (default: Auburn, ESPN id 2 in every college sport)
+  const skip = (Array.isArray(p.skip) ? p.skip : [{id: '2', name: 'Auburn'}]).filter(x => x && x.id).slice(0, 12).map(x => ({id: String(x.id), name: String(x.name || x.id).slice(0, 40)}));
+  return {staleMin: clampN(p.staleMin, 1, 30, 4), names, players, skip, skipOn: p.skipOn !== false};
 }
 function mkCfg(rundown, outputs, prefs){
   const c = {rundown: Array.isArray(rundown) ? rundown : [], outputs: Array.from({length: N_OUT}, (_, i) => fixBoard(outputs && outputs[i], i)), prefs: fixPrefs(prefs)};
@@ -1746,8 +1758,15 @@ async function loadFeed(k){
   return list;
 }
 
+// one of our teams is playing (college ids; manual games by name)
+function isOurGame(g){
+  const p = cfg.prefs || {};
+  if (!g || g.standings || g.fantasy || !p.skipOn || !(p.skip || []).length) return false;
+  const ids = new Set(p.skip.map(x => x.id)), nm = new Set(p.skip.map(x => x.name.toLowerCase()));
+  return g.manual ? [g.away, g.home].some(t => nm.has(String(t.name || '').trim().toLowerCase())) : [g.away, g.home].some(t => ids.has(t.id));
+}
 function rundownGames(){
-  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.fantasy ? {key: r.key, fantasy: true, sport: 'nfl', date: r.date, pos: r.pos || 'all'} : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf, hl: r.hl || [], dim: r.dim !== false} : games[r.key]).filter(Boolean);
+  return cfg.rundown.map(r => r.manual ? manualGame(r) : r.fantasy ? {key: r.key, fantasy: true, sport: 'nfl', date: r.date, pos: r.pos || 'all'} : r.standings ? {key: r.key, standings: true, sport: r.sport, conf: r.conf, hl: r.hl || [], dim: r.dim !== false} : games[r.key]).filter(g => g && !isOurGame(g));
 }
 function pages(i){ return buildPages(rundownGames(), cfg.outputs[i]); }
 
@@ -2341,13 +2360,13 @@ function bootControl(){
           '<label>State<select data-f="state"><option value="pre"' + (r.state === 'pre' ? ' selected' : '') + '>Upcoming</option><option value="in"' + (r.state === 'in' ? ' selected' : '') + '>Live</option><option value="post"' + (r.state === 'post' ? ' selected' : '') + '>Final</option></select></label>' +
           '<label class="full">Status text (e.g. 7:00 PM, Q3 5:12, Final/OT)<input type="text" data-f="status" maxlength="30" value="' + esc(r.status || '') + '"></label></div>';
       }
-      const st = g ? staleMins(g) : 0, ups = g ? upsetTag(g, 'half') : '';
-      return '<li data-key="' + esc(r.key) + '"' + (st ? ' class="is-stale"' : '') + '><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu">' +
+      const st = g ? staleMins(g) : 0, ups = g ? upsetTag(g, 'half') : '', ours = isOurGame(g);
+      return '<li data-key="' + esc(r.key) + '"' + (ours ? ' class="is-ours"' : st ? ' class="is-stale"' : '') + '><div class="ln"><span class="num">' + (i+1) + '</span><span class="mu">' +
         (g ? '<span>' + esc(line(g.away)) + '</span><span>' + esc(line(g.home)) + '</span>' : '<span style="color:var(--muted)">Loading game…</span>') +
         '<span class="meta"><span class="tagx">' + SPORTS[r.sport].short + '</span>' + (r.manual ? '<span class="tagx">Manual</span>' : '') +
         (s ? '<span class="' + s.cls + '">' + esc(s.short) + '</span>' : '') + (pg >= 0 ? '<span class="pg" title="Page on Output ' + (SEL+1) + ' (the output selected in Board settings)">Pg ' + (pg+1) + '</span>' : '') +
         (st ? '<span class="stale" title="Score, clock and situation haven’t changed. Check the game or freeze/remove it.">No update ' + st + ' min</span>' : '') +
-        (ups ? '<span class="ups">' + esc(ups) + '</span>' : '') + '</span></span>' + btns(r) + '</div>' + ed + '</li>';
+        (ups ? '<span class="ups">' + esc(ups) + '</span>' : '') + (ours ? '<span class="ours" title="One of our teams is playing, so this game stays off the boards. Turn this off above the rundown.">Left out · our game</span>' : '') + '</span></span>' + btns(r) + '</div>' + ed + '</li>';
     }).join('');
   }
   $('rdList').addEventListener('click', e => {
@@ -2466,6 +2485,25 @@ function bootControl(){
     const b = e.target.closest('[data-x="del"]'); if (!b) return;
     delete cfg.prefs.names[b.closest('.nrow').dataset.id]; renderNames(); save(); renderAll(); push();
   });
+  // ---------- our teams: their games stay out of the rotation ----------
+  function renderSkip(){
+    const p = cfg.prefs;
+    $('skipOn').checked = p.skipOn;
+    $('skipEdit').textContent = p.skip.length ? p.skip.map(x => x.name).join(', ') : 'Choose teams';
+    $('skipList').innerHTML = p.skip.map(x => '<button type="button" class="chip-btn" aria-pressed="true" data-skip="' + esc(x.id) + '" title="Remove">' + esc(x.name) + ' ×</button>').join('') || '<span class="hint">No teams yet.</span>';
+  }
+  const skipChanged = () => { cfg.prefs = fixPrefs(cfg.prefs); save(); renderSkip(); renderRundown(); renderAll(); push(); };
+  $('skipOn').onchange = e => { cfg.prefs.skipOn = e.target.checked; skipChanged(); toast(e.target.checked ? 'Our games are out of the rotation' : 'Our games are back in the rotation'); };
+  $('skipEdit').onclick = () => { $('namesBox').open = true; syncTeamList(); $('skipHead').scrollIntoView({behavior: 'smooth', block: 'center'}); setTimeout(() => $('skipFind').focus(), 400); };
+  $('skipList').addEventListener('click', e => { const b = e.target.closest('[data-skip]'); if (!b) return; cfg.prefs.skip = cfg.prefs.skip.filter(x => x.id !== b.dataset.skip); skipChanged(); });
+  $('skipAdd').onclick = () => {
+    const t = teamIdx[$('skipFind').value]; if (!t) { toast('Pick a team from the list (it comes from games loaded today).'); return; }
+    if (/^(nfl|nba)-/.test(t.id)) { toast('Pick a college team.'); return; }
+    if (!cfg.prefs.skip.some(x => x.id === t.id)) cfg.prefs.skip.push({id: t.id, name: t.name});
+    $('skipFind').value = ''; skipChanged();
+  };
+  $('skipFind').addEventListener('focus', syncTeamList);
+  renderSkip();
   $('pStale').addEventListener('change', e => { cfg.prefs = fixPrefs(Object.assign({}, cfg.prefs, {staleMin: +e.target.value})); NAME_OVR = cfg.prefs.names; renderNames(); save(); renderRundown(); });
   $('namesBox').addEventListener('toggle', syncTeamList);
   syncQb(); renderNames(); window.__syncQb = syncQb;
