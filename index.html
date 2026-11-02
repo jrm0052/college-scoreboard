@@ -1011,7 +1011,7 @@ function plStripHTML(list){
     let v;
     if (s.kind === 'dnp') v = '<b>DNP</b>' + (s.note ? '<i>' + esc(s.note) + '</i>' : '');
     else if (s.kind === 'out') v = '<i class="ss">' + (s.final ? 'No stats' : 'No stats yet') + '</i>';
-    else if (s.kind === 'leader') v = '<i class="ss">' + esc(s.team ? s.team + ' · ' : '') + 'Top scorer</i>' + (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
+    else if (s.kind === 'leader') v = (s.team ? '<i class="ss">' + esc(s.team) + '</i>' : '') + (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
     else v = (s.kind === 'season' ? '<i class="ss">' + (s.note ? esc(s.note) + ' · ' : '') + (p.sport === 'nba' ? 'Season avg' : 'Season') + '</i>' : '') +
       (s.items || []).map(x => '<span class="pi"><b>' + esc(x.v) + '</b>' + (x.l ? '<i>' + esc(x.l) + '</i>' : '') + '</span>').join('');
     return '<span class="ps"><span class="pt"><img class="phs" alt="" src="' + (p.img || headshot(p)) + '" onerror="this.style.display=\'none\'"><span>' + esc(p.label || p.name) + '</span></span><span class="pv">' + v + '</span></span>';
@@ -1033,7 +1033,8 @@ function topScorer(c, sport){
     if (!a || !a.athlete || !(+a.value >= 0) || (top && +a.value <= top.pts)) return;
     const R = (x.leaders || []).find(l => l.name === 'rating'), r = R && (R.leaders || [])[0];
     const img = a.athlete.headshot ? (typeof a.athlete.headshot === 'string' ? a.athlete.headshot : a.athlete.headshot.href || '') : '';
-    top = {id: String(a.athlete.id || ''), name: a.athlete.displayName || a.athlete.shortName || '', pts: +a.value, img, team: (x.team || {}).abbreviation || '',
+    top = {id: String(a.athlete.id || ''), name: a.athlete.displayName || a.athlete.shortName || '', pts: +a.value, img, team: (x.team || {}).shortDisplayName || (x.team || {}).location || (x.team || {}).abbreviation || '',
+      tid: (x.team || {}).id ? pfxTeam(sport, x.team.id) : '',
       line: r && r.athlete && String(r.athlete.id) === String(a.athlete.id) && /PTS/.test(r.displayValue || '') ? r.displayValue : (a.displayValue || a.value) + ' PTS'};
   });
   return top;
@@ -1046,7 +1047,8 @@ function stripFor(g, b){
   const top = b.leaders !== false && isHoops(g.sport) && g.state !== 'pre' && g.top && g.top.pts >= TOP_MIN ? g.top : null;
   if (!top) return [];
   const items = String(top.line).split(/,\s*/).map(x => { const m = x.match(/^([\d.\-\/]+)\s*(.*)$/); return m ? {v: m[1], l: m[2]} : {v: x, l: ''}; });
-  return [{p: {id: top.id, name: top.name, label: top.name, img: top.img, sport: g.sport}, s: {kind: 'leader', team: top.team, items}}];
+  const tm = [g.away, g.home].find(x => x.id && x.id === top.tid);   // team name as the board shows it (name overrides apply)
+  return [{p: {id: top.id, name: top.name, label: top.name, img: top.img, sport: g.sport}, s: {kind: 'leader', team: tm ? teamLabel(tm, 'school') : top.team, items}}];
 }
 
 // ---------- fantasy football leaders (PPR, ESPN-style standard scoring) ----------
