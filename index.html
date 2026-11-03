@@ -41,6 +41,10 @@ button,input,select{font:inherit;color:inherit}
 .feed{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-right:auto}
 .feed i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .feed.ok i{background:var(--ok)} .feed.err i{background:var(--warn)} .feed.err{color:var(--warn)}
+.feed.late i{background:var(--warn)} .feed.late{color:var(--warn)}
+.feed.down i{background:var(--live);animation:fdown 1s steps(2) infinite} .feed.down{color:var(--live);font-weight:600}
+@keyframes fdown{50%{opacity:.25}}
+.feed b{font-weight:600;font-variant-numeric:tabular-nums}
 .btn{background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:7px 12px;cursor:pointer;white-space:nowrap}
 .btn:hover{border-color:#3A4554;background:#212833}
 .btn.primary{background:var(--sel);border-color:var(--sel);color:#09142A;font-weight:600}
@@ -188,7 +192,7 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .online.ok .od i{background:var(--ok)} .online.err .od i{background:var(--warn)} .online.err #onlineTxt{color:var(--warn)}
 #onlineTxt{color:var(--muted)}
 .outs{display:flex;flex-direction:column;gap:10px}
-.ob{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "stage" "tr" "note";gap:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);cursor:pointer}
+.ob{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "stage" "tr" "nx" "note";gap:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);cursor:pointer}
 .ob.sel{border-color:var(--sel);box-shadow:0 0 0 1px var(--sel)}
 .ob .obh{grid-area:head;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .ob .obh h2{margin:0 auto 0 0;font:600 12px/1.3 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -201,7 +205,7 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .ob .pnote:hover{color:var(--fg);border-color:#3A4554}
 /* 16:9 outputs on a wide screen: preview on the left, title and controls on the right */
 @media (min-width:1500px){
-  .ob:not(.wide){grid-template-columns:minmax(260px,min(48%,520px)) minmax(220px,1fr);grid-template-areas:"stage head" "stage tr" "stage note" "stage .";grid-template-rows:auto auto auto 1fr;align-items:start}
+  .ob:not(.wide){grid-template-columns:minmax(260px,min(48%,520px)) minmax(220px,1fr);grid-template-areas:"stage head" "stage tr" "stage nx" "stage note" "stage .";grid-template-rows:auto auto auto auto 1fr;align-items:start}
   .ob:not(.wide) .obh{flex-direction:column;align-items:flex-start}
   .ob:not(.wide) .stage{max-height:none}
 }
@@ -214,6 +218,20 @@ input[type=color]{width:38px;height:30px;padding:2px;background:var(--panel);bor
 .ob.is-hidden{border-color:var(--warn)}
 .transport .hidebtn.on{border-color:var(--warn);color:var(--warn)}
 .ob .osz{font:500 11px var(--f-mono);letter-spacing:0;color:var(--muted)}
+/* up next (preview) beside the on-air page (program) */
+.ob .nx{grid-area:nx;display:flex;gap:10px;align-items:flex-start;padding-top:8px;border-top:1px solid var(--line);min-width:0}
+.ob .nx[hidden]{display:none}
+.ob .nxs{position:relative;overflow:hidden;width:min(46%,220px);flex:none;border-radius:4px;outline:2px solid #2E7D32;outline-offset:1px;background:#000;cursor:pointer}
+.ob.wide .nx{flex-direction:column}.ob.wide .nxs{width:100%}
+.ob .nxs .holder{position:absolute;left:0;top:0;transform-origin:0 0}
+.ob .nxs *{animation:none!important;transition:none!important}
+.ob .nxd{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ob .nxl{font:700 10px/1.2 var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:#66BB6A}
+.ob .nxt{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ob .nxt.cued{color:var(--fg)}
+.ob .nxb{display:flex;gap:6px;flex-wrap:wrap}
+.ob .stage{outline:2px solid transparent;outline-offset:1px}
+.ob:has(.air.on) .stage{outline-color:#C62828}
 .seg.two{grid-template-columns:repeat(2,1fr)}
 .seg.four{grid-template-columns:repeat(4,1fr)}
 .seg.four button{padding:8px 10px;white-space:nowrap}
@@ -1755,7 +1773,9 @@ async function loadFeed(k){
   if (!res) throw new Error('network error');
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const j = await res.json();
-  const list = (j.events || []).map(e => norm(e, sport)).filter(Boolean);
+  if (!j || !Array.isArray(j.events)) throw new Error('ESPN sent data this app can’t read');
+  const list = j.events.map(e => { try { return norm(e, sport); } catch(x) { return null; } }).filter(Boolean);
+  if (j.events.length && !list.length) throw new Error('ESPN sent data this app can’t read');
   list.forEach(ingest);
   feeds[k] = list;
   return list;
@@ -1859,9 +1879,14 @@ function boardFont(b, i){
   return "'" + b.fontName + "','Scoreboard Display',sans-serif";
 }
 
+// the page that goes on air next: the cued page if the operator picked one, otherwise the following page
+function nextPage(i){
+  const len = pages(i).length || 1, rt = rts[i];
+  return rt.cue != null && rt.cue < len && rt.cue !== rt.page ? rt.cue : (rt.page + 1) % len;
+}
 function step(i, n){
   const len = pages(i).length || 1, rt = rts[i];
-  rt.page = ((rt.page + n) % len + len) % len; rt.cycle = ((rt.cycle || 0) + 1) % 1e6;
+  rt.page = n === 1 ? nextPage(i) : ((rt.page + n) % len + len) % len; rt.cue = null; rt.cycle = ((rt.cycle || 0) + 1) % 1e6;
   rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
   renderAll(); push();
 }
@@ -2587,10 +2612,39 @@ function bootControl(){
     '<div class="stage"><div class="holder"></div><div class="hidmask">Hidden · screens show the background only</div></div>' +
     '<div class="transport"><button class="btn sm" data-x="prev">‹ Prev</button><button class="btn sm" data-x="play">Pause</button><button class="btn sm" data-x="next">Next ›</button>' +
     '<button class="btn sm hidebtn" data-x="hide" title="Blank this output on every screen (background only). Click again to show it.">Hide</button><span class="info"></span></div>' +
+    '<div class="nx" hidden><div class="nxs" data-x="take" title="Put this page on air now"><div class="holder"></div></div><div class="nxd"><span class="nxl">Up next</span><span class="nxt"></span>' +
+    '<span class="nxb"><button class="btn sm" data-x="cprev" title="Cue an earlier page to go next">‹</button><button class="btn sm" data-x="cnext" title="Cue a later page to go next">›</button>' +
+    '<button class="btn sm" data-x="take" title="Put the cued page on air now">Take</button><button class="btn sm" data-x="cclr" title="Go back to the normal order" hidden>Clear cue</button></span></div></div>' +
     '<button type="button" class="pnote" data-x="pnote" hidden>Player stats are hidden on this output (smaller than 960×540). Change it in Board settings › What shows</button></div>').join('');
   const OB = cfg.outputs.map((_, i) => { const el = document.querySelector('.ob[data-o="' + i + '"]');
     return {el, stage: el.querySelector('.stage'), holder: el.querySelector('.holder'), info: el.querySelector('.info'), play: el.querySelector('[data-x="play"]'),
-      hide: el.querySelector('[data-x="hide"]'), air: el.querySelector('.air'), pnote: el.querySelector('.pnote')}; });
+      hide: el.querySelector('[data-x="hide"]'), air: el.querySelector('.air'), pnote: el.querySelector('.pnote'),
+      nx: el.querySelector('.nx'), nxs: el.querySelector('.nxs'), nxh: el.querySelector('.nxs .holder'), nxt: el.querySelector('.nxt'), nxc: el.querySelector('[data-x="cclr"]')}; });
+  // what a page is, in words (for "Up next")
+  const pageWords = pg => !pg ? '' : pg.standings ? (CONF_NAMES[pg.standings.conf] || '') + ' ' + SPORTS[pg.standings.sport].short + ' standings' :
+    pg.fantasy ? 'Fantasy leaders · ' + (FF_LABEL[pg.fantasy.pos] || 'All positions') :
+    pg.games.map(g => teamLabel(g.away, 'abbr') + '–' + teamLabel(g.home, 'abbr')).join(', ');
+  function renderNext(o, i){
+    const ps = pages(i), rt = rts[i], n = ps.length;
+    o.nx.hidden = n < 2 || !!rt.hidden;
+    if (o.nx.hidden) return;
+    if (rt.cue != null && (rt.cue >= n || rt.cue === rt.page)) rt.cue = null;
+    const k = nextPage(i), b = cfg.outputs[i];
+    o.nxt.textContent = 'Page ' + (k + 1) + ' of ' + n + ' · ' + pageWords(ps[k]); o.nxt.classList.toggle('cued', rt.cue != null);
+    o.nxt.title = o.nxt.textContent;
+    o.nx.querySelector('.nxl').textContent = rt.cue != null ? 'Up next · cued' : 'Up next';
+    o.nxc.hidden = rt.cue == null;
+    o.nxs.style.aspectRatio = b.w + ' / ' + b.h;
+    o.nxh.style.width = b.w + 'px'; o.nxh.style.height = b.h + 'px';
+    // redraw only when the next page or its data changes
+    const sig = JSON.stringify([k, n, pageWords(ps[k]), lastUpdate && +lastUpdate, stripAssets(b), (b.logo || '').length, b.w, b.h, cfg.prefs.names]);
+    if (o.nxh.__sig !== sig) {
+      o.nxh.__sig = sig;
+      o.nxh.innerHTML = boardHTML(ps, k, b, {enter: false, font: boardFont(b, i), bumped: () => 0, pageStart: Date.now()});
+      fitNames(o.nxh);
+    }
+    const sc = o.nxs.clientWidth / b.w; o.nxh.style.transform = 'scale(' + sc + ')';
+  }
   window.renderAll = () => {
     OB.forEach((o, i) => {
       const b = cfg.outputs[i];
@@ -2599,7 +2653,7 @@ function bootControl(){
       o.holder.style.width = b.w + 'px'; o.holder.style.height = b.h + 'px';
       o.el.querySelector('.onm').textContent = b.name || ''; if (i === SEL) $('editingTxt').textContent = 'Editing Output ' + (i+1) + ' · ' + (b.name || '');
       o.el.querySelector('.osz').textContent = b.w + '×' + b.h;
-      renderBoard(o.holder, i); fit(o.stage, o.holder, b);
+      renderBoard(o.holder, i); fit(o.stage, o.holder, b); renderNext(o, i);
       // tracked players are in this output's games but the size rule keeps them off: say so
       o.pnote.hidden = !(b.players === 'auto' && !showPlayers(b) && TRACKED.length && pages(i).some(p => !p.standings && p.games.some(g => playersFor(g).length)));
     });
@@ -2622,8 +2676,8 @@ function bootControl(){
     $('liveNote').textContent = 'Changes go live immediately' + (online.on && onlineStatus.ok && FAIL.role !== 'standby' && ago >= 0 && ago < 60 ? ' · screens updated ' + (ago < 2 ? 'just now' : ago + 's ago') : '');
     syncGuide();
   }
-  const ro = new ResizeObserver(() => OB.forEach((o, i) => fit(o.stage, o.holder, cfg.outputs[i])));
-  OB.forEach(o => ro.observe(o.stage));
+  const ro = new ResizeObserver(() => OB.forEach((o, i) => { fit(o.stage, o.holder, cfg.outputs[i]); if (!o.nx.hidden) o.nxh.style.transform = 'scale(' + (o.nxs.clientWidth / cfg.outputs[i].w) + ')'; }));
+  OB.forEach(o => { ro.observe(o.stage); ro.observe(o.nxs); });
   const togglePlay = i => { rts[i].paused = !rts[i].paused; rts[i].nextAt = Date.now() + cfg.outputs[i].secs*1000; updInfo(); push(); };
   $('outs').addEventListener('click', e => {
     const ob = e.target.closest('.ob'); if (!ob) return;
@@ -2632,7 +2686,9 @@ function bootControl(){
     if (!x) { selectOutput(i); return; }
     const a = x.dataset.x;
     if (a === 'pnote') { selectOutput(i); setTab('show'); $('boardSettings').open = true; $('boardSettings').scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
-    if (a === 'prev') step(i, -1); else if (a === 'next') step(i, 1); else if (a === 'play') togglePlay(i);
+    if (a === 'prev') step(i, -1); else if (a === 'next' || a === 'take') step(i, 1); else if (a === 'play') togglePlay(i);
+    else if (a === 'cnext' || a === 'cprev') { const n = pages(i).length, rt = rts[i]; if (n > 1) { let k = nextPage(i); do { k = ((k + (a === 'cnext' ? 1 : -1)) % n + n) % n; } while (k === rt.page); rt.cue = k === (rt.page + 1) % n ? null : k; renderAll(); } }
+    else if (a === 'cclr') { rts[i].cue = null; renderAll(); }
     else if (a === 'open') openOutput(i); else if (a === 'link') copyLink(i);
     else if (a === 'hide') { rts[i].hidden = !rts[i].hidden; renderAll(); push(); toast(rts[i].hidden ? 'Output ' + (i+1) + ' is hidden on every screen' : 'Output ' + (i+1) + ' is showing again'); }
   });
@@ -2805,14 +2861,36 @@ function bootControl(){
   window.addEventListener('beforeunload', e => { if (FAIL.role === 'control' && online.on && pub.v === 2) { e.preventDefault(); e.returnValue = ''; } });
 
   // feed status
-  function setFeed(err){
-    feedErr = err; const f = $('feed');
-    f.classList.toggle('err', !!err); f.classList.toggle('ok', !err && !!lastUpdate);
-    const t = lastUpdate ? lastUpdate.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', second:'2-digit', timeZone:TZ}) : '';
-    $('feedTxt').textContent = frozen ? 'Scores frozen' + (t ? ' at ' + t : '') :
-      err ? 'Can’t reach ESPN (' + err + '). Showing last scores, retrying every ' + cfg.outputs[0].refresh + 's.' :
-      lastUpdate ? 'Live from ESPN · updated ' + t + (rankSource ? ' · Football rankings: ' + (rankSource === 'CFP' ? 'CFP' : 'AP poll') : '') : 'Connecting to ESPN…';
+  // Data health light: how old the newest ESPN data is. Green = fresh, amber = late, red (blinking) = boards
+  // are showing old scores. Boards always keep the last good scores; they never go blank because ESPN is down.
+  const ago = s => s < 60 ? s + ' sec' : s < 3600 ? Math.floor(s / 60) + ' min' + (s % 60 >= 10 && s < 600 ? ' ' + (s % 60) + ' sec' : '') : Math.floor(s / 3600) + ' hr';
+  let healthWas = 'ok';
+  function healthLevel(){
+    if (frozen || !lastUpdate) return '';
+    const age = (Date.now() - lastUpdate) / 1000, every = cfg.outputs[0].refresh;
+    return age > Math.max(120, every * 4) ? 'down' : (feedErr || age > every * 2 + 15) ? 'late' : 'ok';
   }
+  function setFeed(err){
+    if (err !== undefined) feedErr = err;
+    const f = $('feed'), lvl = healthLevel();
+    ['ok', 'err', 'late', 'down'].forEach(c => f.classList.remove(c));
+    if (lvl) f.classList.add(lvl); else if (feedErr && !frozen) f.classList.add('err');
+    const age = lastUpdate ? Math.max(0, Math.round((Date.now() - lastUpdate) / 1000)) : 0;
+    const t = lastUpdate ? lastUpdate.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', second:'2-digit', timeZone:TZ}) : '';
+    const why = feedErr ? ' (' + feedErr + ')' : '';
+    $('feedTxt').innerHTML = frozen ? 'Scores frozen' + (t ? ' at ' + t : '') :
+      !lastUpdate ? (feedErr ? 'Can’t reach ESPN' + esc(why) + '. Retrying…' : 'Connecting to ESPN…') :
+      lvl === 'down' ? 'ESPN data is <b>' + ago(age) + '</b> old' + esc(why) + '. Boards are holding the last scores; retrying every ' + cfg.outputs[0].refresh + 's.' :
+      lvl === 'late' ? 'ESPN data <b>' + ago(age) + '</b> old' + esc(feedErr ? why + ', retrying' : ', waiting on ESPN') :
+      'ESPN data <b>' + ago(age) + '</b> old' + (rankSource ? ' · Football rankings: ' + (rankSource === 'CFP' ? 'CFP' : 'AP poll') : '');
+    $('feed').title = lastUpdate ? 'Last good data from ESPN at ' + t + '. Green: fresh. Amber: a refresh or two missed. Red: boards are showing old scores.' : '';
+    if (lvl === 'down' && healthWas !== 'down') toast('ESPN data has stopped updating. Boards are holding the last scores they had.', {label: 'OK', fn: () => {}});
+    if (lvl === 'ok' && healthWas === 'down') toast('ESPN data is back. Boards are updating again.');
+    if (lvl) healthWas = lvl;
+    window.__health = {level: lvl, age, err: feedErr};
+  }
+  setInterval(() => setFeed(), 1000);
+  window.__ageData = sec => { lastUpdate = new Date(Date.now() - sec * 1000); setFeed(); };   // for the automated checks
   async function refresh(){
     if (!frozen) {
       const keys = new Set(feedRows().map(feedKey)); keys.add(pickerKey());
@@ -3067,7 +3145,7 @@ function bootControl(){
     const outs = c.out === 'all' || !c.out ? rts.map((_, i) => i) : [Math.min(N_OUT, Math.max(1, +c.out)) - 1];
     outs.forEach(i => {
       const rt = rts[i], len = pages(i).length || 1, again = () => rt.nextAt = Date.now() + cfg.outputs[i].secs * 1000;
-      if (c.c === 'next') { rt.page = (rt.page + 1) % len; again(); }
+      if (c.c === 'next') { rt.page = nextPage(i); rt.cue = null; again(); }
       else if (c.c === 'prev') { rt.page = (rt.page - 1 + len) % len; again(); }
       else if (c.c === 'toggle') { rt.paused = !rt.paused; again(); }
       else if (c.c === 'pause') rt.paused = true;
@@ -3149,7 +3227,7 @@ function bootControl(){
     const lock = (el, ok) => { if (!el) return; el.inert = !ok; el.classList.toggle('locked', !ok); };
     document.querySelectorAll('.pane.picker, .pane.rundown').forEach(el => lock(el, can('rundown')));
     document.querySelectorAll('#boardSettings .sgrid > *, #lookFrom, #matchLook, #namesBox .names, .build .qb').forEach(el => lock(el, can(el.dataset.perm || 'settings')));
-    document.querySelectorAll('.ob .transport, #freezeLbl').forEach(el => lock(el, can('control')));
+    document.querySelectorAll('.ob .transport, .ob .nx, #freezeLbl').forEach(el => lock(el, can('control')));
     document.querySelectorAll('.ob [data-x="open"], .ob [data-x="link"], #onlineOnLbl, #onlineMove, #linksBtn').forEach(el => lock(el, can('outputs')));
     document.querySelectorAll('[data-need="users"]').forEach(el => lock(el, AUTH.v2 !== false && (can('users') || (!AUTH.hasUsers && !AUTH.user && !AUTH.require))));
     document.querySelectorAll('[data-need="failover"]').forEach(el => lock(el, can('failover')));

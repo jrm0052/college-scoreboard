@@ -69,9 +69,9 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   await A.click('.ob[data-o="0"] [data-x="play"]');
   const goKey = await A.$$eval('#rdList li', l => l.map(x => x.dataset.key).find(k => k === 'nba:401909880'));
   await A.click('#rdList li[data-key="nba:401909880"] [data-a="go"]'); await A.waitForTimeout(900);
-  const strips = await A.$$eval('.ob[data-o="0"] .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
+  const strips = await A.$$eval('.ob[data-o="0"] .stage .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
   ok(strips.some(t => /Walker Kessler.*13.*PTS.*8.*REB/i.test(t)), 'Kessler game line under Lakers game: ' + strips.join(' || '));
-  const pre = await A.$$eval('.ob[data-o="0"] .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()).filter(t => /Celtic/.test(t)));
+  const pre = await A.$$eval('.ob[data-o="0"] .stage .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()).filter(t => /Celtic/.test(t)));
   ok(pre.length && /Season avg.*15\.8.*PPG/i.test(pre[0]), 'pre-game season averages: ' + pre);
   // standalone output 1 window at 1920x1080 (same browser, controlled by dashboard)
   const O = await ctx.newPage(); O.on('pageerror', e => errs.push('out: ' + e.message)); await O.setViewportSize({ width: 1920, height: 1080 });

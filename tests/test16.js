@@ -61,7 +61,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   await O.goto('http://site.test/college-scoreboard/#output'); await O.waitForTimeout(1500);
   const pageNow = () => O.evaluate(() => { const d = [...document.querySelectorAll('.board .dots i')]; return d.findIndex(i => i.classList.contains('on')); });
   const watch = async (secs) => { const seq = []; for (let k = 0; k < secs * 2; k++) { seq.push(await pageNow()); await O.waitForTimeout(500); } return seq.filter((v, k) => k === 0 || v !== seq[k - 1]); };
-  const n = await A.evaluate(() => document.querySelectorAll('.ob[data-o="0"] .board .dots i').length);
+  const n = await A.evaluate(() => document.querySelectorAll('.ob[data-o="0"] .stage .board .dots i').length);
   console.log('pages:', n);
   // dashboard tab gets frozen/throttled (Chrome does this to background tabs), then wakes up for a moment, again and again
   const cdp = await A.context().newCDPSession(A);

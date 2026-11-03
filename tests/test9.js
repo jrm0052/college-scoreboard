@@ -58,7 +58,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   await A.waitForTimeout(1500);
   await A.click('.ob[data-o="0"] [data-x="play"]');
   await A.click('#rdList li[data-key="nba:401909880"] [data-a="go"]'); await A.waitForTimeout(800);
-  const strips = await A.$$eval('.ob[data-o="0"] .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
+  const strips = await A.$$eval('.ob[data-o="0"] .stage .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
   ok(strips.some(t => /Kessler.*Season avg.*PPG/i.test(t)), 'no minutes yet -> season: ' + strips.find(t => /Kessler/.test(t)));
   ok(strips.some(t => /Avdija.*DNP · Season avg.*PPG/i.test(t)), 'DNP -> season with DNP tag: ' + strips.find(t => /Avdija/.test(t)));
   // scoring play: Lakers score, then watch the drop animation through many redraws

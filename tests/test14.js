@@ -55,7 +55,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   await A.goto('http://site.test/college-scoreboard/'); await A.waitForTimeout(900);
   await A.click('#sportSeg [data-s="cfb"]'); await A.waitForTimeout(600); await A.click('#addAll'); await A.waitForTimeout(500);
   ok(await A.$eval('#skipOn', e => e.checked) && /Auburn/.test(await A.textContent('#skipEdit')), 'on by default for Auburn: ' + await A.textContent('#skipEdit'));
-  const shown = async () => A.$$eval('.ob[data-o="0"] .g .nm', l => l.map(x => x.textContent).join(','));
+  const shown = async () => A.$$eval('.ob[data-o="0"] .stage .g .nm', l => l.map(x => x.textContent).join(','));
   ok(!/AUBURN|Auburn/i.test(await shown()) && (await A.$$eval('#rdList li', l => l.length)) === 3, 'Auburn game stays in the rundown but not on the board: ' + await shown());
   ok(/Left out · our game/.test(await A.textContent('#rdList li[data-key="cfb:71"]')), 'rundown row marked');
   await A.screenshot({ path: OUT + '/s_on.png' });
