@@ -393,8 +393,12 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 /* tracked NFL / NBA players: stat strip under the game */
 .g .pl{position:absolute;left:1.15em;right:.55em;top:calc(100% + .05em);height:3em;display:flex;gap:.45em;z-index:1}
 .g.mir .pl{left:0;right:1.7em}
-.g .pl .ps{flex:1 1 0;min-width:0;display:flex;align-items:stretch;background:var(--panel);box-shadow:.4em .4em 0 var(--shade)}
-.g .pl .pt{display:flex;align-items:center;gap:.4em;padding:0 .75em 0 .3em;background:var(--accent);color:#fff;flex:none}
+.g .pl .ps{flex:1 1 0;min-width:0;overflow:hidden;display:flex;align-items:stretch;background:var(--panel);box-shadow:.4em .4em 0 var(--shade)}
+.g .pl .pt{display:flex;align-items:center;gap:.4em;padding:0 .75em 0 .3em;background:var(--accent);color:#fff;flex:none;max-width:50%;min-width:0}
+.g .pl .pt span{overflow:hidden}
+.g .pl .pt.nohs .phs{display:none}
+.g .pl .pt.nohs{padding-left:.75em}
+.g .pl .pi.drop{display:none}
 .g .pl .pt span{font:800 1.5em/1 var(--f-score);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap}
 .g .pl .phs{height:2.5em;width:2.5em;flex:none;object-fit:cover;object-position:50% 12%;border-radius:50%;background:rgba(0,0,0,.18)}
 .g .pl .pv{display:flex;align-items:center;gap:.65em;padding:0 .8em;font:800 1.55em/1 var(--f-score);text-transform:uppercase;white-space:nowrap;overflow:hidden;min-width:0;flex:1 1 auto}
@@ -1312,6 +1316,12 @@ function cardHTML(g, ctx){
 }
 
 // Shrink any team name that overflows its slot so names aren't cut off on air; drop the record if still too long
+if (typeof document !== 'undefined' && document.fonts) {
+  const refit = () => document.querySelectorAll('.board').forEach(b => { try { fitNames(b); } catch(e) {} });
+  document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => setTimeout(refit, 50));
+  document.fonts.ready && document.fonts.ready.then(() => setTimeout(refit, 50));
+}
+if (typeof window !== 'undefined') window.__fitNames = r => fitNames(r);   // for the automated checks
 function fitNames(root){
   root.querySelectorAll('.g .nm').forEach(el => {
     const rg = document.createRange(); rg.selectNodeContents(el);
@@ -1324,13 +1334,35 @@ function fitNames(root){
     while (over() && f > 0.5) { f -= 0.03; el.style.fontSize = (base * f).toFixed(3) + 'em'; }
   });
   // player strips: the name keeps up to ~45% of its box (shrinking if needed), then the stat line shrinks to fit the rest
+  // When two players share a game each box is half as wide, so: name gets at most ~40% (shrinks, then switches to
+  // "F. Lastname"), stats shrink a little, then the least important stats drop off the end (never cut mid-number),
+  // and only then shrink further. A strip never spills into the one beside it.
   root.querySelectorAll('.g .pl .ps').forEach(ps => {
     const nm = ps.querySelector('.pt span'), pv = ps.querySelector('.pv'), pt = ps.querySelector('.pt');
+    if (!nm || !pv || !ps.clientWidth) return;
+    if (nm.dataset.full == null) nm.dataset.full = nm.textContent;
+    nm.textContent = nm.dataset.full;
     [nm, pv].forEach(el => el.style.fontSize = '');
-    let f = 1; const fn = parseFloat(getComputedStyle(nm).fontSize);
-    while (pt.offsetWidth > ps.clientWidth * 0.45 && f > 0.55) { f -= 0.04; nm.style.fontSize = (fn * f) + 'px'; }
-    f = 1; const fv = parseFloat(getComputedStyle(pv).fontSize);
-    while (pv.scrollWidth > pv.clientWidth + 1 && f > 0.5) { f -= 0.04; pv.style.fontSize = (fv * f) + 'px'; }
+    const items = [...pv.querySelectorAll('.pi')]; items.forEach(x => x.classList.remove('drop')); pt.classList.remove('nohs');
+    const nameOver = () => pt.scrollWidth > ps.clientWidth * 0.5 + 1 || nm.scrollWidth > nm.clientWidth + 1;
+    const statOver = () => pv.scrollWidth > pv.clientWidth + 1;
+    const fn = parseFloat(getComputedStyle(nm).fontSize); let f = 1;
+    while (nameOver() && f > 0.54) { f -= 0.04; nm.style.fontSize = (fn * f) + 'px'; }
+    if (nameOver() && typeof shortName === 'function' && shortName(nm.dataset.full) !== nm.dataset.full) {
+      nm.textContent = shortName(nm.dataset.full); f = 1; nm.style.fontSize = '';
+      while (nameOver() && f > 0.64) { f -= 0.04; nm.style.fontSize = (fn * f) + 'px'; }
+    }
+    if (nameOver()) pt.classList.add('nohs');   // still too long: give the headshot's room to the name
+    while (nameOver() && f > 0.5) { f -= 0.04; nm.style.fontSize = (fn * f) + 'px'; }
+    const fv = parseFloat(getComputedStyle(pv).fontSize); f = 1;
+    const setF = x => { f = x; pv.style.fontSize = (fv * f) + 'px'; };
+    while (statOver() && f > 0.5) setF(f - 0.04);
+    if (statOver()) {   // drop stats from the end, then let the rest grow back into the room that frees up
+      for (let k = items.length - 1; statOver() && k >= 2; k--) items[k].classList.add('drop');
+      while (f < 0.98 && !statOver()) setF(f + 0.04);
+      if (statOver()) setF(f - 0.04);
+    }
+    while (statOver() && f > 0.5) setF(f - 0.04);
   });
   root.querySelectorAll('.g .st').forEach(el => {
     [...el.querySelectorAll('.p1,.p2,.bl')].forEach(x => { x.style.fontSize = ''; let f = 1; const fs = parseFloat(getComputedStyle(x).fontSize);
