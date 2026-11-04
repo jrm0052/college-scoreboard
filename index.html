@@ -314,6 +314,10 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .board .hd{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-end;gap:1.4em;padding-bottom:1.6em}
 .board .hd .ttl{font:800 5.4em/1 var(--f-score);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;padding-bottom:.12em;border-bottom:.09em solid var(--accent)}
 .board .hd .sp{font:800 3em/1 var(--f-score);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;padding-bottom:.25em}
+.board .hd .sp.spl{display:flex;align-items:flex-end;padding-bottom:.12em}
+.board .hd .sp.spl img{display:block;height:1.9em;width:auto;max-width:5em;object-fit:contain}
+.board .hd.lg .sp.spl{align-self:center;height:72%;padding:0}.board .hd.lg .sp.spl img{height:100%;max-height:none}
+.board .hd.side .sp.spl img{height:1.6em}
 .board .hd .dots{margin-left:auto;display:flex;gap:.8em;padding-bottom:.9em}
 .board .hd .dots i{width:2.2em;height:.5em;background:rgba(255,255,255,.25)}
 .board .hd .dots i.on{background:var(--accent)}
@@ -399,6 +403,12 @@ input[type=email],input[type=password]{background:var(--panel);border:1px solid 
 .g .pl .pt.nohs .phs{display:none}
 .g .pl .pt.nohs{padding-left:.75em}
 .g .pl .pi.drop{display:none}
+.g .pl .ps.fbl .pv{justify-content:space-between;gap:1em;padding:0 1em}
+.g .pl .ps.fbl .pi{align-items:center;gap:.32em}
+.g .pl .ps.fbl .pi i.ss{font-size:.56em;margin-right:.2em}
+.g .pl .ps.fbl .pi u{display:inline-block;width:.16em;height:.9em;align-self:center;margin-right:.08em}
+.g .pl .ps.fbl .fn{font-weight:800;color:var(--txt)}
+.g .pl .ps.fbl .pi b{color:var(--accent);margin-left:.15em}
 .g .pl .pt span{font:800 1.5em/1 var(--f-score);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap}
 .g .pl .phs{height:2.5em;width:2.5em;flex:none;object-fit:cover;object-position:50% 12%;border-radius:50%;background:rgba(0,0,0,.18)}
 .g .pl .pv{display:flex;align-items:center;gap:.65em;padding:0 .8em;font:800 1.55em/1 var(--f-score);text-transform:uppercase;white-space:nowrap;overflow:hidden;min-width:0;flex:1 1 auto}
@@ -526,7 +536,7 @@ body.out.trans{background:transparent}
         <button class="btn sm" id="addManual" title="A game ESPN doesn’t have: type the teams, score and status yourself">Add manual game</button>
         <button class="btn sm" id="clearRd" title="Remove everything from the rundown (you can undo)">Clear</button>
       </div>
-      <div class="skipbar"><label class="ck" title="Games with one of our teams stay in the rundown but never show on the boards"><input type="checkbox" id="skipOn"> Leave our games out of the rotation</label><button type="button" class="linkbtn" id="skipEdit" title="Choose which teams count as ours"></button></div>
+      <div class="skipbar"><label class="ck" title="Games with one of our teams stay in the rundown but never show on the boards"><input type="checkbox" id="skipOn"> Leave our games out of the rotation</label><label class="ck" title="NBA and NFL games with one of our tracked players move to the front of their sport, so they show on the same pages"><input type="checkbox" id="groupOurs"> Keep games with our players together</label><button type="button" class="linkbtn" id="skipEdit" title="Choose which teams count as ours"></button></div>
       <details class="build" id="buildBox">
         <summary>Build &amp; presets</summary>
         <div class="qb">
@@ -687,6 +697,7 @@ body.out.trans{background:transparent}
           </label>
           <label class="ck" title="Once a page is on air, new scores, logos and stats wait for the next page (or the next turn of a one-page board), so nothing flashes or jumps on screen"><input type="checkbox" id="sHold" data-k="holdOnAir"> Hold scores while a page is on air</label>
           <label class="ck" title="Under each basketball game once someone has 20 points. Our tracked players take the spot first. Same size rule as player stats."><input type="checkbox" id="sLeaders" data-k="leaders"> Basketball top scorer (20+ pts)</label>
+          <label class="ck" title="Under each football game once it kicks off: the passing, rushing and receiving yards leaders. Our tracked players and scoring plays take the spot first. Same size rule as player stats."><input type="checkbox" id="sFbLeaders" data-k="fbLeaders"> Football leaders (pass, rush, rec yards)</label>
           <label class="f">NFL / NBA player stats
             <select id="sPlayers" data-k="players"><option value="auto">Large outputs only (960×540 and up)</option><option value="always">Always</option><option value="off">Off</option></select>
           </label>
@@ -820,7 +831,7 @@ const CONF_IDS = {
 };
 // College Football Playoff rankings, filled in once the committee releases them (team id -> rank)
 var CFP_RANKS = null;
-const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',leaders:true,holdOnAir:true,presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
+const DEFAULT_BOARD = {w:1920,h:1080,layout:'auto',perPage:4,cols:2,rows:2,secs:8,refresh:20,header:false,hdMode:'off',hdAlign:'left',hdSize:14,logo:'',sportLabel:false,plays:'cfb',playSecs:12,fade:0.6,upsets:'half',players:'auto',leaders:true,fbLeaders:true,holdOnAir:true,presentedOn:false,presented:'Presented by',tpl:'package',fontName:'Scoreboard Display',fontData:'',textColor:'#FFFFFF',panelColor:'',leadColor:'',rankColor:'',upper:true,title:'Out of Town Scores',groupBySport:true,
   logos:true,ranks:true,records:false,tv:true,names:'auto',bg:'board',bgColor:'#102A5E',accent:'#E87722',brand:1};
 const STORE = 'college-scoreboard.v1';
 const API = 'https://site.api.espn.com/apis/site/v2/sports/';
@@ -872,7 +883,7 @@ function norm(ev, sport){
     key: sport + ':' + ev.id, id: String(ev.id), sport, date: ev.date || c.date,
     state: ty.state || 'pre', statusName: ty.name || '', detail: ty.shortDetail || ty.detail || '', period: +st.period || 0,
     timeValid: c.timeValid !== false, tv,
-    away: side('away'), home: side('home'), top: topScorer(c, sport),
+    away: side('away'), home: side('home'), top: topScorer(c, sport), fbl: fbLeaders(c, sport),
     sit: {
       poss: s.possession ? pfxTeam(sport, s.possession) : '', red: !!s.isRedZone,
       down: down, spot: spot,
@@ -1030,6 +1041,8 @@ function plText(s){
 }
 function plStripHTML(list){
   return '<div class="pl">' + list.map(({p, s}) => {
+    if (s.kind === 'fbl') return '<span class="ps fbl"><span class="pv">' + s.items.map(x =>
+      '<span class="pi"><i class="ss">' + esc(x.cat) + '</i>' + (x.color ? '<u style="background:' + esc(/^#/.test(x.color) ? x.color : '#' + x.color) + '"></u>' : '') + '<span class="fn">' + esc(x.name) + '</span><b>' + esc(x.yds) + '</b></span>').join('') + '</span></span>';
     let v;
     if (s.kind === 'dnp') v = '<b>DNP</b>' + (s.note ? '<i>' + esc(s.note) + '</i>' : '');
     else if (s.kind === 'out') v = '<i class="ss">' + (s.final ? 'No stats' : 'No stats yet') + '</i>';
@@ -1062,10 +1075,35 @@ function topScorer(c, sport){
   return top;
 }
 const TOP_MIN = 20;
+// league marks for the header (pro leagues; college sports keep the text label)
+const LEAGUE_LOGO = {nfl: 'https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png', nba: 'https://a.espncdn.com/i/teamlogos/leagues/500/nba.png'};
+// ---------- football game leaders: passing, rushing and receiving yards (ESPN scoreboard leaders) ----------
+function fbLeaders(c, sport){
+  if (!isFB(sport) || !c) return null;
+  const cats = [['passingYards', 'PASS'], ['rushingYards', 'RUSH'], ['receivingYards', 'REC']];
+  const pools = [].concat(c.leaders || [], ...(c.competitors || []).map(x => (x.leaders || []).map(l => Object.assign({}, l, {_team: String((x.team || {}).id || '')}))));
+  const out = cats.map(([name, lbl]) => {
+    let best = null;
+    pools.filter(l => l.name === name).forEach(l => (l.leaders || []).slice(0, 1).forEach(a => {
+      const yds = parseInt((String(a.displayValue || '').match(/(-?\d+)\s*YDS/i) || [])[1] != null ? String(a.displayValue).match(/(-?\d+)\s*YDS/i)[1] : a.value, 10);
+      if (!a.athlete || isNaN(yds) || (best && yds <= best.yds)) return;
+      const ath = a.athlete, tid = String((a.team || {}).id || (ath.team || {}).id || l._team || '');
+      best = {cat: lbl, yds, id: String(ath.id || ''), name: ath.displayName || ath.fullName || ath.shortName || '', last: ath.lastName || '', team: tid ? pfxTeam(sport, tid) : ''};
+    }));
+    return best;
+  }).filter(Boolean);
+  return out.length ? out : null;
+}
+const lastName = n => { const p = String(n || '').trim().replace(/\s+(Jr\.?|Sr\.?|II|III|IV|V)$/i, '').split(/\s+/); return p.length > 1 ? p.slice(1).join(' ') : p[0] || ''; };
 // what hangs under a game: our tracked players first; otherwise, in basketball, the game's top scorer once he has 20
 function stripFor(g, b){
   if (!showPlayers(b)) return [];
   const t = playersFor(g); if (t.length) return t;
+  if (b.fbLeaders !== false && isFB(g.sport) && g.state !== 'pre' && g.fbl && g.fbl.length)
+    return [{p: {id: 'fbl-' + g.key, name: '', label: '', sport: g.sport}, s: {kind: 'fbl', items: g.fbl.map(x => {
+      const tm = [g.away, g.home].find(t => t.id && t.id === x.team);
+      return {cat: x.cat, name: x.last || lastName(x.name), yds: x.yds, color: tm ? tm.color : ''};
+    })}}];
   const top = b.leaders !== false && isHoops(g.sport) && g.state !== 'pre' && g.top && g.top.pts >= TOP_MIN ? g.top : null;
   if (!top) return [];
   const items = String(top.line).split(/,\s*/).map(x => { const m = x.match(/^([\d.\-\/]+)\s*(.*)$/); return m ? {v: m[1], l: m[2]} : {v: x, l: ''}; });
@@ -1339,7 +1377,16 @@ function fitNames(root){
   // and only then shrink further. A strip never spills into the one beside it.
   root.querySelectorAll('.g .pl .ps').forEach(ps => {
     const nm = ps.querySelector('.pt span'), pv = ps.querySelector('.pv'), pt = ps.querySelector('.pt');
-    if (!nm || !pv || !ps.clientWidth) return;
+    if (!pv || !ps.clientWidth) return;
+    if (!nm) {
+      const items = [...pv.querySelectorAll('.pi')]; items.forEach(x => x.classList.remove('drop')); pv.style.fontSize = '';
+      const fv = parseFloat(getComputedStyle(pv).fontSize); let f = 1;
+      const over = () => pv.scrollWidth > pv.clientWidth + 1;
+      while (over() && f > 0.56) { f -= 0.04; pv.style.fontSize = (fv * f) + 'px'; }
+      for (let k = items.length - 1; over() && k >= 2; k--) items[k].classList.add('drop');
+      while (over() && f > 0.45) { f -= 0.04; pv.style.fontSize = (fv * f) + 'px'; }
+      return;
+    }
     if (nm.dataset.full == null) nm.dataset.full = nm.textContent;
     nm.textContent = nm.dataset.full;
     [nm, pv].forEach(el => el.style.fontSize = '');
@@ -1396,7 +1443,7 @@ function boardHTML(pages, idx, b, opt){
     h += '<header class="hd' + (useLogo ? ' lg' : '') + (geo.wide ? ' side' : b.hdAlign === 'center' ? ' ctr' : '') + '" style="' + hst + 'font-size:' + fs.toFixed(2) + 'px">' +
       (useLogo ? '<span class="hgrp">' + (b.presentedOn && b.presented ? '<span class="pby">' + esc(b.presented) + '</span>' : '') + '<img class="slogo" alt="" src="' + b.logo + '"></span>' :
         (b.hdMode === 'text' || !b.logo ? '<span class="ttl">' + esc(b.title) + '</span>' : '')) +
-      (sp && b.sportLabel ? '<span class="sp">' + esc(sp) + '</span>' : '') +
+      (sp && b.sportLabel ? (LEAGUE_LOGO[page.sport] ? '<span class="sp spl"><img alt="' + esc(sp) + '" src="' + LEAGUE_LOGO[page.sport] + '" onerror="this.parentNode.classList.remove(\'spl\');this.replaceWith(this.alt)"></span>' : '<span class="sp">' + esc(sp) + '</span>') : '') +
       '<span class="dots">' + (pages.length > 1 ? pages.map((_, i) => '<i class="' + (i === idx ? 'on' : '') + '"></i>').join('') : '') + '</span></header>';
   }
   if (opt.blank) {
@@ -1455,7 +1502,7 @@ function fixBoard(b, i){
   o.plays = ['off','cfb','all'].includes(o.plays) ? o.plays : 'cfb'; o.playSecs = clampN(o.playSecs,4,30,d.playSecs); o.sportLabel = !!o.sportLabel;
   o.upsets = ['half','late','off'].includes(o.upsets) ? o.upsets : 'half';
   o.players = ['off', 'always'].includes(o.players) ? o.players : 'auto';
-  o.leaders = o.leaders !== false; o.holdOnAir = o.holdOnAir !== false;   // older 'below' setting becomes the size rule
+  o.leaders = o.leaders !== false; o.fbLeaders = o.fbLeaders !== false; o.holdOnAir = o.holdOnAir !== false;   // older 'below' setting becomes the size rule
   o.presentedOn = !!o.presentedOn; o.presented = String(o.presented == null ? d.presented : o.presented).slice(0, 30);
   o.tpl = ['package','clean','bar'].includes(o.tpl) ? o.tpl : 'package';
   if (o.fontName !== 'custom' && !(o.fontName in FONTS)) o.fontName = d.fontName;
@@ -1477,7 +1524,7 @@ function fixPrefs(p){
     .map(x => ({id: String(x.id), name: String(x.name || ''), label: String(x.label == null ? x.name || '' : x.label).slice(0, 30), sport: x.sport, team: String(x.team || ''), teamAbbr: String(x.teamAbbr || ''), pos: String(x.pos || ''), jersey: String(x.jersey || '')}));
   // our own teams' games come out of the rotation (default: Auburn, ESPN id 2 in every college sport)
   const skip = (Array.isArray(p.skip) ? p.skip : [{id: '2', name: 'Auburn'}]).filter(x => x && x.id).slice(0, 12).map(x => ({id: String(x.id), name: String(x.name || x.id).slice(0, 40)}));
-  return {staleMin: clampN(p.staleMin, 1, 30, 4), names, players, skip, skipOn: p.skipOn !== false};
+  return {staleMin: clampN(p.staleMin, 1, 30, 4), names, players, skip, skipOn: p.skipOn !== false, groupOurs: p.groupOurs !== false};
 }
 function mkCfg(rundown, outputs, prefs){
   const c = {rundown: Array.isArray(rundown) ? rundown : [], outputs: Array.from({length: N_OUT}, (_, i) => fixBoard(outputs && outputs[i], i)), prefs: fixPrefs(prefs)};
@@ -2582,11 +2629,12 @@ function bootControl(){
   // ---------- our teams: their games stay out of the rotation ----------
   function renderSkip(){
     const p = cfg.prefs;
-    $('skipOn').checked = p.skipOn;
+    $('skipOn').checked = p.skipOn; $('groupOurs').checked = p.groupOurs;
     $('skipEdit').textContent = p.skip.length ? p.skip.map(x => x.name).join(', ') : 'Choose teams';
     $('skipList').innerHTML = p.skip.map(x => '<button type="button" class="chip-btn" aria-pressed="true" data-skip="' + esc(x.id) + '" title="Remove">' + esc(x.name) + ' ×</button>').join('') || '<span class="hint">No teams yet.</span>';
   }
   const skipChanged = () => { cfg.prefs = fixPrefs(cfg.prefs); save(); renderSkip(); renderRundown(); renderAll(); push(); };
+  $('groupOurs').onchange = e => { cfg.prefs.groupOurs = e.target.checked; changed(); toast(e.target.checked ? 'Games with our players stay together' : 'Games with our players keep your order'); };
   $('skipOn').onchange = e => { cfg.prefs.skipOn = e.target.checked; skipChanged(); toast(e.target.checked ? 'Our games are out of the rotation' : 'Our games are back in the rotation'); };
   $('skipEdit').onclick = () => { $('namesBox').open = true; syncTeamList(); $('skipHead').scrollIntoView({behavior: 'smooth', block: 'center'}); setTimeout(() => $('skipFind').focus(), 400); };
   $('skipList').addEventListener('click', e => { const b = e.target.closest('[data-skip]'); if (!b) return; cfg.prefs.skip = cfg.prefs.skip.filter(x => x.id !== b.dataset.skip); skipChanged(); });
@@ -2609,10 +2657,18 @@ function bootControl(){
 
   // Each sport stays together in the rundown, sports in the order they were first added; standings and
   // fantasy pages ride with their sport. Moving a sport's first item above another sport moves the whole block.
+  // a pro game one of our tracked players' teams is in (by team, so it works before stats arrive)
+  const hasOurPlayer = r => { const g = r && !r.manual && !r.standings && !r.fantasy && games[r.key];
+    return !!(g && isPro(g.sport) && TRACKED.some(p => p.team && (p.team === g.away.id || p.team === g.home.id))); };
   function groupRundown(order){
     const seen = (order || []).slice();
     cfg.rundown.forEach(r => { if (!seen.includes(r.sport)) seen.push(r.sport); });
-    cfg.rundown = cfg.rundown.map((r, i) => [r, i]).sort((a, b) => (seen.indexOf(a[0].sport) - seen.indexOf(b[0].sport)) || (a[1] - b[1])).map(x => x[0]);
+    const ours = r => cfg.prefs.groupOurs !== false && hasOurPlayer(r) ? 0 : 1;
+    // sports stay together in the order added; inside a sport, games with our players come first (so they share pages);
+    // standings / fantasy pages stay after that sport's games
+    const kind = r => r.standings || r.fantasy ? 2 : ours(r);
+    cfg.rundown = cfg.rundown.map((r, i) => [r, i]).sort((a, b) => (seen.indexOf(a[0].sport) - seen.indexOf(b[0].sport)) ||
+      ((cfg.prefs.groupOurs !== false ? Math.min(kind(a[0]), 1) - Math.min(kind(b[0]), 1) : 0) || (a[1] - b[1]))).map(x => x[0]);
   }
   const sportOrder = () => { const o = []; cfg.rundown.forEach(r => { if (!o.includes(r.sport)) o.push(r.sport); }); return o; };
   function changed(){ groupRundown(); save(); renderList(); renderRundown(); renderAll(); push(); }
@@ -2788,7 +2844,7 @@ function bootControl(){
   $('matchLook').onclick = () => {
     const from = +$('lookFrom').value, src = cfg.outputs[from];
     ['bg','bgColor','accent','hdMode','hdAlign','title','logo','logos','ranks','records','tv','names','groupBySport','secs','sportLabel','plays','playSecs','fade','upsets',
-     'players','leaders','holdOnAir','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
+     'players','leaders','fbLeaders','holdOnAir','presentedOn','presented','tpl','fontName','fontData','textColor','panelColor','leadColor','rankColor','upper'].forEach(k => cfg.board[k] = src[k]);
     cfg.board = fixBoard(cfg.board, SEL); syncSettings(); save(); renderAll(); push();
     toast('Output ' + (SEL+1) + ' now matches Output ' + (from+1) + '’s look');
   };
@@ -2960,7 +3016,7 @@ function bootControl(){
     cfg.prefs.players.push({id: r.id, name: r.name, label: r.name, sport: r.sport, team: r.team, teamAbbr: r.teamAbbr, pos: r.pos || '', jersey: r.jersey || ''});
     return true;
   };
-  const afterPlayers = () => { plSave(); renderPlayers(); refreshPlayerStats().then(() => { renderPlayers(); renderAll(); push(); }); renderAll(); push(); };
+  const afterPlayers = () => { plSave(); groupRundown(); renderRundown(); renderPlayers(); refreshPlayerStats().then(() => { renderPlayers(); renderAll(); push(); }); renderAll(); push(); };
   // every NFL and NBA roster (fetched on demand, kept for this session): the backup search, and "find our players"
   let ROSTERS = null;
   async function allRosters(progress){
@@ -3075,7 +3131,7 @@ function bootControl(){
   const PS_GROUPS = {
     look: ['tpl', 'fontName', 'fontData', 'textColor', 'panelColor', 'leadColor', 'rankColor', 'upper', 'bg', 'bgColor', 'accent', 'names'],
     sponsor: ['hdMode', 'hdAlign', 'hdSize', 'title', 'logo', 'presentedOn', 'presented', 'sportLabel'],
-    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players', 'leaders', 'holdOnAir']
+    layout: ['name', 'w', 'h', 'layout', 'perPage', 'cols', 'rows', 'secs', 'fade', 'groupBySport', 'logos', 'ranks', 'records', 'tv', 'plays', 'playSecs', 'upsets', 'players', 'leaders', 'fbLeaders', 'holdOnAir']
   };
   const PS_NAMES = {games: 'games', look: 'look', sponsor: 'sponsor', layout: 'layout'};
   const HOUSE = {name: 'House package look', builtin: true, look1: {tpl: 'package', fontName: 'Scoreboard Display', fontData: '', textColor: '#FFFFFF', panelColor: '', leadColor: '', rankColor: '', upper: true, bg: 'board', bgColor: '#102A5E', accent: '#E87722'}};
