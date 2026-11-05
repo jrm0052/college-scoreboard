@@ -65,7 +65,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   await O.waitForTimeout(13000);
   const mid = await sc(), same = await O.evaluate(() => [...document.querySelectorAll('.board img')].every(i => i.__mark === 1));
   ok(mid === before && same, 'mid-page: scores held (' + mid + ') and logos never reloaded: ' + same);
-  ok(/17/.test(await A.$$eval('#rdList li', l => l.map(x => x.textContent).join(' '))), 'dashboard rundown already has the new score');
+  ok(/17/.test(await A.$$eval('#rdList li[data-key]', l => l.map(x => x.textContent).join(' '))), 'dashboard rundown already has the new score');
   await A.click('.ob[data-o="0"] [data-x="next"]'); await O.waitForTimeout(2500);
   ok(/17/.test(await sc()), 'next turn shows it: ' + await sc());
   await A.uncheck('#sHold'); await O.waitForTimeout(1500);

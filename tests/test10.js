@@ -47,7 +47,7 @@ const seen = {};
   });
   const ok = (c, m) => console.log((c ? 'PASS ' : 'FAIL ') + m);
   const A = await ctx.newPage(); A.on('pageerror', e => errs.push(e.message));
-  await A.goto('http://site.test/college-scoreboard/'); await A.waitForTimeout(800);
+  await A.goto('http://site.test/college-scoreboard/'); await A.waitForTimeout(800); await A.evaluate(() => document.getElementById('boardSettings').open = true);
   await A.click('#sportSeg [data-s="nba"]'); await A.waitForTimeout(500); await A.click('#addAll'); await A.waitForTimeout(300);
   await A.click('#playersBox summary');
   for (const n of ['Walker Kessler', 'Deni Avdija', 'Test Celtic']) { await A.fill('#plQ', n); await A.click('#plFind'); await A.waitForTimeout(400); await A.click('#plResults .plr'); await A.waitForTimeout(300); }

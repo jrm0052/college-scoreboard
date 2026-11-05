@@ -54,15 +54,16 @@ const seen = {};
   await A.click('#sportSeg [data-s="nba"]'); await A.waitForTimeout(500);
   ok(await A.$eval('#qbSports [data-s="nba"]', e => e.getAttribute('aria-pressed') === 'true') && await A.$eval('#qbRecipe', e => e.value === 'all'), 'quick build follows the picker sport (NBA, All games)');
   await A.click('#qbAdd'); await A.waitForTimeout(1200);
-  ok((await A.$$eval('#rdList li', l => l.length)) === 4, 'Add these games adds 4');
+  ok((await A.$$eval('#rdList li[data-key]', l => l.length)) === 4, 'Add these games adds 4');
   await A.evaluate(() => document.getElementById('buildBox').open = true); await A.click('#qbReplace'); await A.waitForTimeout(1200);
   ok(/Undo/.test(await A.textContent('#toast')), 'Replace shows Undo: ' + await A.textContent('#toast'));
   await A.click('#clearRd'); await A.waitForTimeout(300);
-  ok((await A.$$eval('#rdList li', l => l.length)) === 0, 'Clear empties the rundown');
+  ok((await A.$$eval('#rdList li[data-key]', l => l.length)) === 0, 'Clear empties the rundown');
   await A.click('#toast button'); await A.waitForTimeout(400);
-  ok((await A.$$eval('#rdList li', l => l.length)) === 4, 'Undo brings it back');
+  ok((await A.$$eval('#rdList li[data-key]', l => l.length)) === 4, 'Undo brings it back');
   ok((await A.$eval('#guide li[data-step="games"]', e => e.classList.contains('done'))), 'guide step 1 ticked');
   // settings tabs
+  await A.evaluate(() => document.getElementById('boardSettings').open = true);
   for (const t of ['size', 'look', 'header', 'show']) { await A.click('#setTabs [data-t="' + t + '"]'); const vis = await A.$$eval('#boardSettings .sgrid', l => l.filter(x => !x.hidden).map(x => x.dataset.pane)); ok(vis.length === 1 && vis[0] === t, 'tab ' + t + ' shows only its fields'); }
   await A.click('#setTabs [data-t="size"]');
   // presets

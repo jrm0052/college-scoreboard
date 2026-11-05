@@ -53,7 +53,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   const ok = (c, m) => console.log((c ? 'PASS ' : 'FAIL ') + m);
   const A = await ctx.newPage(); A.on('pageerror', e => errs.push(e.message));
   await A.goto('http://site.test/college-scoreboard/'); await A.waitForTimeout(900); await reveal(A);
-  const order = () => A.$$eval('#rdList li', l => l.map(x => x.dataset.key.replace(/:\d{6,}.*$/, '').replace(/^(cfb|nba|nfl|mbb):.*/, '$1').replace(/^st:(\w+):\w+/, 'st-$1').replace(/^ff:.*/, 'ff-nfl')).join(' '));
+  const order = () => A.$$eval('#rdList li[data-key]', l => l.map(x => x.dataset.key.replace(/:\d{6,}.*$/, '').replace(/^(cfb|nba|nfl|mbb):.*/, '$1').replace(/^st:(\w+):\w+/, 'st-$1').replace(/^ff:.*/, 'ff-nfl')).join(' '));
   await A.click('#sportSeg [data-s="cfb"]'); await A.waitForTimeout(500);
   await A.click('#gameList .gl:nth-child(1)'); await A.waitForTimeout(200);
   await A.click('#sportSeg [data-s="nba"]'); await A.waitForTimeout(500); await A.click('#gameList .gl:nth-child(1)'); await A.click('#gameList .gl:nth-child(2)'); await A.waitForTimeout(200);
@@ -66,7 +66,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   ok(o1 === 'cfb cfb cfb st-cfb nba nba nba ff nfl', 'sports together, in the order added; standings/fantasy with their sport');
   await A.click('#sortTime'); await A.waitForTimeout(300);
   ok((await order()) === 'cfb cfb cfb st-cfb nba nba nba nfl ff', 'sorting stays inside each sport (pages after games): ' + await order());
-  const firstNba = await A.$$eval('#rdList li', l => l.find(x => x.dataset.key.startsWith('nba:')).dataset.key);
+  const firstNba = await A.$$eval('#rdList li[data-key]', l => l.find(x => x.dataset.key.startsWith('nba:')).dataset.key);
   for (let k = 0; k < 1; k++) { await A.click('#rdList li[data-key="' + firstNba + '"] [data-a="up"]'); await A.waitForTimeout(150); }
   console.log('after moving NBA up:', await order());
   ok((await order()) === 'nba nba nba cfb cfb cfb st-cfb nfl ff', 'Move up on a sport’s first game moves the whole sport above the one before');

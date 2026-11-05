@@ -56,7 +56,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   // NFL first (all games), then NBA (all games)
   await A.click('#sportSeg [data-s="nfl"]'); await A.waitForTimeout(600); await A.click('#addAll'); await A.waitForTimeout(300);
   await A.click('#sportSeg [data-s="nba"]'); await A.waitForTimeout(600); await A.click('#addAll'); await A.waitForTimeout(300);
-  const keys = () => A.$$eval('#rdList li', l => l.map(x => x.dataset.key));
+  const keys = () => A.$$eval('#rdList li[data-key]', l => l.map(x => x.dataset.key));
   const before = await keys();
   // track a Celtic and a 49er
   for (const n of ['Test Celtic', 'Fred Warner']) { await A.fill('#plQ', n); await A.click('#plFind'); await A.waitForTimeout(400); await A.click('#plResults .plr'); await A.waitForTimeout(400); }

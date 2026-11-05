@@ -67,7 +67,7 @@ const reveal = p => p.evaluate(() => { document.querySelectorAll('details').forE
   ok(st === 'nba-13,nba-22,nba-2,nfl-25,nfl-25', 'teams stored with league prefix: ' + st);
   // put the Lakers game on output 1 and look
   await A.click('.ob[data-o="0"] [data-x="play"]');
-  const goKey = await A.$$eval('#rdList li', l => l.map(x => x.dataset.key).find(k => k === 'nba:401909880'));
+  const goKey = await A.$$eval('#rdList li[data-key]', l => l.map(x => x.dataset.key).find(k => k === 'nba:401909880'));
   await A.click('#rdList li[data-key="nba:401909880"] [data-a="go"]'); await A.waitForTimeout(900);
   const strips = await A.$$eval('.ob[data-o="0"] .stage .g .pl .ps', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
   ok(strips.some(t => /Walker Kessler.*13.*PTS.*8.*REB/i.test(t)), 'Kessler game line under Lakers game: ' + strips.join(' || '));
