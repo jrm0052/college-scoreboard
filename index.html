@@ -406,6 +406,8 @@ body.mode-show .rd{max-height:calc(100vh - 150px)}
 .board .hd.side .sp{padding:0}
 .board .hd.side .dots{display:none}
 .board .grid{position:absolute;display:grid;place-content:center}
+.board .grid.odd2 > *{grid-column:span 2}
+.board .grid.odd2 > *:last-child{grid-column:2 / span 2}
 .board .grid.enter{animation:dissolveIn var(--fade,.6s) ease-in-out both}
 .board .grid.leave{animation:dissolveOut var(--fade,.6s) ease-in-out both;pointer-events:none}
 .board .stand.enter{animation:dissolveIn var(--fade,.6s) ease-in-out both}
@@ -1527,9 +1529,19 @@ function boardHTML(pages, idx, b, opt){
     // if any team on the page is ranked, every row keeps a rank slot so names line up
     const rankSlot = b.ranks && page.games.some(g => g.away.rank || g.home.rank);
     const now = Date.now();
-    h += '<div class="grid' + (opt.enter && b.fade > 0 ? ' enter' : '') + '" style="left:' + (geo.hw + geo.padX) + 'px;top:' + (geo.hh + geo.padY) + 'px;width:' + geo.gw + 'px;height:' + (geo.gh - geo.stripPx) + 'px;' +
-      'grid-template-columns:repeat(' + geo.cols + ',' + geo.cw.toFixed(1) + 'px);grid-template-rows:repeat(' + geo.rows + ',' + geo.ch.toFixed(1) + 'px);column-gap:' + geo.cgap + 'px;row-gap:' + geo.rgap + 'px;font-size:' + geo.u.toFixed(2) + 'px">' +
-      page.games.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, pageStart: opt.pageStart, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide, flip: Math.floor(now / 6000) % 2 === 1})).join('') + '</div>';
+    // odd count in two columns (3 games): the last game sits centered under the top two. If exactly one game
+    // has one of our players under it (or the only player line), that game takes the centered spot.
+    const odd2 = geo.cols === 2 && page.games.length > 1 && page.games.length % 2 === 1 && b.layout !== 'grid';
+    let list = page.games;
+    if (odd2) {   // our tracked player first; otherwise any lone player line (top scorer, football leaders)
+      const ours = showPlayers(b) ? list.filter(g => playersFor(g).length) : [], any = list.filter(g => stripFor(g, b).length);
+      const w = ours.length === 1 ? ours : any.length === 1 ? any : [];
+      if (w.length) list = list.filter(g => g !== w[0]).concat(w);
+    }
+    const colsCss = odd2 ? 'repeat(4,' + ((geo.cw - geo.cgap) / 2).toFixed(1) + 'px)' : 'repeat(' + geo.cols + ',' + geo.cw.toFixed(1) + 'px)';
+    h += '<div class="grid' + (odd2 ? ' odd2' : '') + (opt.enter && b.fade > 0 ? ' enter' : '') + '" style="left:' + (geo.hw + geo.padX) + 'px;top:' + (geo.hh + geo.padY) + 'px;width:' + geo.gw + 'px;height:' + (geo.gh - geo.stripPx) + 'px;' +
+      'grid-template-columns:' + colsCss + ';grid-template-rows:repeat(' + geo.rows + ',' + geo.ch.toFixed(1) + 'px);column-gap:' + geo.cgap + 'px;row-gap:' + geo.rgap + 'px;font-size:' + geo.u.toFixed(2) + 'px">' +
+      list.map((g, i) => cardHTML(g, {board:b, narrow:geo.narrow, tag:mixed, bumped:opt.bumped, pageStart: opt.pageStart, mirror: geo.cols === 2 && i % 2 === 1, rankSlot, now, wide:geo.wide, flip: Math.floor(now / 6000) % 2 === 1})).join('') + '</div>';
   }
   return h + '</div>';
 }
