@@ -475,7 +475,7 @@ body.mode-show .rd{max-height:calc(100vh - 150px)}
 .g .pl .ps.fbl .pv{justify-content:space-between;gap:1em;padding:0 1em}
 .g .pl .ps.fbl .pi{align-items:center;gap:.32em}
 .g .pl .ps.fbl .pi i.ss{font-size:.56em;margin-right:.2em}
-.g .pl .ps.fbl .pi u{display:inline-block;width:.16em;height:.9em;align-self:center;margin-right:.08em}
+.g .pl .ps.fbl .pi .tc{font-weight:700;color:var(--txt);opacity:.6;margin-right:.05em}
 .g .pl .ps.fbl .fn{font-weight:800;color:var(--txt)}
 .g .pl .ps.fbl .pi b{color:var(--accent);margin-left:.15em}
 .g .pl .pt span{font:800 1.5em/1 var(--f-score);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap}
@@ -1112,7 +1112,7 @@ function plText(s){
 function plStripHTML(list){
   return '<div class="pl">' + list.map(({p, s}) => {
     if (s.kind === 'fbl') return '<span class="ps fbl"><span class="pv">' + s.items.map(x =>
-      '<span class="pi"><i class="ss">' + esc(x.cat) + '</i>' + (x.color ? '<u style="background:' + esc(/^#/.test(x.color) ? x.color : '#' + x.color) + '"></u>' : '') + '<span class="fn">' + esc(x.name) + '</span><b>' + esc(x.yds) + '</b></span>').join('') + '</span></span>';
+      '<span class="pi"><i class="ss">' + esc(x.cat) + '</i>' + (x.abbr ? '<span class="tc">' + esc(x.abbr) + '</span>' : '') + '<span class="fn">' + esc(x.name) + '</span><b>' + esc(x.yds) + '</b></span>').join('') + '</span></span>';
     let v;
     if (s.kind === 'dnp') v = '<b>DNP</b>' + (s.note ? '<i>' + esc(s.note) + '</i>' : '');
     else if (s.kind === 'out') v = '<i class="ss">' + (s.final ? 'No stats' : 'No stats yet') + '</i>';
@@ -1172,7 +1172,7 @@ function stripFor(g, b){
   if (b.fbLeaders !== false && isFB(g.sport) && g.state !== 'pre' && g.fbl && g.fbl.length)
     return [{p: {id: 'fbl-' + g.key, name: '', label: '', sport: g.sport}, s: {kind: 'fbl', items: g.fbl.map(x => {
       const tm = [g.away, g.home].find(t => t.id && t.id === x.team);
-      return {cat: x.cat, name: x.last || lastName(x.name), yds: x.yds, color: tm ? tm.color : ''};
+      return {cat: x.cat, name: x.last || lastName(x.name), yds: x.yds, abbr: tm ? (tm.abbr || teamLabel(tm, 'abbr') || '') : ''};
     })}}];
   const top = b.leaders !== false && isHoops(g.sport) && g.state !== 'pre' && g.top && g.top.pts >= TOP_MIN ? g.top : null;
   if (!top) return [];
